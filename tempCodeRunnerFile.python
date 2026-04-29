@@ -1,0 +1,264 @@
+import pygame
+import random
+import math
+
+pygame.init()
+
+# Screen
+WIDTH = 400
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Bubble Shooter Logic")
+
+# Grid settings
+ROWS = 12
+COLS = 8
+RADIUS = 20
+
+# Colors
+COLORS = [
+    (255,0,0),
+    (0,255,0),
+    (0,0,255),
+    (255,255,0)
+]
+
+grid = [[None for _ in range(COLS)] for _ in range(ROWS)]
+
+
+# ---------------- Bubble Class ----------------
+class Bubble:
+
+    def __init__(self,row,col,color):
+        self.row=row
+        self.col=col
+        self.color=color
+        self.radius=RADIUS
+        self.state="fixed"
+
+        self.x = col*RADIUS*2 + RADIUS
+        self.y = row*RADIUS*2 + RADIUS
+
+    def draw(self):
+        pygame.draw.circle(screen,self.color,(int(self.x),int(self.y)),self.radius)
+
+
+# ---------------- Initialize Grid ----------------
+def initialize_grid():
+    for r in range(5):
+        for c in range(COLS):
+            color=random.choice(COLORS)
+            grid[r][c]=Bubble(r,c,color)
+
+
+# ---------------- Draw Grid ----------------
+def draw_grid():
+    for r in range(ROWS):
+        for c in range(COLS):
+            if grid[r][c]:
+                grid[r][c].draw()
+
+
+# ---------------- Find Neighbors ----------------
+def get_neighbors(row,col):
+
+
+    if row % 2 == 0:
+        directions = [
+            (-1,0),(-1,-1),
+            (0,-1),(0,1),
+            (1,0),(1,-1)
+        ]
+    else:
+        directions = [
+            (-1,0),(-1,1),
+            (0,-1),(0,1),
+            (1,0),(1,1)
+        ]
+
+    neighbors=[]
+
+    for dr,dc in directions:
+
+        r=row+dr
+        c=col+dc
+
+        if 0<=r<ROWS and 0<=c<COLS:
+            neighbors.append((r,c))
+
+    return neighbors
+
+# ---------------- Match Detection (DFS) ----------------
+def find_match(row,col,color):
+
+    stack=[(row,col)]
+    visited=set()
+    match=[]
+
+    while stack:
+
+        r,c=stack.pop()
+
+        if (r,c) in visited:
+            continue
+
+        visited.add((r,c))
+        match.append((r,c))
+
+        for nr,nc in get_neighbors(r,c):
+
+            bubble=grid[nr][nc]
+
+            if bubble and bubble.color==color:
+                stack.append((nr,nc))
+
+    return match
+
+# ---------------- Remove Match ----------------
+def remove_match(match):
+
+    for r,c in match:
+        grid[r][c]=None
+
+
+# ---------------- Floating Bubble Removal ----------------
+def remove_floating():
+
+    connected=set()
+    stack=[]
+
+    for c in range(COLS):
+        if grid[0][c]:
+            stack.append((0,c))
+
+    while stack:
+
+        r,c=stack.pop()
+
+        if (r,c) in connected:
+            continue
+
+        connected.add((r,c))
+
+        for nr,nc in get_neighbors(r,c):
+            if grid[nr][nc]:
+                stack.append((nr,nc))
+
+    for r in range(ROWS):
+        for c in range(COLS):
+
+            if grid[r][c] and (r,c) not in connected:
+                grid[r][c]=None
+
+    # remove unconnected bubbles
+    for r in range(ROWS):
+        for c in range(COLS):
+
+            if grid[r][c] and (r,c) not in connected:
+                grid[r][c]=None
+
+
+# ---------------- Snap Bubble To Grid ----------------
+def snap_bubble(x,y,color):
+
+    col=int(x//(RADIUS*2))
+    row=int(y//(RADIUS*2))
+
+    if row>=ROWS:
+        row=ROWS-1
+
+    if col>=COLS:
+        col=COLS-1
+
+    if grid[row][col] is None:
+
+        bubble=Bubble(row,col,color)
+        grid[row][col]=bubble
+
+        visited=set()
+        match=find_match(row,col,color,visited)
+
+        if len(match)>=3:
+
+            remove_match(match)
+            remove_floating()
+
+def get_position(row,col):
+
+    x = col * RADIUS * 2 + RADIUS
+
+    if row % 2 == 1:
+        x += RADIUS
+
+    y = row * RADIUS * 1.7 + RADIUS
+
+    return x,y
+# ---------------- Win Condition ----------------
+def check_win():
+
+    for row in grid:
+        for bubble in row:
+            if bubble:
+                return False
+
+    return True
+
+
+# ---------------- Lose Condition ----------------
+def check_lose():
+
+    for c in range(COLS):
+        if grid[ROWS-1][c]:
+            return True
+
+    return False
+
+def snap_to_grid(x,y):
+
+    row = int(y // (RADIUS*1.7))
+    col = int(x // (RADIUS*2))
+
+    if row>=ROWS:
+        row=ROWS-1
+
+    if col>=COLS:
+        col=COLS-1
+
+    return row,col
+# ---------------- Main ----------------
+
+initialize_grid()
+
+clock=pygame.time.Clock()
+running=True
+
+while running:
+
+    screen.fill((30,30,30))
+
+    for event in pygame.event.get():
+
+        if event.type==pygame.QUIT:
+            running=False
+
+        # Click to simulate bubble placement
+        if event.type==pygame.MOUSEBUTTONDOWN:
+
+            x,y=pygame.mouse.get_pos()
+            color=random.choice(COLORS)
+
+            snap_bubble(x,y,color)
+
+
+    draw_grid()
+
+    if check_win():
+        print("YOU WIN")
+
+    if check_lose():
+        print("GAME OVER")
+
+    pygame.display.update()
+    clock.tick(60)
+
+pygame.quit()
