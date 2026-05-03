@@ -1,0 +1,133 @@
+*{
+    background-color:#F4F9F9 ;
+    padding: 0px;
+    margin:0px;
+    color:#1E2D2F;
+    justify-content: space-evenly;
+}
+.navbar{
+    height:70px;
+    background-color: #0F4C5C;
+    color:#F4F9F9 ;
+    display: flex;
+    align-items: center;
+    
+}
+#name{
+    height:60px;
+    font-size: 40px;
+    background-color: #0F4C5C;
+    color:#F4F9F9 ;
+}
+.seminavbar{
+    height:40px;
+    font-size:20px;
+    background-color: #4F6D7A;
+    justify-content: space-evenly;
+    display: flex;
+
+}
+.mainbtn{
+    height: 40px;
+    background-color: #4F6D7A;
+    border-color: #4F6D7A;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-width: 0cap;
+    width:300px;
+    transition-duration: 0.2s ease;
+
+
+}
+.mainbtn:hover{
+    background-color: #3E5863;
+}
+.slideshow {
+    position: relative;
+    height: 200px;
+    width: 300px;
+}
+.body{
+    padding-top: 100px;
+    display: flex;
+    justify-content: space-evenly;
+}
+.feature-slider {
+    position: relative;
+    width: 90%;
+    max-width: 1100px;
+    height: 500px;
+    margin: 80px auto;
+    overflow: hidden;
+}
+
+.feature {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    gap: 50px;
+    animation: fade 1s ease-in-out;
+}
+
+.feature.active {
+    display: flex;
+}
+
+/* Image side */
+.feature-image {
+    width: 50%;
+}
+
+.feature-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+}
+
+/* Content side */
+.feature-content {
+    width: 50%;
+}
+
+.feature-content h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.feature-content p {
+    font-size: 18px;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Animation */
+@keyframes fade {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Buttons */
+.prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.4);
+    color: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+
+.prev:hover, .next:hover {
+    background: black;
+}

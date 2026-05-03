@@ -1,0 +1,93 @@
+*{
+    background-color:#F4F9F9 ;
+    padding: 0px;
+    margin:0px;
+    color:#1E2D2F;
+    justify-content: space-evenly;
+}
+.navbar{
+    height:70px;
+    background-color: #0F4C5C;
+    color:#F4F9F9 ;
+    display: flex;
+    align-items: center;
+    
+}
+#name{
+    height:60px;
+    font-size: 40px;
+    background-color: #0F4C5C;
+    color:#F4F9F9 ;
+}
+#appointment_form{
+    flex-direction: column;
+    gap: 15px;
+    display: flex;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 480px;
+    margin: 40px auto;
+    padding: 32px;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    text-align: center;
+
+}
+label {
+  display: block;
+  font-size: 20px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 6px;
+}
+input,
+select {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 15px;
+  border: 1px solid  #0F4C5C;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  
+}
+input:focus,
+select:focus {
+  border-color: #0F4C5C;
+ 
+  box-shadow: 0 0 0 3px rgba(83, 74, 183, 0.12);
+}
+
+/* Field group spacing */
+.form-group {
+  margin-bottom: 18px;
+}
+.form-group {
+  margin-bottom: 18px;
+}
+
+/* Submit button */
+button[type="submit"] {
+  width: 480px;
+  padding: 12px;
+  margin-top: 8px;
+  background: #0F4C5C;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  color:#F4F9F9 ;
+}
+
+button[type="submit"]:hover {
+  background: #0F4C5C;
+}
+
+button[type="submit"]:active {
+  transform: scale(0.98);
+}
