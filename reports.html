@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Doctors</title>
+    <link rel="stylesheet" href="patients.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <div id="name">Hospital Appointment and Patient Management system</div>
+    </div>
+
+    <div class="page">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">MediPortal</div>
+            <nav>
+                <a href="patients.html">Dashboard</a>
+                <a href="find-doctors.html" >Find Doctors</a>
+                <a href="my-appointments.html">My Appointment</a>
+                <a href="medical-history.html">Medical History</a>
+                <a href="reports.html" class="active">Reports</a>
+            </nav>
+            <div class="doc-info">
+                <div class="avatar">RK</div>
+                <p>Rajesh Kumar</p>
+                <p>Patient</p>
+            </div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div>
+            <h2>My Reports</h2>
+            <p>View and download your lab reports</p>
+        </div>
+        <p>Mon, 4 May 2026</p>
+    </div>
+
+    <!-- Reports list -->
+    <div class="appointment-section">
+        <h3>Recent Reports</h3>
+        <table>
+            <tr>
+                <th>Report Name</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            <tr>
+                <td>Blood Test Report</td>
+                <td>04 May 2026</td>
+                <td>Lab Test</td>
+                <td><span class="status green">New</span></td>
+                <td>
+                    <button class="view-btn">View</button>
+                    <button class="download-btn">Download</button>
+                </td>
+            </tr>
+            <tr>
+                <td>ECG Report</td>
+                <td>01 Apr 2026</td>
+                <td>Cardiac</td>
+                <td><span class="status gray">Seen</span></td>
+                <td>
+                    <button class="view-btn">View</button>
+                    <button class="download-btn">Download</button>
+                </td>
+            </tr>
+            <tr>
+                <td>X-Ray Report</td>
+                <td>15 Mar 2026</td>
+                <td>Radiology</td>
+                <td><span class="status gray">Seen</span></td>
+                <td>
+                    <button class="view-btn">View</button>
+                    <button class="download-btn">Download</button>
+                </td>
+            </tr>
+            <tr>
+                <td>MRI Scan Report</td>
+                <td>10 Feb 2026</td>
+                <td>Radiology</td>
+                <td><span class="status gray">Seen</span></td>
+                <td>
+                    <button class="view-btn">View</button>
+                    <button class="download-btn">Download</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Urine Test Report</td>
+                <td>20 Jan 2026</td>
+                <td>Lab Test</td>
+                <td><span class="status green">New</span></td>
+                <td>
+                    <button class="view-btn">View</button>
+                    <button class="download-btn">Download</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

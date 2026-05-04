@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="doctors.css">
+</head>
+<body>
+     <div class="navbar">
+        <div id="name">Hospital Appointment and Patient Management system</div>
+    </div>
+    <div class="page">
+    <div class="sidebar">
+        <div class="logo">MediPortal</div>
+        <nav>
+            <a href="doctors.html">DashBoard</a>
+            <a href="schedule.html">Schedule</a>
+            <a href="patient-history.html">Patients</a>
+            <a href="update-diagnosis.html">Report</a>
+        </nav>
+        <div class="doc-info">
+            <div class="avatar">AK</div>
+            <p>Name of doctor</p>
+            <p>Specialization</p>
+        </div>
+    </div>
+    <div class="main">
+        <div class="topbar">
+            <div>
+                <h2>Update Diagnosis</h2>
+                <p>Add or update patient diagnosis and reports</p>
+            </div>
+            <p>Mon,4 May 2026</p>
+        </div>
+
+        <div class="patient-card">
+            <div class="patient avatar">RS</div>
+            
+            <div class="patient-details">
+                <h2>Ravi Sharma</h2>
+                <div class="info-row">
+                    <span><strong>Age:</strong> 42</span>
+                    <span><strong>Blood Group:</strong> B+</span>
+                    <span><strong>Contact:</strong> 9800000000</span>
+                    <span><strong>Gender:</strong> Male</span>
+                </div>
+        </div>
+    </div>
+
+    <div class="diagnosis-form">
+        <div class="form-group">
+            <label>Diagnosis Notes</label>
+            <textarea rows="4" placeholder="Write diagnosis detials here..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Prescription</label>
+            <table class="prescription-table">
+                <tr>
+                    <th>Medicine Name</th>
+                    <th>Dosage</th>
+                    <th>Duration</th>
+                </tr>
+                 <tr>
+                    <td><input type="text" placeholder="e.g. Paracetamol"></td>
+                    <td><input type="text" placeholder="e.g. 500mg"></td>
+                    <td><input type="text" placeholder="e.g. 5 days"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" placeholder="e.g. Amlodipine"></td>
+                    <td><input type="text" placeholder="e.g. 5mg"></td>
+                    <td><input type="text" placeholder="e.g. 30 days"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="form-group">
+            <label>Patients Status</label>
+            <select>
+                <option>Select Status</option>
+                <option>Follow-up Needed</option>
+                <option>Diacharged</option>
+                <option>Refferred</option>
+                <option>Admitted</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label >Upload Lab Report</label>
+            <input type="file">
+        </div>
+
+         <div class="form-buttons">
+            <button class="btn-save">Save Diagnosis</button>
+            <button class="btn-cancel">Cancel</button>
+        </div>
+        </div>
+    </div>
+</div>
+
+    
+</body>
+</html>
