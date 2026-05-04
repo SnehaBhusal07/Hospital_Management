@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Doctors</title>
+    <link rel="stylesheet" href="patients.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <div id="name">Hospital Appointment and Patient Management system</div>
+    </div>
+
+<div class="page">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">MediPortal</div>
+            <nav>
+                <a href="patients.html">Dashboard</a>
+                <a href="find-doctors.html" class="active">Find Doctors</a>
+                <a href="my-appointments.html">My Appointment</a>
+                <a href="#">Medical History</a>
+                <a href="#">Reports</a>
+            </nav>
+            <div class="doc-info">
+                <div class="avatar">RK</div>
+                <p>Rajesh Kumar</p>
+                <p>Patient</p>
+            </div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="main">
+            <div class="topbar">
+                <div>
+                    <h2>Book Appointment</h2>
+                    <br>
+                    <p>Choose Your Preferred Date and Time</p>
+                </div>
+                <p>Mon, 4 May 2026</p>
+            </div>
+            <div class="booking-form">
+                <div class="doctor-avatar">AK</div>
+                <div class="doctor-info">
+                <h3>Dr. Anil Kumar</h3>
+                <p class="specialization">Cardiologist</p>
+                <p class="available">Available: Mon, Wed, Fri</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Step 1- Choose a Date</label>
+                <input type="date" id="date-picker">
+            </div>
+            <div class="form-group">
+                <label>Step 2 - Choose a Time Slot</label>
+                <div class="slots-grid">
+                    <button class="slot">09:00 AM</button>
+                    <button class="slot">09:15 AM</button>
+                    <button class="slot booked">09:30 AM</button>
+                    <button class="slot">09:45 AM</button>
+                    <button class="slot">10:00 AM</button>
+                    <button class="slot booked">10:15 AM</button>
+                    <button class="slot">10:30 AM</button>
+                    <button class="slot">10:45 AM</button>
+                    <button class="slot booked">11:00 AM</button>
+                    <button class="slot">11:15 AM</button>
+                    <button class="slot">11:30 AM</button>
+                    <button class="slot">11:45 AM</button>
+                </div>
+                <div class="slot-legend">
+                    <span class="legend-available">Available</span>
+                    <span class="legend-booked">Booked</span>
+                    <span class="legend-selected">Selected</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Step 3 - Confirm Booking</label>
+                <div class="confirm-box">
+                    <p><strong>Doctor:</strong>Dr Anil Kumar</p>
+                    <p><strong>Date:</strong> <span id="confirm-date">Not selected</span></p>
+                    <p><strong>Time:</strong> <span id="confirm-time">Not selected</span></p>
+                </div>
+            </div>
+             <div class="form-buttons">
+            <button class="btn-save">Confirm Booking</button>
+            <button class="btn-cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+<script>
+    const slots=document.querySelectorAll('.slot:not(.booked)');
+    slots.forEach(slot=>{
+        slot.addEventListener("click",function(){
+            slots.forEach(s=>s.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('confirm-time').textContent=this.textContent;
+        
+        });
+    });
+    document.getElementById('date-picker').addEventListener('change', function() {
+        document.getElementById('confirm-date').textContent = this.value;
+    });
+</script>
+
+</body>
+</html>

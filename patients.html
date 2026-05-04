@@ -12,75 +12,92 @@
         <div id="name">Hospital Appointment and Patient Management system</div>
     </div>
 
-    <div class="seminavbar">
-        <button class="mainbtn">Book Appointment</button>
-        <button class="mainbtn">Your Medical History</button>
-        <button class="mainbtn">Reports</button>
-    </div>
+   <div class="page">
 
-    <div class="feature-slider">
-        <div class="feature active">
-            <div class="feature-image"><img src="1.png"></div>
-            <div class="feature-content">
-                <h2>Book Appointments</h2>
-                <p>Schedule hospital visits easily without waiting in queues.</p>
+    <!-- SIDEBAR — only these 3 things inside -->
+    <div class="sidebar">
+        <div class="logo">MediPortal</div>
+        <nav>
+            <a href="patients.html" class="active">Dashboard</a>
+            <a href="find-doctors.html">Find Doctors</a>
+            <a href="my-appointments.html">My Appointment</a>
+            <a href="#">Medical History</a>
+            <a href="#">Reports</a>
+        </nav>
+        <div class="doc-info">
+            <div class="avatar">RK</div>
+            <p>Rajesh Kumar</p>
+            <p>Patient</p>
+        </div>
+    </div>  
+   
+    <div class="main">
+
+        <div class="topbar">
+            <div>
+                <p>Hello, Rajesh!</p>
+                <br>
+                <p>Here's your health overview for today</p>
+            </div>
+            <p>Mon, 4 May 2026</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="card">
+                <h3>2</h3>
+                <p>Upcoming Appointments</p>
+            </div>
+            <div class="card">
+                <h3>8</h3>
+                <p>Total Visits</p>
+            </div>
+            <div class="card">
+                <h3>3</h3>
+                <p>New Reports</p>
+            </div>
+            <div class="card">
+                <h3>2</h3>
+                <p>Active Prescription</p>
             </div>
         </div>
 
-        <div class="feature">
-            <div class="feature-image"><img src="3.png"></div>
-            <div class="feature-content">
-                <h2>Find Doctors</h2>
-                <p>Search doctors based on specialization and availability.</p>
+        <div class="bottom-row">
+            <div class="patient-list">
+                <h3>Upcoming Appointments</h3>
+                <table>
+                    <tr>
+                        <th>Doctor</th>
+                        <th>Specialization</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td>Dr. Anil Kumar</td>
+                        <td>Cardiologist</td>
+                        <td>05 May 2026</td>
+                        <td>10:00 AM</td>
+                        <td><span class="status green">Confirmed</span></td>
+                    </tr>
+                    <tr>
+                        <td>Dr. Sita Thapa</td>
+                        <td>Dermatologist</td>
+                        <td>10 May 2026</td>
+                        <td>02:00 PM</td>
+                        <td><span class="status orange">Pending</span></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="actions">
+                <h3>Quick Actions</h3>
+                <button>Book Appointment</button>
+                <button>View Reports</button>
+                <button>Medical History</button>
             </div>
         </div>
 
-        <div class="feature">
-            <div class="feature-image"><img src="2.png"></div>
-            <div class="feature-content">
-                <h2>View Medical Records</h2>
-                <p>Access your reports and appointment history anytime.</p>
-            </div>
-        </div>
+    </div>  
 
-        <button class="prev" onclick="changeFeature(-1)">❮</button>
-        <button class="next" onclick="changeFeature(1)">❯</button>
-    </div>
-
-    <script>
-        let current = 0;
-        let features = document.getElementsByClassName("feature");
-        let interval;
-
-        showFeature(current);
-        startAuto();
-
-        function showFeature(index) {
-            for (let i = 0; i < features.length; i++) {
-                features[i].classList.remove("active");
-            }
-            features[index].classList.add("active");
-        }
-
-        function changeFeature(direction) {
-            clearInterval(interval);
-            current += direction;
-            if (current >= features.length) current = 0;
-            if (current < 0) current = features.length - 1;
-            showFeature(current);
-            startAuto();
-        }
-
-        function nextAuto() {
-            current++;
-            if (current >= features.length) current = 0;
-            showFeature(current);
-        }
-
-        function startAuto() {
-            interval = setInterval(nextAuto, 4000);
-        }
-    </script>
-
+</div> 
 </body>
 </html>
