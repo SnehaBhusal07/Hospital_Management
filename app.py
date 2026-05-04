@@ -4,6 +4,7 @@ from extensions import db
 from routes.auth import auth     
 from routes.doctor import doctor_bp
 from flask import Flask, jsonify
+from routes.patient import patient_bp
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aspataal'
@@ -19,7 +20,8 @@ def unauthorized():
     return jsonify({'message': 'Please log in to access this page.'}), 401
 
 app.register_blueprint(auth) 
-app.register_blueprint(doctor_bp)                  
+app.register_blueprint(doctor_bp)  
+app.register_blueprint(patient_bp)                
 
 @login_manager.user_loader
 def load_user(user_id):
