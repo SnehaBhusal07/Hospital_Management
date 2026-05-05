@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Doctors</title>
+    <link rel="stylesheet" href="patients.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <div id="name">Hospital Appointment and Patient Management system</div>
+    </div>
+
+<div class="page">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">MediPortal</div>
+            <nav>
+                <a href="patients.html">Dashboard</a>
+                <a href="find-doctors.html" class="active">Find Doctors</a>
+                <a href="my-appointments.html" >My Appointment</a>
+                <a href="medical-history.html" >Medical History</a>
+                <a href="reports.html">Reports</a>
+            </nav>
+            <div class="doc-info">
+                <div class="avatar">RK</div>
+                <p>Rajesh Kumar</p>
+                <p>Patient</p>
+            </div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="main">
+            <div class="topbar">
+                <div>
+                    <h2>Book Appointment</h2>
+                    <br>
+                    <p>Choose Your Preferred Date and Time</p>
+                </div>
+                <p id="current-date">Mon, 4 May 2026</p>
+            </div>
+            <div class="booking-form">
+                <div class="doctor-avatar">AK</div>
+                <div class="doctor-info">
+                <h3>Dr. Anil Kumar</h3>
+                <p class="specialization">Cardiologist</p>
+                <p class="available">Available: Mon, Wed, Fri</p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Step 1- Choose a Date</label>
+                <input type="date" id="date-picker">
+            </div>
+            <div class="form-group">
+                <label>Step 2 - Choose a Time Slot</label>
+                <div class="slots-grid">
+                    <button class="slot">09:00 AM</button>
+                    <button class="slot">09:15 AM</button>
+                    <button class="slot booked">09:30 AM</button>
+                    <button class="slot">09:45 AM</button>
+                    <button class="slot">10:00 AM</button>
+                    <button class="slot booked">10:15 AM</button>
+                    <button class="slot">10:30 AM</button>
+                    <button class="slot">10:45 AM</button>
+                    <button class="slot booked">11:00 AM</button>
+                    <button class="slot">11:15 AM</button>
+                    <button class="slot">11:30 AM</button>
+                    <button class="slot">11:45 AM</button>
+                </div>
+                <div class="slot-legend">
+                    <span class="legend-available">Available</span>
+                    <span class="legend-booked">Booked</span>
+                    <span class="legend-selected">Selected</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Step 3 - Confirm Booking</label>
+                <div class="confirm-box">
+                    <p><strong>Doctor:</strong>Dr Anil Kumar</p>
+                    <p><strong>Date:</strong> <span id="confirm-date">Not selected</span></p>
+                    <p><strong>Time:</strong> <span id="confirm-time">Not selected</span></p>
+                </div>
+            </div>
+             <div class="form-buttons">
+            <button class="btn-save" id="confirm-btn">Confirm Booking</button>
+            <button class="btn-cancel">Cancel</button>
+        
+        <div id="success-box" style="display:none;">
+        <div class="success-card">
+            <h2>✅ Appointment Booked!</h2>
+            <p id="success-doctor">Doctor: Dr. Anil Kumar</p>
+            <p id="success-date">Date: —</p>
+            <p id="success-time">Time: —</p>
+            <a href="my-appointments.html">
+                <button class="btn-save" 
+                style="margin-top:15px;">
+                    View My Appointments
+                </button>
+            </a>
+        </div>
+    </div>
+</div>
+<script>
+
+    
+    const today = new Date();
+    const options = { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    };
+    document.getElementById('current-date').textContent = 
+        today.toLocaleDateString('en-GB', options);
+
+
+    // ---- 2. Slot selection ----
+    const slots = document.querySelectorAll('.slot:not(.booked)');
+    let selectedTime = '';
+
+    slots.forEach(function(slot) {
+        slot.addEventListener('click', function() {
+
+            // remove selected from all slots
+            slots.forEach(function(s) {
+                s.classList.remove('selected');
+            });
+
+            // mark this slot as selected
+            this.classList.add('selected');
+
+            // save the selected time
+            selectedTime = this.textContent;
+
+            // update confirm box
+            document.getElementById('confirm-time').textContent = 
+                selectedTime;
+        });
+    });
+
+
+    // ---- 3. Date picker validation ----
+    const datePicker = document.getElementById('date-picker');
+
+    datePicker.addEventListener('change', function() {
+
+        const selectedDate = new Date(this.value);
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+
+        // check if date is in the past
+        if (selectedDate < todayDate) {
+            alert('Please select today or a future date!');
+            this.value = '';  // clear the input
+            document.getElementById('confirm-date').textContent = 
+                'Not selected';
+        } else {
+            // update confirm box with selected date
+            document.getElementById('confirm-date').textContent = 
+                this.value;
+        }
+    });
+
+
+    // ---- 4. Confirm booking button ----
+    document.getElementById('confirm-btn').addEventListener(
+        'click', function() {
+
+        const dateValue = datePicker.value;
+        const selectedSlot = document.querySelector('.slot.selected');
+
+        // check date is selected
+        if (!dateValue) {
+            alert('Please select a date first!');
+            return;
+        }
+
+        // check time slot is selected
+        if (!selectedSlot) {
+            alert('Please select a time slot!');
+            return;
+        }
+
+        // all good — show success message
+        document.getElementById('success-date').textContent = 
+            'Date: ' + dateValue;
+        document.getElementById('success-time').textContent = 
+            'Time: ' + selectedTime;
+
+        // hide booking form
+        document.querySelector('.booking-form').style.display = 'none';
+
+        // show success box
+        document.getElementById('success-box').style.display = 'block';
+    });
+
+</script>
+
+</body>
+</html>

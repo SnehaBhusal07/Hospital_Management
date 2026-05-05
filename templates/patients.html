@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="patients.css">
+    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\patients.css">
 </head>
 <body>
 
@@ -35,11 +35,11 @@
 
         <div class="topbar">
             <div>
-                <p>Hello, Rajesh!</p>
+                <h2 id="greeting">Hello, Rajesh!</h2>
                 <br>
                 <p>Here's your health overview for today</p>
             </div>
-            <p>Mon, 4 May 2026</p>
+            <p id="current-date">Mon, 4 May 2026</p>
         </div>
     
 
@@ -100,5 +100,54 @@
     </div>  
 
 </div> 
+<script>
+
+    // ---- 1. Show today's date automatically ----
+    const today = new Date();
+    const options = { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    };
+    const dateString = today.toLocaleDateString('en-GB', options);
+    document.getElementById('current-date').textContent = dateString;
+
+
+    // ---- 2. Change greeting based on time of day ----
+    const hour = today.getHours();
+    let greeting = '';
+
+    if (hour < 12) {
+        greeting = 'Good Morning, Rajesh!';
+    } else if (hour < 17) {
+        greeting = 'Good Afternoon, Rajesh!';
+    } else {
+        greeting = 'Good Evening, Rajesh!';
+    }
+
+    document.getElementById('greeting').textContent = greeting;
+
+
+    const cancelBtns = document.querySelectorAll('.cancel-btn');
+
+   
+    cancelBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+
+            
+            const confirmed = confirm(
+                'Are you sure you want to cancel this appointment?'
+            );
+
+            if (confirmed) {
+            
+                this.closest('tr').style.display = 'none';
+            }
+        });
+    });
+
+
+</script>
 </body>
 </html>

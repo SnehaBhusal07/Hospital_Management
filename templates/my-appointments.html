@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Doctors</title>
-    <link rel="stylesheet" href="patients.css">
+    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\patients.css">
 </head>
 <body>
 
@@ -40,12 +40,21 @@
                     <br>
                     <p>View and manage your appointments</p>
                 </div>
-                <p>Mon, 4 May 2026</p>
+                <p id="current-date">Mon, 4 May 2026</p>
+            </div>
+            <div class="filter-bar">
+                <button class="filter-btn active" id="btn-upcoming">
+                    Upcoming
+                </button>
+                <button class="filter-btn" id="btn-past">
+                    Past
+                </button>
             </div>
 
-            <div class="appointment-section">
+            <div class="appointment-section" id="appointment-section">
                 <h3>Upcomming Appointments</h3>
-                <table>
+                    <span id="upcoming-count"></span>
+                <table id="upcoming-table">
                     <tr>
                         <th>Doctor</th>
                         <th>Specialization</th>
@@ -73,7 +82,7 @@
                 </table>
             </div>
 
-               <div class="appointment-section">
+               <div class="appointment-section" id="past-section" style="display:none;">
         <h3>Past Appointments</h3>
         <table>
             <tr>
@@ -108,6 +117,88 @@
     </div>
 
 </div>
+<script>
 
+    // ---- 1. Auto date ----
+    const today = new Date();
+    const options = { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    };
+    document.getElementById('current-date').textContent = 
+        today.toLocaleDateString('en-GB', options);
+
+
+    // ---- 2. Count upcoming appointments ----
+    function updateCount() {
+        const rows = document.querySelectorAll(
+            '#upcoming-table tr:not(:first-child)'
+        );
+
+        // filter only visible rows
+        let count = 0;
+        rows.forEach(function(row) {
+            if (row.style.display !== 'none') {
+                count++;
+            }
+        });
+
+        document.getElementById('upcoming-count').textContent = count;
+    }
+
+    // run on page load
+    updateCount();
+
+
+    // ---- 3. Filter buttons ----
+    const btnUpcoming = document.getElementById('btn-upcoming');
+    const btnPast = document.getElementById('btn-past');
+    const upcomingSection = document.getElementById('upcoming-section');
+    const pastSection = document.getElementById('past-section');
+
+    btnUpcoming.addEventListener('click', function() {
+        // show upcoming, hide past
+        upcomingSection.style.display = 'block';
+        pastSection.style.display = 'none';
+
+        // update active button style
+        btnUpcoming.classList.add('active');
+        btnPast.classList.remove('active');
+    });
+
+    btnPast.addEventListener('click', function() {
+        // show past, hide upcoming
+        pastSection.style.display = 'block';
+        upcomingSection.style.display = 'none';
+
+        // update active button style
+        btnPast.classList.add('active');
+        btnUpcoming.classList.remove('active');
+    });
+
+
+    // ---- 4. Cancel appointment ----
+    const cancelBtns = document.querySelectorAll('.cancel-btn');
+
+    cancelBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+
+            const confirmed = confirm(
+                'Are you sure you want to cancel this appointment?'
+            );
+
+            if (confirmed) {
+                // hide the row
+                this.closest('tr').style.display = 'none';
+
+                // update the count
+                updateCount();
+            }
+        });
+    });
+
+</script>
 </body>
 </html>

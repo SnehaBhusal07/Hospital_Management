@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports</title>
+    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\patients.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <div id="name">Hospital Appointment and Patient Management system</div>
+    </div>
+
+    <div class="page">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">MediPortal</div>
+            <nav>
+                <a href="patients.html">Dashboard</a>
+                <a href="find-doctors.html">Find Doctors</a>
+                <a href="my-appointments.html">My Appointment</a>
+                <a href="medical-history.html">Medical History</a>
+                <a href="reports.html" class="active">Reports</a>
+            </nav>
+            <div class="doc-info">
+                <div class="avatar">RK</div>
+                <p>Rajesh Kumar</p>
+                <p>Patient</p>
+            </div>
+        </div>
+
+    
+        <div class="main">
+
+         
+            <div class="topbar">
+                <div>
+                    <h2>My Reports</h2>
+                    <p>View and download your lab reports</p>
+                </div>
+                <p id="current-date"></p>
+            </div>
+
+           
+            <div class="filter-bar">
+                <input
+                    type="text"
+                    id="search-input"
+                    placeholder="Search reports..."
+                    style="padding:8px 14px; border:1px solid #0F4C5C; border-radius:20px; font-size:13px; outline:none; min-width:200px;"
+                />
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="new">New</button>
+                <button class="filter-btn" data-filter="seen">Seen</button>
+                <button class="filter-btn" data-filter="Lab Test">Lab Test</button>
+                <button class="filter-btn" data-filter="Cardiac">Cardiac</button>
+                <button class="filter-btn" data-filter="Radiology">Radiology</button>
+            </div>
+
+           
+            <div class="appointment-section">
+                <h3>Recent Reports <span id="report-count"></span></h3>
+                <table>
+                    <tr>
+                        <th>Report Name</th>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr data-status="new" data-type="Lab Test">
+                        <td>Blood Test Report</td>
+                        <td>04 May 2026</td>
+                        <td>Lab Test</td>
+                        <td><span class="status green">New</span></td>
+                        <td>
+                            <button class="view-btn">View</button>
+                            <button class="download-btn">Download</button>
+                        </td>
+                    </tr>
+                    <tr data-status="seen" data-type="Cardiac">
+                        <td>ECG Report</td>
+                        <td>01 Apr 2026</td>
+                        <td>Cardiac</td>
+                        <td><span class="status gray">Seen</span></td>
+                        <td>
+                            <button class="view-btn">View</button>
+                            <button class="download-btn">Download</button>
+                        </td>
+                    </tr>
+                    <tr data-status="seen" data-type="Radiology">
+                        <td>X-Ray Report</td>
+                        <td>15 Mar 2026</td>
+                        <td>Radiology</td>
+                        <td><span class="status gray">Seen</span></td>
+                        <td>
+                            <button class="view-btn">View</button>
+                            <button class="download-btn">Download</button>
+                        </td>
+                    </tr>
+                    <tr data-status="seen" data-type="Radiology">
+                        <td>MRI Scan Report</td>
+                        <td>10 Feb 2026</td>
+                        <td>Radiology</td>
+                        <td><span class="status gray">Seen</span></td>
+                        <td>
+                            <button class="view-btn">View</button>
+                            <button class="download-btn">Download</button>
+                        </td>
+                    </tr>
+                    <tr data-status="new" data-type="Lab Test">
+                        <td>Urine Test Report</td>
+                        <td>20 Jan 2026</td>
+                        <td>Lab Test</td>
+                        <td><span class="status green">New</span></td>
+                        <td>
+                            <button class="view-btn">View</button>
+                            <button class="download-btn">Download</button>
+                        </td>
+                    </tr>
+                </table>
+                <p id="no-results" style="display:none; text-align:center; padding:20px; color:#888; font-size:13px;">
+                    No reports found.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+
+        const today = new Date();
+        const options = {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        };
+        document.getElementById('current-date').textContent =
+            today.toLocaleDateString('en-GB', options);
+
+
+        function updateCount() {
+            const rows = document.querySelectorAll('table tr[data-status]');
+            let count = 0;
+            rows.forEach(function(row) {
+                if (row.style.display !== 'none') count++;
+            });
+            document.getElementById('report-count').textContent = count;
+        }
+
+        updateCount();
+
+
+
+        const searchInput = document.getElementById('search-input');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const rows = document.querySelectorAll('table tr[data-status]');
+        const noResults = document.getElementById('no-results');
+
+        let activeFilter = 'all';
+
+        function filterReports() {
+            const query = searchInput.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            rows.forEach(function(row) {
+                const text = row.textContent.toLowerCase();
+                const status = row.dataset.status;
+                const type = row.dataset.type;
+
+                const matchesSearch = text.includes(query);
+                const matchesFilter =
+                    activeFilter === 'all' ||
+                    activeFilter === status ||
+                    activeFilter === type;
+
+                if (matchesSearch && matchesFilter) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+            updateCount();
+        }
+
+        searchInput.addEventListener('input', filterReports);
+
+
+        filterBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+                activeFilter = this.dataset.filter;
+                filterReports();
+            });
+        });
+
+
+        
+        document.querySelectorAll('.view-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const reportName = row.cells[0].textContent;
+                const date = row.cells[1].textContent;
+                const type = row.cells[2].textContent;
+
+                alert('Report: ' + reportName + '\nDate: ' + date + '\nType: ' + type + '\n\n(In a real system, this would open the report.)');
+
+                // mark as seen
+                const statusSpan = row.querySelector('.status');
+                statusSpan.textContent = 'Seen';
+                statusSpan.className = 'status gray';
+                row.dataset.status = 'seen';
+            });
+        });
+
+
+        document.querySelectorAll('.download-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const reportName = row.cells[0].textContent;
+                alert('Downloading: ' + reportName + '\n\n(In a real system, this would download the PDF.)');
+            });
+        });
+
+    </script>
+
+</body>
+</html>

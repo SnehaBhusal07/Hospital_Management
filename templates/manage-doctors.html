@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management  Portal</title>
+    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\management.css">
+</head>
+<body>
+    <div class="navbar">
+        <div id="name">Hospital Appointment and Patient Management System</div>
+    </div>
+    <div class="page">
+
+        <div class="sidebar">
+            <div class="logo">MediPortal</div>
+            <nav>
+                <a href="management.html" >Dashboard</a>
+                <a href="manage-doctors.html" class="active">Manage Doctors</a>
+                <a href="doctor-availability.html">Availability</a>
+                <a href="appointments-monitor.html">Appointments</a>
+                <a href="daily-schedule.html">Daily Schedule</a>
+                <a href="system-settings.html">Settings</a>
+            </nav>
+            <div class="doc-info">
+                <div class="avatar">AD</div>
+                <p>Admin</p>
+                <p>Managementt</p>
+            </div>
+        </div>
+        <div class="main">
+
+            <div class="topbar">
+                <div>
+                    <h2>Manage Doctors</h2>
+                    <p>Add View and Remove Doctors</p>
+                </div>
+                <p>Mon,4 May 2026</p>
+            </div>
+
+            <div class="appointment-section">
+                <h3>All Doctors</h3>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Specialization</th>
+                        <th>Working Days</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    <tr>
+                        <td>Dr. Anil Kumar</td>
+                        <td>Cardiologist</td>
+                        <td>Mon, Wed, Fri</td>
+                        <td><span class="status green">Active</span></td>
+                        <td><button class="cancel-btn">Remove</button></td>
+                    </tr>
+                    <tr>
+                        <td>Dr. Sita Thapa</td>
+                        <td>Dermatologist</td>
+                        <td>Tue, Thu</td>
+                        <td><span class="status green">Active</span></td>
+                        <td><button class="cancel-btn">Remove</button></td>
+                    </tr>
+                    <tr>
+                        <td>Dr. Rama Pokharel</td>
+                        <td>Neurologist</td>
+                        <td>Mon, Thu, Sat</td>
+                        <td><span class="status green">Active</span></td>
+                        <td><button class="cancel-btn">Remove</button></td>
+                    </tr>
+                    <tr>
+                        <td>Dr. Bikram Shrestha</td>
+                        <td>Orthopedic</td>
+                        <td>Wed, Fri</td>
+                        <td><span class="status orange">On Leave</span></td>
+                        <td><button class="cancel-btn">Remove</button></td>
+                    </tr>
+                    <tr>
+                        <td>Dr. Priya Maharjan</td>
+                        <td>Pediatrician</td>
+                        <td>Mon, Tue, Wed</td>
+                        <td><span class="status green">Active</span></td>
+                        <td><button class="cancel-btn">Remove</button></td>
+                    </tr>
+                    <tr>
+                        <td>Dr. Hari Bahadur</td>
+                        <td>General Physician</td>
+                        <td>Mon to Fri</td>
+                        <td><span class="status green">Active</span></td>
+                        <td><button class="cancel-btn">Remove</button></td>
+                    </tr>
+                </table>
+                </div>
+                <div class="appointment-section">
+                    <h3>Add New Doctor</h3>
+                    <div class="add-doctor-form">
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" placeholder="e.g. Dr. John Smith">
+                            </div>
+                            <div class="form-group">
+                                <label>Specialization</label>
+                                <input type="text" placeholder="e.g. Cardiologist">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" placeholder="e.g. doctor@hospital.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="text" placeholder="e.g. 9800000000">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Working Days</label>
+                            <div class="days-row">
+                                <label class="day-checkbox">
+                                    <input type="checkbox"> Mon
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox"> Tue
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox"> Wed
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox"> Thu
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox"> Fri
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox"> Sat
+                                </label>
+                                <label class="day-checkbox">
+                                    <input type="checkbox"> Sun
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Start Time</label>
+                                <input type="time" value="09:00">
+                            </div>
+                            <div class="form-group">
+                                <label>End Time</label>
+                                <input type="time" value="17:00">
+                            </div>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button class="btn-save">Add Doctor</button>
+                            <button class="btn-cancel">Cancel</button>
+                        </div>
+
+                    </div>
+                </div>
+
+        </div>
+</body>
+</html>

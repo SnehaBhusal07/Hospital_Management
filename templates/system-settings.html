@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management  Portal</title>
+    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\management.css">
+</head>
+<body>
+    <div class="navbar">
+        <div id="name">Hospital Appointment and Patient Management System</div>
+    </div>
+    <div class="page">
+
+        <div class="sidebar">
+            <div class="logo">MediPortal</div>
+            <nav>
+                <a href="management.html" >Dashboard</a>
+                <a href="manage-doctors.html">Manage Doctors</a>
+                <a href="doctor-availability.html">Availability</a>
+                <a href="appointments-monitor.html" >Appointments</a>
+                <a href="daily-schedule.html">Daily Schedule</a>
+                <a href="system-settings.html" class="active">Settings</a>
+            </nav>
+            <div class="doc-info">
+                <div class="avatar">AD</div>
+                <p>Admin</p>
+                <p>Managementt</p>
+            </div>
+        </div>
+        <div class="main">
+
+            <!-- Topbar -->
+            <div class="topbar">
+                <div>
+                    <h2>System Settings</h2>
+                    <p>Update hospital and system information</p>
+                </div>
+                <p>Mon, 4 May 2026</p>
+            </div>
+
+            <!-- Hospital information -->
+            <div class="appointment-section">
+                <h3>Hospital Information</h3>
+                <div class="add-doctor-form">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hospital Name</label>
+                            <input type="text" 
+                            value="MediPortal Hospital">
+                        </div>
+                        <div class="form-group">
+                            <label>Registration Number</label>
+                            <input type="text" 
+                            value="REG-2024-001">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" 
+                            value="info@mediportal.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" 
+                            value="01-4000000">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" 
+                        value="Kathmandu, Bagmati Province, Nepal">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Website</label>
+                        <input type="text" 
+                        value="www.mediportal.com">
+                    </div>
+
+                    <div class="form-buttons">
+                        <button class="btn-save">Save Changes</button>
+                        <button class="btn-cancel">Cancel</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- System preferences -->
+            <div class="appointment-section">
+                <h3>System Preferences</h3>
+                <div class="add-doctor-form">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Appointment Slot Duration</label>
+                            <select>
+                                <option>15 minutes</option>
+                                <option>20 minutes</option>
+                                <option>30 minutes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Max Appointments Per Doctor Per Day</label>
+                            <input type="number" value="32">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hospital Opening Time</label>
+                            <input type="time" value="08:00">
+                        </div>
+                        <div class="form-group">
+                            <label>Hospital Closing Time</label>
+                            <input type="time" value="18:00">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Working Days</label>
+                        <div class="days-row">
+                            <label class="day-checkbox">
+                                <input type="checkbox" checked> Mon
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" checked> Tue
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" checked> Wed
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" checked> Thu
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" checked> Fri
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" checked> Sat
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox"> Sun
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button class="btn-save">Save Preferences</button>
+                        <button class="btn-cancel">Cancel</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Change password -->
+            <div class="appointment-section">
+                <h3>Change Admin Password</h3>
+                <div class="add-doctor-form">
+
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" 
+                        placeholder="Enter current password">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" 
+                            placeholder="Enter new password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" 
+                            placeholder="Confirm new password">
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button class="btn-save">Update Password</button>
+                        <button class="btn-cancel">Cancel</button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+</body>
+</html>
