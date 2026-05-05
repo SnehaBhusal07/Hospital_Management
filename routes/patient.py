@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
-from models import Doctor, Appointment
+from models import Doctor, Appointment, MedicalRecord
 from extensions import db
 from datetime import datetime, timedelta
 
@@ -153,3 +153,59 @@ def generate_slots(start_time, end_time):
         current += timedelta(minutes=15)
 
     return slots
+
+
+# view medical history
+@patient_bp.route('/my-history', methods=['GET'])
+@login_required
+def my_history():
+    if not current_user.get_id().startswith('patient_'):
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    records = MedicalRecord.query.filter_by(
+        patient_id=current_user.id
+    ).all()
+
+    if not records:
+        return jsonify({'message': 'No medical history found'}), 404
+
+    result = []
+    for record in records:
+        doctor = Doctor.query.get(record.doctor_id)
+        result.append({
+            'date': str(record.date),
+            'doctor_name': doctor.name if doctor else 'Unknown',
+            'department': doctor.department if doctor else 'Unknown',
+            'diagnosis': record.diagnosis,
+            'report': record.report
+        })
+
+    return jsonify({'medical_history': result}), 200
+
+
+# view latest report
+@patient_bp.route('/my-report', methods=['GET'])
+@login_required
+def my_report():
+    if not current_user.get_id().startswith('patient_'):
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    # Get most recent record only
+    latest_record = MedicalRecord.query.filter_by(
+        patient_id=current_user.id
+    ).order_by(MedicalRecord.date.desc()).first()
+
+    if not latest_record:
+        return jsonify({'message': 'No reports found'}), 404
+
+    doctor = Doctor.query.get(latest_record.doctor_id)
+
+    return jsonify({
+        'latest_report': {
+            'date': str(latest_record.date),
+            'doctor_name': doctor.name if doctor else 'Unknown',
+            'department': doctor.department if doctor else 'Unknown',
+            'diagnosis': latest_record.diagnosis,
+            'report': latest_record.report
+        }
+    }), 200

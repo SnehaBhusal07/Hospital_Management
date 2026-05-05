@@ -106,24 +106,3 @@ def update_patient(patient_id):
     db.session.commit()
 
     return jsonify({'message': 'Patient record updated successfully!'}), 201
-
-
-### test
-@doctor_bp.route('/temp-add-doctor', methods=['POST'])
-def temp_add_doctor():
-    from werkzeug.security import generate_password_hash
-    data = request.get_json()
-    
-    new_doctor = Doctor(
-        name=data['name'],
-        specialization=data['specialization'],
-        department=data['department'],
-        email=data['email'],
-        password=generate_password_hash(data['password']),
-        working_days=data['working_days'],   # e.g. "Mon,Tue,Wed,Thu,Fri"
-        start_time=data['start_time'],       # e.g. "09:00"
-        end_time=data['end_time']            # e.g. "17:00"
-    )
-    db.session.add(new_doctor)
-    db.session.commit()
-    return jsonify({'message': 'Doctor added!'}), 201
