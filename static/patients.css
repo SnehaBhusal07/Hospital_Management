@@ -31,9 +31,10 @@ body{
     
 }
 .sidebar{
-    width: 300px;
+    
+    width: 200px;
     background-color: white;
-    border-right:1px solid #ddd ;
+    border-right: 1px solid #ddd;
     display: flex;
     flex-direction: column;
     gap:20px;
@@ -56,12 +57,11 @@ body{
  }
  nav a{
     text-decoration: none;
-    color:#555;
+    color: #555;
     padding: 10px;
     border-radius: 6px;
     font-size: 14px;
     display: block;
-    width: 100%;
  }
  nav a:hover{
     background-color: #e1f5ee;

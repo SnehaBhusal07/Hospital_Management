@@ -348,10 +348,22 @@ td {
     cursor: pointer;
 }
 
+.block-btn:hover {
+    background-color: #0f2a38;
+}
+.block-btn {
+    padding: 6px 14px;
+    background-color: #1a3c4d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
 .edit-btn:hover {
     background-color: #0f2a38;
 }
-
 /* Select dropdown */
 .form-group select {
     padding: 10px;
@@ -431,4 +443,12 @@ td {
 .form-group textarea:focus {
     border-color: #1a3c4d;
     outline: none;
+}
+#row-count {
+    font-size: 12px;
+    background-color: #1a3c4d;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
 }

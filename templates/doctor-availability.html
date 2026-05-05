@@ -35,7 +35,7 @@
                     <h2>Doctor Availability</h2>
                     <p>Manage working days and hours for each doctor</p>
                 </div>
-                <p>Mon,4 May 2026</p>
+                <p id="current-date">Mon,4 May 2026</p>
             </div>
 
             <div class="appointment-section">
@@ -185,6 +185,203 @@
 
         </div>
                
+<script>
 
+    // ---- 1. Auto date ----
+    const today = new Date();
+    const options = { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    };
+    document.getElementById('current-date').textContent = 
+        today.toLocaleDateString('en-GB', options);
+
+
+    // ---- store which row is being edited ----
+    let currentRow = null;
+
+
+    // ---- 2. Edit button ----
+    const editBtns = document.querySelectorAll('.edit-btn');
+
+    editBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+
+            // save reference to this row
+            currentRow = this.closest('tr');
+
+            // get data from row cells
+            const name = currentRow.cells[0].textContent.trim();
+            const days = currentRow.cells[2].textContent.trim();
+            const startTime = currentRow.cells[3].textContent.trim();
+            const endTime = currentRow.cells[4].textContent.trim();
+            const status = currentRow.cells[5].textContent.trim();
+
+            // fill doctor dropdown
+            const doctorSelect = document.querySelectorAll(
+                '.add-doctor-form select'
+            )[0];
+            const allOptions = doctorSelect.querySelectorAll('option');
+            allOptions.forEach(function(option) {
+                if (option.textContent.trim() === name) {
+                    option.selected = true;
+                }
+            });
+
+            // check matching days
+            const dayCheckboxes = document.querySelectorAll(
+                '.day-checkbox input'
+            );
+            dayCheckboxes.forEach(function(cb) {
+                const dayLabel = cb.parentElement.textContent.trim();
+                cb.checked = days.includes(dayLabel);
+            });
+
+            // convert time to 24hr format for input
+            function convertTo24Hr(timeStr) {
+                const parts = timeStr.split(' ');
+                const time = parts[0];
+                const modifier = parts[1];
+                let hours = time.split(':')[0];
+                const minutes = time.split(':')[1];
+                if (modifier === 'PM' && hours !== '12') {
+                    hours = parseInt(hours) + 12;
+                }
+                if (modifier === 'AM' && hours === '12') {
+                    hours = '00';
+                }
+                return hours + ':' + minutes;
+            }
+
+            // fill time inputs
+            const timeInputs = document.querySelectorAll(
+                '.add-doctor-form input[type="time"]'
+            );
+            timeInputs[0].value = convertTo24Hr(startTime);
+            timeInputs[1].value = convertTo24Hr(endTime);
+
+            // fill status dropdown
+            const statusSelect = document.querySelectorAll(
+                '.add-doctor-form select'
+            )[1];
+            const statusOptions = statusSelect.querySelectorAll('option');
+            statusOptions.forEach(function(option) {
+                if (option.textContent.trim() === status) {
+                    option.selected = true;
+                }
+            });
+
+            // scroll to form smoothly
+            document.querySelector('.add-doctor-form').scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+
+    // ---- 3. Update button — saves back to table ----
+    const updateBtn = document.querySelector('.btn-save');
+
+    updateBtn.addEventListener('click', function() {
+
+        // check a doctor is selected
+        const doctorSelect = document.querySelectorAll(
+            '.add-doctor-form select'
+        )[0];
+        if (doctorSelect.selectedIndex === 0) {
+            alert('Please select a doctor!');
+            return;
+        }
+
+        // check at least one day selected
+        const checkedDays = document.querySelectorAll(
+            '.day-checkbox input:checked'
+        );
+        if (checkedDays.length === 0) {
+            alert('Please select at least one working day!');
+            return;
+        }
+
+        // collect selected days as string
+        let days = '';
+        checkedDays.forEach(function(cb) {
+            days += cb.parentElement.textContent.trim() + ', ';
+        });
+        days = days.slice(0, -2);
+
+        // get time inputs
+        const timeInputs = document.querySelectorAll(
+            '.add-doctor-form input[type="time"]'
+        );
+        const startTime = timeInputs[0].value;
+        const endTime = timeInputs[1].value;
+
+        // convert 24hr to 12hr for display
+        function convertTo12Hr(time24) {
+            let hours = parseInt(time24.split(':')[0]);
+            const minutes = time24.split(':')[1];
+            const modifier = hours >= 12 ? 'PM' : 'AM';
+            if (hours > 12) hours = hours - 12;
+            if (hours === 0) hours = 12;
+            return hours + ':' + minutes + ' ' + modifier;
+        }
+
+        // get selected status
+        const statusSelect = document.querySelectorAll(
+            '.add-doctor-form select'
+        )[1];
+        const statusValue = statusSelect.value;
+
+        // set status color
+        let statusClass = 'green';
+        if (statusValue === 'On Leave') statusClass = 'orange';
+        if (statusValue === 'Inactive') statusClass = 'gray';
+
+        // if a row is being edited — update it
+        if (currentRow) {
+            currentRow.cells[2].textContent = days;
+            currentRow.cells[3].textContent = convertTo12Hr(startTime);
+            currentRow.cells[4].textContent = convertTo12Hr(endTime);
+            currentRow.cells[5].innerHTML = 
+                '<span class="status ' + statusClass + '">' + 
+                statusValue + '</span>';
+
+            alert('Availability updated successfully!');
+            currentRow = null;
+
+        } else {
+            alert('Please click Edit on a doctor first!');
+        }
+    });
+
+
+    // ---- 4. Cancel button ----
+    const cancelBtn = document.querySelector('.btn-cancel');
+
+    cancelBtn.addEventListener('click', function() {
+
+        document.querySelectorAll('.add-doctor-form select')[0]
+            .selectedIndex = 0;
+
+        document.querySelectorAll('.day-checkbox input')
+            .forEach(function(cb) {
+                cb.checked = false;
+            });
+
+        const timeInputs = document.querySelectorAll(
+            '.add-doctor-form input[type="time"]'
+        );
+        timeInputs[0].value = '09:00';
+        timeInputs[1].value = '17:00';
+
+        document.querySelectorAll('.add-doctor-form select')[1]
+            .selectedIndex = 0;
+
+        currentRow = null;
+    });
+
+</script>
 </body>
 </html>

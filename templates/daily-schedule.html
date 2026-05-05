@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management  Portal</title>
+    <title>Management Portal</title>
     <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\management.css">
 </head>
 <body>
@@ -25,32 +25,33 @@
             <div class="doc-info">
                 <div class="avatar">AD</div>
                 <p>Admin</p>
-                <p>Managementt</p>
+                <p>Management</p>
             </div>
         </div>
+
         <div class="main">
-    <!-- Topbar -->
+
             <div class="topbar">
                 <div>
                     <h2>Daily Schedule</h2>
                     <p>Manual control over today's doctor schedules</p>
                 </div>
-                <p>Mon, 4 May 2026</p>
+                <p id="current-date">Mon, 4 May 2026</p>
             </div>
 
             <!-- Date selector -->
             <div class="appointment-section">
                 <div class="date-selector">
                     <label><strong>Select Date:</strong></label>
-                    <input type="date" value="2026-05-04">
-                    <button class="btn-save">Load Schedule</button>
+                    <input type="date" id="date-picker" value="2026-05-04">
+                    <button class="btn-save" id="load-btn">Load Schedule</button>
                 </div>
             </div>
 
             <!-- Schedule table -->
             <div class="appointment-section">
-                <h3>Doctor Schedules — Mon, 4 May 2026</h3>
-                <table>
+                <h3 id="schedule-title">Doctor Schedules — Mon, 4 May 2026</h3>
+                <table id="schedule-table">
                     <tr>
                         <th>Doctor</th>
                         <th>Specialization</th>
@@ -59,9 +60,10 @@
                         <th>Total Slots</th>
                         <th>Booked</th>
                         <th>Available</th>
+                        <th>Status</th>
                         <th>Action</th>
                     </tr>
-                    <tr>
+                    <tr data-doctor="Dr. Anil Kumar">
                         <td>Dr. Anil Kumar</td>
                         <td>Cardiologist</td>
                         <td>09:00 AM</td>
@@ -69,12 +71,13 @@
                         <td>32</td>
                         <td>18</td>
                         <td>14</td>
+                        <td><span class="status green">Active</span></td>
                         <td>
                             <button class="edit-btn">Edit</button>
-                            <button class="cancel-btn">Block</button>
+                            <button class="block-btn">Block</button>
                         </td>
                     </tr>
-                    <tr>
+                    <tr data-doctor="Dr. Rama Pokharel">
                         <td>Dr. Rama Pokharel</td>
                         <td>Neurologist</td>
                         <td>08:00 AM</td>
@@ -82,12 +85,13 @@
                         <td>28</td>
                         <td>10</td>
                         <td>18</td>
+                        <td><span class="status green">Active</span></td>
                         <td>
                             <button class="edit-btn">Edit</button>
-                            <button class="cancel-btn">Block</button>
+                            <button class="block-btn">Block</button>
                         </td>
                     </tr>
-                    <tr>
+                    <tr data-doctor="Dr. Priya Maharjan">
                         <td>Dr. Priya Maharjan</td>
                         <td>Pediatrician</td>
                         <td>09:00 AM</td>
@@ -95,12 +99,13 @@
                         <td>32</td>
                         <td>25</td>
                         <td>7</td>
+                        <td><span class="status green">Active</span></td>
                         <td>
                             <button class="edit-btn">Edit</button>
-                            <button class="cancel-btn">Block</button>
+                            <button class="block-btn">Block</button>
                         </td>
                     </tr>
-                    <tr>
+                    <tr data-doctor="Dr. Hari Bahadur">
                         <td>Dr. Hari Bahadur</td>
                         <td>General Physician</td>
                         <td>08:00 AM</td>
@@ -108,50 +113,46 @@
                         <td>40</td>
                         <td>30</td>
                         <td>10</td>
+                        <td><span class="status green">Active</span></td>
                         <td>
                             <button class="edit-btn">Edit</button>
-                            <button class="cancel-btn">Block</button>
+                            <button class="block-btn">Block</button>
                         </td>
                     </tr>
                 </table>
             </div>
 
-            <!-- Edit slot form -->
-            <div class="appointment-section">
+            <!-- Edit schedule form -->
+            <div class="appointment-section" id="edit-form-section">
                 <h3>Edit Doctor Schedule</h3>
                 <p style="font-size:13px; color:#888; margin-bottom:15px;">
-                    Select a doctor to manually adjust their schedule for the selected date
+                    Click Edit on a doctor above to fill this form
                 </p>
-
                 <div class="add-doctor-form">
 
                     <div class="form-group">
-                        <label>Select Doctor</label>
-                        <select>
-                            <option>Select a doctor</option>
-                            <option>Dr. Anil Kumar</option>
-                            <option>Dr. Rama Pokharel</option>
-                            <option>Dr. Priya Maharjan</option>
-                            <option>Dr. Hari Bahadur</option>
-                        </select>
+                        <label>Selected Doctor</label>
+                        <input type="text" id="selected-doctor" 
+                        placeholder="Click Edit on a doctor above" 
+                        readonly>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label>Start Time</label>
-                            <input type="time" value="09:00">
+                            <input type="time" id="edit-start" value="09:00">
                         </div>
                         <div class="form-group">
                             <label>End Time</label>
-                            <input type="time" value="17:00">
+                            <input type="time" id="edit-end" value="17:00">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Schedule Status</label>
-                        <select>
-                            <option>Active — accepting appointments</option>
-                            <option>Blocked — no appointments</option>
+                        <select id="edit-status">
+                            <option>Active</option>
+                            <option>Blocked</option>
                             <option>Half Day — morning only</option>
                             <option>Half Day — afternoon only</option>
                         </select>
@@ -159,18 +160,234 @@
 
                     <div class="form-group">
                         <label>Notes (optional)</label>
-                        <textarea rows="3" 
-                        placeholder="e.g. Doctor on emergency leave"></textarea>
+                        <textarea id="edit-notes" rows="3" 
+                        placeholder="e.g. Doctor on emergency leave">
+                        </textarea>
                     </div>
 
                     <div class="form-buttons">
-                        <button class="btn-save">Save Schedule</button>
-                        <button class="btn-cancel">Cancel</button>
+                        <button class="btn-save" id="save-btn">
+                            Save Schedule
+                        </button>
+                        <button class="btn-cancel" id="cancel-btn">
+                            Cancel
+                        </button>
                     </div>
 
                 </div>
             </div>
 
         </div>
+    </div>
+
+<script>
+
+    // ---- 1. Auto date ----
+    const today = new Date();
+    const options = { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    };
+    document.getElementById('current-date').textContent = 
+        today.toLocaleDateString('en-GB', options);
+
+
+    // ---- 2. Load schedule button ----
+    document.getElementById('load-btn').addEventListener('click', function() {
+
+        const dateValue = document.getElementById('date-picker').value;
+
+        if (!dateValue) {
+            alert('Please select a date!');
+            return;
+        }
+
+        // format date nicely for title
+        const selectedDate = new Date(dateValue);
+        const titleOptions = { 
+            weekday: 'short', 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+        };
+        const formattedDate = selectedDate.toLocaleDateString(
+            'en-GB', titleOptions
+        );
+
+        // update the schedule title
+        document.getElementById('schedule-title').textContent = 
+            'Doctor Schedules — ' + formattedDate;
+
+        alert('Schedule loaded for ' + formattedDate);
+    });
+
+
+    // ---- 3. Store current row being edited ----
+    let currentRow = null;
+
+
+    // ---- 4. Edit button ----
+    function attachEditButtons() {
+        const editBtns = document.querySelectorAll('.edit-btn');
+
+        editBtns.forEach(function(btn) {
+            btn.onclick = function() {
+
+                // save the row
+                currentRow = this.closest('tr');
+
+                // get data from row
+                const name = currentRow.cells[0].textContent.trim();
+                const startTime = currentRow.cells[2].textContent.trim();
+                const endTime = currentRow.cells[3].textContent.trim();
+
+                // fill the form
+                document.getElementById('selected-doctor').value = name;
+
+                // convert time to 24hr for input
+                function convertTo24Hr(timeStr) {
+                    const parts = timeStr.split(' ');
+                    const time = parts[0];
+                    const modifier = parts[1];
+                    let hours = time.split(':')[0];
+                    const minutes = time.split(':')[1];
+                    if (modifier === 'PM' && hours !== '12') {
+                        hours = parseInt(hours) + 12;
+                    }
+                    if (modifier === 'AM' && hours === '12') {
+                        hours = '00';
+                    }
+                    return hours + ':' + minutes;
+                }
+
+                document.getElementById('edit-start').value = 
+                    convertTo24Hr(startTime);
+                document.getElementById('edit-end').value = 
+                    convertTo24Hr(endTime);
+
+                // clear notes
+                document.getElementById('edit-notes').value = '';
+
+                // scroll to form
+                document.getElementById('edit-form-section').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            };
+        });
+    }
+
+    attachEditButtons();
+
+
+    // ---- 5. Block button ----
+    function attachBlockButtons() {
+        const blockBtns = document.querySelectorAll('.block-btn');
+
+        blockBtns.forEach(function(btn) {
+            btn.onclick = function() {
+
+                const row = this.closest('tr');
+                const name = row.cells[0].textContent.trim();
+                const statusCell = row.cells[7];
+                const currentStatus = statusCell.textContent.trim();
+
+                if (currentStatus === 'Active') {
+                    const confirmed = confirm(
+                        'Block ' + name + ' for today? ' +
+                        'No appointments will be accepted.'
+                    );
+                    if (confirmed) {
+                        statusCell.innerHTML = 
+                            '<span class="status red">Blocked</span>';
+                        this.textContent = 'Unblock';
+                    }
+                } else {
+                    const confirmed = confirm(
+                        'Unblock ' + name + ' for today?'
+                    );
+                    if (confirmed) {
+                        statusCell.innerHTML = 
+                            '<span class="status green">Active</span>';
+                        this.textContent = 'Block';
+                    }
+                }
+            };
+        });
+    }
+
+    attachBlockButtons();
+
+
+    // ---- 6. Save schedule button ----
+    document.getElementById('save-btn').addEventListener('click', function() {
+
+        if (!currentRow) {
+            alert('Please click Edit on a doctor first!');
+            return;
+        }
+
+        const startTime = document.getElementById('edit-start').value;
+        const endTime = document.getElementById('edit-end').value;
+        const status = document.getElementById('edit-status').value;
+
+        if (!startTime || !endTime) {
+            alert('Please set start and end time!');
+            return;
+        }
+
+        // convert 24hr to 12hr for display
+        function convertTo12Hr(time24) {
+            let hours = parseInt(time24.split(':')[0]);
+            const minutes = time24.split(':')[1];
+            const modifier = hours >= 12 ? 'PM' : 'AM';
+            if (hours > 12) hours = hours - 12;
+            if (hours === 0) hours = 12;
+            return hours + ':' + minutes + ' ' + modifier;
+        }
+
+        // update the row
+        currentRow.cells[2].textContent = convertTo12Hr(startTime);
+        currentRow.cells[3].textContent = convertTo12Hr(endTime);
+
+        // update status
+        let statusClass = 'green';
+        if (status === 'Blocked') statusClass = 'red';
+        if (status.includes('Half')) statusClass = 'orange';
+
+        currentRow.cells[7].innerHTML = 
+            '<span class="status ' + statusClass + '">' + 
+            status + '</span>';
+
+        // update block button text
+        const blockBtn = currentRow.querySelector('.block-btn');
+        if (status === 'Blocked') {
+            blockBtn.textContent = 'Unblock';
+        } else {
+            blockBtn.textContent = 'Block';
+        }
+
+        alert('Schedule updated successfully!');
+        currentRow = null;
+
+        // clear form
+        document.getElementById('selected-doctor').value = '';
+        document.getElementById('edit-notes').value = '';
+        document.getElementById('edit-status').selectedIndex = 0;
+    });
+
+
+    // ---- 7. Cancel button ----
+    document.getElementById('cancel-btn').addEventListener('click', function() {
+        document.getElementById('selected-doctor').value = '';
+        document.getElementById('edit-start').value = '09:00';
+        document.getElementById('edit-end').value = '17:00';
+        document.getElementById('edit-notes').value = '';
+        document.getElementById('edit-status').selectedIndex = 0;
+        currentRow = null;
+    });
+
+</script>
 </body>
 </html>

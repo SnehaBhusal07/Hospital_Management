@@ -11,7 +11,8 @@ body {
 }
 .page{
     display: flex;
-    height:calc(100vh-70px)
+    height:calc(100vh-70px);
+    overflow: hidden;
 }
 #name{
     height:60px;
@@ -28,14 +29,13 @@ body {
     
 }
 .sidebar{
-    background-color: white; 
-    width:300px;
-    border-right:1px solid #0F4C5C;
+    width: 200px;
+    background-color: white;
+    border-right: 1px solid #ddd;
     display: flex;
     flex-direction: column;
     gap:20px;
    
-
 }
 
 .logo{
@@ -57,9 +57,11 @@ nav{
 }
 nav a{
     text-decoration: none;
-    padding:10px;
+    color: #555;
+    padding: 10px;
     border-radius: 6px;
-    font-size:14px;
+    font-size: 14px;
+    display: block;
 }
 nav a:hover{
     background-color: #0F4C5C;

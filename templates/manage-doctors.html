@@ -25,7 +25,7 @@
             <div class="doc-info">
                 <div class="avatar">AD</div>
                 <p>Admin</p>
-                <p>Managementt</p>
+                <p>Management</p>
             </div>
         </div>
         <div class="main">
@@ -35,7 +35,7 @@
                     <h2>Manage Doctors</h2>
                     <p>Add View and Remove Doctors</p>
                 </div>
-                <p>Mon,4 May 2026</p>
+                <p id="current-date">Mon, 4 May 2026</p>
             </div>
 
             <div class="appointment-section">
@@ -163,7 +163,148 @@
 
                     </div>
                 </div>
-
         </div>
+        </div>
+    
+<script>
+
+    // ---- 1. Auto date ----
+    const today = new Date();
+    const options = { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    };
+    document.getElementById('current-date').textContent = 
+        today.toLocaleDateString('en-GB', options);
+
+
+    // ---- 2. Remove doctor button ----
+    function attachRemoveButtons() {
+        const removeBtns = document.querySelectorAll('.cancel-btn');
+        removeBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                const confirmed = confirm(
+                    'Are you sure you want to remove this doctor?'
+                );
+                if (confirmed) {
+                    this.closest('tr').style.display = 'none';
+                }
+            };
+        });
+    }
+
+    attachRemoveButtons();
+
+
+    // ---- 3. Add doctor form validation ----
+    const addBtn = document.querySelector('.btn-save');
+
+    addBtn.addEventListener('click', function() {
+
+        const allInputs = document.querySelectorAll('.form-group input[type="text"]');
+        const emailInput = document.querySelector('.form-group input[type="email"]');
+
+        const name = allInputs[0].value.trim();
+        const spec = allInputs[1].value.trim();
+        const phone = allInputs[2].value.trim();
+        const email = emailInput.value.trim();
+
+        if (!name) {
+            alert('Please enter doctor name!');
+            return;
+        }
+        if (!spec) {
+            alert('Please enter specialization!');
+            return;
+        }
+        if (!email) {
+            alert('Please enter email!');
+            return;
+        }
+        if (!phone) {
+            alert('Please enter phone number!');
+            return;
+        }
+
+        const checkedDays = document.querySelectorAll(
+            '.day-checkbox input:checked'
+        );
+        if (checkedDays.length === 0) {
+            alert('Please select at least one working day!');
+            return;
+        }
+
+        // collect selected days
+        let days = '';
+        checkedDays.forEach(function(cb) {
+            days += cb.parentElement.textContent.trim() + ', ';
+        });
+        days = days.slice(0, -2);
+
+        // find the table and add new row
+        const table = document.querySelector('.appointment-section table');
+
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = 
+            '<td>' + name + '</td>' +
+            '<td>' + spec + '</td>' +
+            '<td>' + days + '</td>' +
+            '<td><span class="status green">Active</span></td>' +
+            '<td><button class="cancel-btn">Remove</button></td>';
+
+        table.appendChild(newRow);
+
+        // attach remove to new button
+        newRow.querySelector('.cancel-btn').onclick = function() {
+            const confirmed = confirm(
+                'Are you sure you want to remove this doctor?'
+            );
+            if (confirmed) {
+                newRow.style.display = 'none';
+            }
+        };
+
+        // clear the form
+        allInputs.forEach(function(input) {
+            input.value = '';
+        });
+        emailInput.value = '';
+        checkedDays.forEach(function(cb) {
+            cb.checked = false;
+        });
+
+        alert(name + ' added successfully!');
+    });
+
+
+    // ---- 4. Cancel form button ----
+    const cancelBtn = document.querySelector('.btn-cancel');
+
+    cancelBtn.addEventListener('click', function() {
+
+        const textInputs = document.querySelectorAll(
+            '.add-doctor-form input[type="text"]'
+        );
+        const emailInput = document.querySelector(
+            '.add-doctor-form input[type="email"]'
+        );
+
+        textInputs.forEach(function(input) {
+            input.value = '';
+        });
+
+        if (emailInput) {
+            emailInput.value = '';
+        }
+
+        const checkboxes = document.querySelectorAll('.day-checkbox input');
+        checkboxes.forEach(function(cb) {
+            cb.checked = false;
+        });
+    });
+
+</script>
 </body>
 </html>

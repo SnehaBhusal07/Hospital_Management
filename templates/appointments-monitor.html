@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management  Portal</title>
+    <title>Management Portal</title>
     <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\management.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="management.html" >Dashboard</a>
+                <a href="management.html">Dashboard</a>
                 <a href="manage-doctors.html">Manage Doctors</a>
                 <a href="doctor-availability.html">Availability</a>
                 <a href="appointments-monitor.html" class="active">Appointments</a>
@@ -25,21 +25,20 @@
             <div class="doc-info">
                 <div class="avatar">AD</div>
                 <p>Admin</p>
-                <p>Managementt</p>
+                <p>Management</p>
             </div>
         </div>
+
         <div class="main">
 
-            <!-- Topbar -->
             <div class="topbar">
                 <div>
                     <h2>Appointments Monitor</h2>
                     <p>View and manage all appointments</p>
                 </div>
-                <p>Mon, 4 May 2026</p>
+                <p id="current-date">Mon, 4 May 2026</p>
             </div>
 
-            <!-- Filter bar -->
             <div class="filter-bar">
                 <button class="filter-btn active">All</button>
                 <button class="filter-btn">Confirmed</button>
@@ -48,10 +47,11 @@
                 <button class="filter-btn">Cancelled</button>
             </div>
 
-            <!-- Appointments table -->
             <div class="appointment-section">
-                <h3>All Appointments</h3>
-                <table>
+                <h3>All Appointments 
+                    <span id="row-count"></span>
+                </h3>
+                <table id="appointments-table">
                     <tr>
                         <th>Patient</th>
                         <th>Doctor</th>
@@ -62,7 +62,7 @@
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
-                    <tr>
+                    <tr data-status="Confirmed">
                         <td>Rajesh Kumar</td>
                         <td>Dr. Anil Kumar</td>
                         <td>Cardiologist</td>
@@ -72,7 +72,7 @@
                         <td><span class="status green">Confirmed</span></td>
                         <td><button class="cancel-btn">Cancel</button></td>
                     </tr>
-                    <tr>
+                    <tr data-status="Pending">
                         <td>Sita Rai</td>
                         <td>Dr. Sita Thapa</td>
                         <td>Dermatologist</td>
@@ -82,7 +82,7 @@
                         <td><span class="status orange">Pending</span></td>
                         <td><button class="cancel-btn">Cancel</button></td>
                     </tr>
-                    <tr>
+                    <tr data-status="Completed">
                         <td>Bikash Thapa</td>
                         <td>Dr. Rama Pokharel</td>
                         <td>Neurologist</td>
@@ -92,7 +92,7 @@
                         <td><span class="status gray">Completed</span></td>
                         <td><button class="cancel-btn">Cancel</button></td>
                     </tr>
-                    <tr>
+                    <tr data-status="Pending">
                         <td>Priya Maharjan</td>
                         <td>Dr. Anil Kumar</td>
                         <td>Cardiologist</td>
@@ -102,7 +102,7 @@
                         <td><span class="status orange">Pending</span></td>
                         <td><button class="cancel-btn">Cancel</button></td>
                     </tr>
-                    <tr>
+                    <tr data-status="Confirmed">
                         <td>Hari Bahadur</td>
                         <td>Dr. Priya Maharjan</td>
                         <td>Pediatrician</td>
@@ -112,7 +112,7 @@
                         <td><span class="status green">Confirmed</span></td>
                         <td><button class="cancel-btn">Cancel</button></td>
                     </tr>
-                    <tr>
+                    <tr data-status="Cancelled">
                         <td>Mina Shrestha</td>
                         <td>Dr. Hari Bahadur</td>
                         <td>General Physician</td>
@@ -122,7 +122,7 @@
                         <td><span class="status red">Cancelled</span></td>
                         <td><button class="cancel-btn">Cancel</button></td>
                     </tr>
-                    <tr>
+                    <tr data-status="Confirmed">
                         <td>Ram Prasad</td>
                         <td>Dr. Bikram Shrestha</td>
                         <td>Orthopedic</td>
@@ -136,5 +136,89 @@
             </div>
 
         </div>
+    </div>
+
+<script>
+
+    // ---- 1. Auto date ----
+    const today = new Date();
+    const options = { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    };
+    document.getElementById('current-date').textContent = 
+        today.toLocaleDateString('en-GB', options);
+
+
+    // ---- 2. Count visible rows ----
+    function updateCount() {
+        const allRows = document.querySelectorAll(
+            '#appointments-table tr[data-status]'
+        );
+        let count = 0;
+        allRows.forEach(function(row) {
+            if (row.style.display !== 'none') {
+                count++;
+            }
+        });
+        document.getElementById('row-count').textContent = count;
+    }
+
+    updateCount();
+
+
+    // ---- 3. Filter buttons ----
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    filterBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+
+            filterBtns.forEach(function(b) {
+                b.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            const filter = this.textContent.trim();
+
+            const allRows = document.querySelectorAll(
+                '#appointments-table tr[data-status]'
+            );
+
+            allRows.forEach(function(row) {
+                if (filter === 'All') {
+                    row.style.display = '';
+                } else if (row.dataset.status === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updateCount();
+        });
+    });
+
+
+    // ---- 4. Cancel button ----
+    function attachCancelButtons() {
+        const cancelBtns = document.querySelectorAll('.cancel-btn');
+        cancelBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                const confirmed = confirm(
+                    'Are you sure you want to cancel this appointment?'
+                );
+                if (confirmed) {
+                    this.closest('tr').style.display = 'none';
+                    updateCount();
+                }
+            };
+        });
+    }
+
+    attachCancelButtons();
+
+</script>
 </body>
 </html>
