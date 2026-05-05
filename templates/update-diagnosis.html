@@ -3,100 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\doctors.css">
+    <title>Update Diagnosis</title>
+    <link rel="stylesheet" href="../static/doctors.css">
 </head>
 <body>
-     <div class="navbar">
+    <div class="navbar">
         <div id="name">Hospital Appointment and Patient Management system</div>
     </div>
+
     <div class="page">
-    <div class="sidebar">
-        <div class="logo">MediPortal</div>
-        <nav>
-            <a href="doctors.html">DashBoard</a>
-            <a href="schedule.html">Schedule</a>
-            <a href="patient-history.html">Patients</a>
-            <a href="update-diagnosis.html">Report</a>
-        </nav>
-        <div class="doc-info">
-            <div class="avatar">AK</div>
-            <p>Name of doctor</p>
-            <p>Specialization</p>
-        </div>
-    </div>
-    <div class="main">
-        <div class="topbar">
-            <div>
-                <h2>Update Diagnosis</h2>
-                <p>Add or update patient diagnosis and reports</p>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">MediPortal</div>
+            <nav>
+                <a href="doctors.html">DashBoard</a>
+                <a href="schedule.html">Schedule</a>
+                <a href="patient-history.html">Patients</a>
+                <a href="update-diagnosis.html" class="active">Report</a>
+            </nav>
+            <div class="doc-info">
+                <div class="avatar">AK</div>
+                <p>Name of doctor</p>
+                <p>Specialization</p>
             </div>
-            <p>Mon,4 May 2026</p>
         </div>
 
-        <div class="patient-card">
-            <div class="patient avatar">RS</div>
-            
-            <div class="patient-details">
-                <h2>Ravi Sharma</h2>
-                <div class="info-row">
-                    <span><strong>Age:</strong> 42</span>
-                    <span><strong>Blood Group:</strong> B+</span>
-                    <span><strong>Contact:</strong> 9800000000</span>
-                    <span><strong>Gender:</strong> Male</span>
+        <!-- MAIN -->
+        <div class="main">
+
+            <div class="topbar">
+                <div>
+                    <h2>Update Diagnosis</h2>
+                    <p>Add or update patient diagnosis and reports</p>
                 </div>
+                <p id="current-date"></p>
+            </div>
+
+            <!-- Patient Card -->
+            <div class="patient-card">
+                <div class="patient-avatar">RS</div>
+                <div class="patient-details">
+                    <h2>Ravi Sharma</h2>
+                    <div class="info-row">
+                        <span><strong>Age:</strong> 42</span>
+                        <span><strong>Blood Group:</strong> B+</span>
+                        <span><strong>Contact:</strong> 9800000000</span>
+                        <span><strong>Gender:</strong> Male</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagnosis Form -->
+            <div class="diagnosis-form">
+
+                <!-- Diagnosis Notes -->
+                <div class="form-group">
+                    <label>Diagnosis Notes</label>
+                    <textarea id="diagnosis-notes" rows="4" placeholder="Write diagnosis details here..."></textarea>
+                    <p id="notes-error" style="display:none; color:red; font-size:12px; margin-top:4px;">
+                        ⚠ Please enter diagnosis notes.
+                    </p>
+                </div>
+
+                <!-- Prescription Table -->
+                <div class="form-group">
+                    <label>Prescription</label>
+                    <table class="prescription-table" id="prescription-table">
+                        <tr>
+                            <th>Medicine Name</th>
+                            <th>Dosage</th>
+                            <th>Duration</th>
+                            <th style="background:#0F4C5C;"></th>
+                        </tr>
+                        <tr>
+                            <td><input type="text" placeholder="e.g. Paracetamol"></td>
+                            <td><input type="text" placeholder="e.g. 500mg"></td>
+                            <td><input type="text" placeholder="e.g. 5 days"></td>
+                            <td>
+                                <button class="btn-cancel" style="padding:4px 10px; font-size:12px;"
+                                    onclick="removeRow(this)">✕</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" placeholder="e.g. Amlodipine"></td>
+                            <td><input type="text" placeholder="e.g. 5mg"></td>
+                            <td><input type="text" placeholder="e.g. 30 days"></td>
+                            <td>
+                                <button class="btn-cancel" style="padding:4px 10px; font-size:12px;"
+                                    onclick="removeRow(this)">✕</button>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- Add Row Button -->
+                    <button id="add-row-btn" class="btn-cancel" style="margin-top:10px; font-size:13px;">
+                        + Add Medicine
+                    </button>
+                </div>
+
+                <!-- Patient Status -->
+                <div class="form-group">
+                    <label>Patient Status</label>
+                    <select id="patient-status">
+                        <option value="">Select Status</option>
+                        <option>Follow-up Needed</option>
+                        <option>Discharged</option>
+                        <option>Referred</option>
+                        <option>Admitted</option>
+                    </select>
+                    <p id="status-error" style="display:none; color:red; font-size:12px; margin-top:4px;">
+                        ⚠ Please select a patient status.
+                    </p>
+                </div>
+
+                <!-- Upload Lab Report -->
+                <div class="form-group">
+                    <label>Upload Lab Report</label>
+                    <input type="file" id="lab-report" accept=".pdf,.jpg,.png">
+                    <p id="file-name" style="font-size:12px; color:#0F4C5C; margin-top:6px;"></p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="form-buttons">
+                    <button class="btn-save" id="save-btn">Save Diagnosis</button>
+                    <button class="btn-cancel" id="cancel-btn">Cancel</button>
+                </div>
+
+            </div>
+
+            <!-- Success Message (hidden by default) -->
+            <div id="success-box" style="display:none; margin:0 20px 20px;">
+                <div style="
+                    background-color:white;
+                    border-radius:8px;
+                    padding:24px;
+                    text-align:center;
+                    border-top:4px solid #0F4C5C;
+                ">
+                    <h2 style="color:#0F4C5C; font-size:20px; margin-bottom:10px;">
+                        ✅ Diagnosis Saved Successfully
+                    </h2>
+                    <p style="font-size:14px; color:#555;">Patient: Ravi Sharma</p>
+                    <p id="success-status" style="font-size:14px; color:#555; margin-top:4px;"></p>
+                    <p id="success-time" style="font-size:13px; color:#888; margin-top:4px;"></p>
+                    <button class="btn-save" id="new-btn" style="margin-top:16px;">
+                        Add Another Entry
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div class="diagnosis-form">
-        <div class="form-group">
-            <label>Diagnosis Notes</label>
-            <textarea rows="4" placeholder="Write diagnosis detials here..."></textarea>
-        </div>
+    <script>
 
-        <div class="form-group">
-            <label>Prescription</label>
-            <table class="prescription-table">
-                <tr>
-                    <th>Medicine Name</th>
-                    <th>Dosage</th>
-                    <th>Duration</th>
-                </tr>
-                 <tr>
-                    <td><input type="text" placeholder="e.g. Paracetamol"></td>
-                    <td><input type="text" placeholder="e.g. 500mg"></td>
-                    <td><input type="text" placeholder="e.g. 5 days"></td>
-                </tr>
-                <tr>
-                    <td><input type="text" placeholder="e.g. Amlodipine"></td>
-                    <td><input type="text" placeholder="e.g. 5mg"></td>
-                    <td><input type="text" placeholder="e.g. 30 days"></td>
-                </tr>
-            </table>
-        </div>
-        <div class="form-group">
-            <label>Patients Status</label>
-            <select>
-                <option>Select Status</option>
-                <option>Follow-up Needed</option>
-                <option>Diacharged</option>
-                <option>Refferred</option>
-                <option>Admitted</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label >Upload Lab Report</label>
-            <input type="file">
-        </div>
+        // ---- 1. Auto date ----
+        const today = new Date();
+        const options = {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        };
+        document.getElementById('current-date').textContent =
+            today.toLocaleDateString('en-GB', options);
 
-         <div class="form-buttons">
-            <button class="btn-save">Save Diagnosis</button>
-            <button class="btn-cancel">Cancel</button>
-        </div>
-        </div>
-    </div>
-</div>
 
-    
+        // ---- 2. Show selected file name ----
+        document.getElementById('lab-report').addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : '';
+            document.getElementById('file-name').textContent =
+                fileName ? '📎 ' + fileName : '';
+        });
+
+
+        // ---- 3. Add medicine row ----
+        document.getElementById('add-row-btn').addEventListener('click', function() {
+            const table = document.getElementById('prescription-table');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" placeholder="Medicine name"></td>
+                <td><input type="text" placeholder="Dosage"></td>
+                <td><input type="text" placeholder="Duration"></td>
+                <td>
+                    <button class="btn-cancel" style="padding:4px 10px; font-size:12px;"
+                        onclick="removeRow(this)">✕</button>
+                </td>
+            `;
+            table.appendChild(newRow);
+        });
+
+
+        // ---- 4. Remove medicine row ----
+        function removeRow(btn) {
+            const row = btn.closest('tr');
+            const table = document.getElementById('prescription-table');
+            // keep at least 1 data row
+            const dataRows = table.querySelectorAll('tr:not(:first-child)');
+            if (dataRows.length > 1) {
+                row.remove();
+            } else {
+                alert('At least one prescription row is required.');
+            }
+        }
+
+
+        // ---- 5. Form validation + save ----
+        document.getElementById('save-btn').addEventListener('click', function() {
+            const notes = document.getElementById('diagnosis-notes').value.trim();
+            const status = document.getElementById('patient-status').value;
+
+            let valid = true;
+
+            // validate notes
+            if (notes === '') {
+                document.getElementById('notes-error').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('notes-error').style.display = 'none';
+            }
+
+            // validate status
+            if (status === '') {
+                document.getElementById('status-error').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('status-error').style.display = 'none';
+            }
+
+            if (!valid) return;
+
+            // show success box
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-GB', {
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            document.getElementById('success-status').textContent = 'Status: ' + status;
+            document.getElementById('success-time').textContent =
+                'Saved on ' + now.toLocaleDateString('en-GB', options) + ' at ' + timeStr;
+
+            document.querySelector('.diagnosis-form').style.display = 'none';
+            document.getElementById('success-box').style.display = 'block';
+        });
+
+
+        // ---- 6. Cancel button ----
+        document.getElementById('cancel-btn').addEventListener('click', function() {
+            const confirmed = confirm('Are you sure you want to cancel? All changes will be lost.');
+            if (confirmed) {
+                document.getElementById('diagnosis-notes').value = '';
+                document.getElementById('patient-status').value = '';
+                document.getElementById('lab-report').value = '';
+                document.getElementById('file-name').textContent = '';
+                document.getElementById('notes-error').style.display = 'none';
+                document.getElementById('status-error').style.display = 'none';
+            }
+        });
+
+
+        // ---- 7. Add another entry ----
+        document.getElementById('new-btn').addEventListener('click', function() {
+            document.getElementById('diagnosis-notes').value = '';
+            document.getElementById('patient-status').value = '';
+            document.getElementById('lab-report').value = '';
+            document.getElementById('file-name').textContent = '';
+            document.getElementById('notes-error').style.display = 'none';
+            document.getElementById('status-error').style.display = 'none';
+            document.querySelector('.diagnosis-form').style.display = 'block';
+            document.getElementById('success-box').style.display = 'none';
+        });
+
+    </script>
+
 </body>
 </html>

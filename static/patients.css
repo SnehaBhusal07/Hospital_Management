@@ -37,8 +37,7 @@ body{
     display: flex;
     flex-direction: column;
     gap:20px;
-    height:100%;
-    overflow-y: auto;  
+  
 }
 .logo{
     font-size: 20px;

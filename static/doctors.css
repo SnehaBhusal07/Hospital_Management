@@ -34,6 +34,7 @@ body {
     display: flex;
     flex-direction: column;
     gap:20px;
+   
 
 }
 
@@ -63,6 +64,10 @@ nav a{
 nav a:hover{
     background-color: #0F4C5C;
     color:#F4F9F9
+}
+nav a.active {
+    background-color: #0F4C5C;
+    color: #F4F9F9;
 }
 .doc-info{
     margin-top: auto;
@@ -238,6 +243,20 @@ td{
     border-left: 5px solid #0F4C5C;
 
 }
+.avatar {
+    width: 36px;
+    height: 36px;
+    background-color: #e1f5ee;
+    color: #0F4C5C;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
 .patient-avatar{
     width:60px;
     height: 60px;
