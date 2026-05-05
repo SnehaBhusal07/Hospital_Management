@@ -5,10 +5,13 @@ from routes.auth import auth
 from routes.doctor import doctor_bp
 from flask import Flask, jsonify
 from routes.patient import patient_bp
+from routes.management import management_bp
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aspataal'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hospital.db'
+app.config['ADMIN_USERNAME'] = 'admin'
+app.config['ADMIN_PASSWORD'] = 'admin123'
 
 db.init_app(app)                 
 login_manager = LoginManager(app)
@@ -21,7 +24,8 @@ def unauthorized():
 
 app.register_blueprint(auth) 
 app.register_blueprint(doctor_bp)  
-app.register_blueprint(patient_bp)                
+app.register_blueprint(patient_bp)
+app.register_blueprint(management_bp)                
 
 @login_manager.user_loader
 def load_user(user_id):
