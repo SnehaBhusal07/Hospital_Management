@@ -118,7 +118,7 @@ def find_match(row,col,color):
 def remove_match(match):
 
     for r,c in match:
-        grid[r][c]=None
+     quit()   grid[r][c]=None
 
 
 # ---------------- Floating Bubble Removal ----------------
@@ -261,4 +261,4 @@ while running:
     pygame.display.update()
     clock.tick(60)
 
-pygame.quit()
+pygame.

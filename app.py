@@ -38,9 +38,7 @@ def load_user(user_id):
         return Doctor.query.get(int(user_id.split('_')[1]))
     return None
 
-@app.route('/')
-def home():
-    return "Hospital System is running!"
+
 
 with app.app_context():
     from models import Patient, Doctor, Appointment, MedicalRecord
