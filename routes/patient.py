@@ -8,7 +8,7 @@ patient_bp = Blueprint('patient_bp', __name__)
 
 
 # to get doctors by department (called while selecting department by patient)
-@patient_bp.route('/doctors', methods=['GET'])
+@patient_bp.route('/api/doctors', methods=['GET'])
 def get_doctors():
     department = request.args.get('department')  # e.g. /doctors?department=cardiology
 
@@ -30,7 +30,7 @@ def get_doctors():
 
 
 # to get available time slots
-@patient_bp.route('/slots', methods=['GET'])
+@patient_bp.route('/api/slots', methods=['GET'])
 def get_slots():
     doctor_id = request.args.get('doctor_id')
     date_str = request.args.get('date')           # format: YYYY-MM-DD
@@ -69,7 +69,7 @@ def get_slots():
 
 
 # booking appointment
-@patient_bp.route('/book', methods=['POST'])
+@patient_bp.route('/api/book', methods=['POST'])
 @login_required
 def book_appointment():
     if not current_user.get_id().startswith('patient_'):
@@ -113,7 +113,7 @@ def book_appointment():
 
 
 # viewing appointments
-@patient_bp.route('/my-appointments', methods=['GET'])
+@patient_bp.route('/api/my-appointments', methods=['GET'])
 @login_required
 def my_appointments():
     if not current_user.get_id().startswith('patient_'):
@@ -156,7 +156,7 @@ def generate_slots(start_time, end_time):
 
 
 # view medical history
-@patient_bp.route('/my-history', methods=['GET'])
+@patient_bp.route('/api/my-history', methods=['GET'])
 @login_required
 def my_history():
     if not current_user.get_id().startswith('patient_'):
@@ -184,7 +184,7 @@ def my_history():
 
 
 # view latest report
-@patient_bp.route('/my-report', methods=['GET'])
+@patient_bp.route('/api/my-report', methods=['GET'])
 @login_required
 def my_report():
     if not current_user.get_id().startswith('patient_'):

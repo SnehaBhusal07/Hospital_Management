@@ -8,7 +8,7 @@ doctor_bp = Blueprint('doctor_bp', __name__)
 
 
 # doctor login
-@doctor_bp.route('/doctor/login', methods=['POST'])
+@doctor_bp.route('/api/doctor/login', methods=['POST'])
 def doctor_login():
     data = request.get_json()
 
@@ -34,7 +34,7 @@ def doctor_login():
 
 
 # doctor logout
-@doctor_bp.route('/doctor/logout', methods=['POST'])
+@doctor_bp.route('/api/doctor/logout', methods=['POST'])
 @login_required
 def doctor_logout():
     logout_user()
@@ -42,7 +42,7 @@ def doctor_logout():
 
 
 # viewing scheduled patients
-@doctor_bp.route('/doctor/appointments', methods=['GET'])
+@doctor_bp.route('/api/doctor/appointments', methods=['GET'])
 @login_required
 def view_appointments():
     if not current_user.get_id().startswith('doctor_'):
@@ -68,7 +68,7 @@ def view_appointments():
 
 
 # view patient history
-@doctor_bp.route('/doctor/patient/<int:patient_id>/history', methods=['GET'])
+@doctor_bp.route('/api/doctor/patient/<int:patient_id>/history', methods=['GET'])
 @login_required
 def patient_history(patient_id):
     if not current_user.get_id().startswith('doctor_'):
@@ -88,7 +88,7 @@ def patient_history(patient_id):
 
 
 # updating patient report
-@doctor_bp.route('/doctor/patient/<int:patient_id>/update', methods=['POST'])
+@doctor_bp.route('/api/doctor/patient/<int:patient_id>/update', methods=['POST'])
 @login_required
 def update_patient(patient_id):
     if not current_user.get_id().startswith('doctor_'):

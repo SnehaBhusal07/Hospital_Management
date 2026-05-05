@@ -18,7 +18,7 @@ def admin_required(f):
 
 
 # admin login
-@management_bp.route('/admin/login', methods=['POST'])
+@management_bp.route('/api/admin/login', methods=['POST'])
 def admin_login():
     data = request.get_json()
 
@@ -34,7 +34,7 @@ def admin_login():
 
 
 # admin logout
-@management_bp.route('/admin/logout', methods=['POST'])
+@management_bp.route('/api/admin/logout', methods=['POST'])
 @admin_required
 def admin_logout():
     session.pop('is_admin', None)
@@ -42,7 +42,7 @@ def admin_logout():
 
 
 # add doctor
-@management_bp.route('/admin/add-doctor', methods=['POST'])
+@management_bp.route('/api/admin/add-doctor', methods=['POST'])
 @admin_required
 def add_doctor():
     data = request.get_json()
@@ -74,7 +74,7 @@ def add_doctor():
 
 
 # remove doctor
-@management_bp.route('/admin/remove-doctor/<int:doctor_id>', methods=['DELETE'])
+@management_bp.route('/api/admin/remove-doctor/<int:doctor_id>', methods=['DELETE'])
 @admin_required
 def remove_doctor(doctor_id):
     doctor = Doctor.query.get(doctor_id)
@@ -90,7 +90,7 @@ def remove_doctor(doctor_id):
 
 
 # view all doctors
-@management_bp.route('/admin/doctors', methods=['GET'])
+@management_bp.route('/api/admin/doctors', methods=['GET'])
 @admin_required
 def view_doctors():
     doctors = Doctor.query.all()
@@ -112,7 +112,7 @@ def view_doctors():
 
 
 # update doctor schedule
-@management_bp.route('/admin/update-doctor/<int:doctor_id>', methods=['PUT'])
+@management_bp.route('/api/admin/update-doctor/<int:doctor_id>', methods=['PUT'])
 @admin_required
 def update_doctor(doctor_id):
     doctor = Doctor.query.get(doctor_id)
@@ -139,7 +139,7 @@ def update_doctor(doctor_id):
 
 
 # view all appointments
-@management_bp.route('/admin/appointments', methods=['GET'])
+@management_bp.route('/api/admin/appointments', methods=['GET'])
 @admin_required
 def view_appointments():
     appointments = Appointment.query.all()
@@ -162,7 +162,7 @@ def view_appointments():
 
 
 # view all patients
-@management_bp.route('/admin/patients', methods=['GET'])
+@management_bp.route('/api/admin/patients', methods=['GET'])
 @admin_required
 def view_patients():
     patients = Patient.query.all()
@@ -179,7 +179,7 @@ def view_patients():
     return jsonify({'patients': result}), 200
 
 # view single doctor
-@management_bp.route('/admin/doctors/<int:doctor_id>', methods=['GET'])
+@management_bp.route('/api/admin/doctors/<int:doctor_id>', methods=['GET'])
 @admin_required
 def view_single_doctor(doctor_id):
     doctor = Doctor.query.get(doctor_id)

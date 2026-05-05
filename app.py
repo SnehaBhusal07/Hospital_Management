@@ -6,6 +6,7 @@ from routes.doctor import doctor_bp
 from flask import Flask, jsonify
 from routes.patient import patient_bp
 from routes.management import management_bp
+from routes.pages import pages_bp           
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aspataal'
@@ -25,7 +26,8 @@ def unauthorized():
 app.register_blueprint(auth) 
 app.register_blueprint(doctor_bp)  
 app.register_blueprint(patient_bp)
-app.register_blueprint(management_bp)                
+app.register_blueprint(management_bp)  
+app.register_blueprint(pages_bp)              
 
 @login_manager.user_loader
 def load_user(user_id):

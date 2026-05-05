@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 auth = Blueprint('auth', __name__)
 
 # registraton
-@auth.route('/register', methods=['POST'])
+@auth.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
 
@@ -33,7 +33,7 @@ def register():
 
 
 # login
-@auth.route('/login', methods=['POST'])
+@auth.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
 
@@ -58,7 +58,7 @@ def login():
 
 
 # logout
-@auth.route('/logout', methods=['POST'])
+@auth.route('/api/logout', methods=['POST'])
 @login_required                   
 def logout():
     logout_user()
@@ -66,7 +66,7 @@ def logout():
 
 
 # to check who is logged in
-@auth.route('/me', methods=['GET'])
+@auth.route('/api/me', methods=['GET'])
 @login_required
 def me():
     from flask_login import current_user
