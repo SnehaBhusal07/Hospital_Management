@@ -57,6 +57,7 @@ def view_appointments():
         patient = Patient.query.get(appt.patient_id)
         result.append({
             'appointment_id': appt.id,
+            'patient_id': patient.id,
             'patient_name': patient.name,
             'patient_email': patient.email,
             'date': str(appt.date),
@@ -106,3 +107,18 @@ def update_patient(patient_id):
     db.session.commit()
 
     return jsonify({'message': 'Patient record updated successfully!'}), 201
+
+# get doctor info
+@doctor_bp.route('/api/doctor/me', methods=['GET'])
+@login_required
+def doctor_me():
+    if not current_user.get_id().startswith('doctor_'):
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    return jsonify({
+        'id': current_user.id,
+        'name': current_user.name,
+        'specialization': current_user.specialization,
+        'department': current_user.department,
+        'email': current_user.email
+    }), 200

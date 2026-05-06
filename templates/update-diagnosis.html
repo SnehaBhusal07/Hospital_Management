@@ -23,9 +23,10 @@
                 <a href="update-diagnosis.html" class="active">Report</a>
             </nav>
             <div class="doc-info">
-                <div class="avatar">AK</div>
-                <p>Name of doctor</p>
-                <p>Specialization</p>
+                <div class="avatar" id="doc-avatar">--</div>
+                <p id="doc-name">Loading...</p>
+                <p id="doc-specialization">Loading...</p>
+                <button onclick="logout()" style="margin-top:10px; cursor:pointer;">Logout</button>
             </div>
         </div>
 
@@ -40,16 +41,30 @@
                 <p id="current-date"></p>
             </div>
 
+            <!-- Patient Selector -->
+            <div style="margin: 15px 20px;">
+                <label style="font-size:14px; font-weight:bold; color:#555;">Select Patient</label>
+                <select id="patient-selector" style="
+                    width:100%;
+                    padding:10px;
+                    margin-top:6px;
+                    border:1px solid #0F4C5C;
+                    border-radius:6px;
+                    font-size:14px;
+                    color:#333;
+                ">
+                    <option value="">-- Select a patient --</option>
+                </select>
+            </div>
+
             <!-- Patient Card -->
-            <div class="patient-card">
-                <div class="patient-avatar">RS</div>
+            <div class="patient-card" id="patient-card" style="display:none;">
+                <div class="patient-avatar" id="patient-avatar">--</div>
                 <div class="patient-details">
-                    <h2>Ravi Sharma</h2>
+                    <h2 id="patient-name">--</h2>
                     <div class="info-row">
-                        <span><strong>Age:</strong> 42</span>
-                        <span><strong>Blood Group:</strong> B+</span>
-                        <span><strong>Contact:</strong> 9800000000</span>
-                        <span><strong>Gender:</strong> Male</span>
+                        <span><strong>Contact:</strong> <span id="patient-contact">--</span></span>
+                        <span><strong>Appointment:</strong> <span id="patient-time">--</span></span>
                     </div>
                 </div>
             </div>
@@ -144,7 +159,7 @@
                     <h2 style="color:#0F4C5C; font-size:20px; margin-bottom:10px;">
                         ✅ Diagnosis Saved Successfully
                     </h2>
-                    <p style="font-size:14px; color:#555;">Patient: Ravi Sharma</p>
+                    <p id="success-patient" style="font-size:14px; color:#555;"></p>
                     <p id="success-status" style="font-size:14px; color:#555; margin-top:4px;"></p>
                     <p id="success-time" style="font-size:13px; color:#888; margin-top:4px;"></p>
                     <button class="btn-save" id="new-btn" style="margin-top:16px;">
@@ -152,33 +167,97 @@
                     </button>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
-
         // ---- 1. Auto date ----
         const today = new Date();
-        const options = {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        };
+        const options = { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' };
         document.getElementById('current-date').textContent =
             today.toLocaleDateString('en-GB', options);
 
+        let selectedPatientId = null;
+        let selectedPatientName = null;
 
-        // ---- 2. Show selected file name ----
-        document.getElementById('lab-report').addEventListener('change', function() {
-            const fileName = this.files[0] ? this.files[0].name : '';
-            document.getElementById('file-name').textContent =
-                fileName ? '📎 ' + fileName : '';
+
+        // ---- 2. Load doctor info and today's patients ----
+        async function loadData() {
+            // Check login
+            const meRes = await fetch('/api/doctor/me');
+            if (meRes.status === 401 || meRes.status === 403) {
+                window.location.href = '/';
+                return;
+            }
+            const meData = await meRes.json();
+
+            // Update sidebar
+            document.getElementById('doc-name').textContent = meData.name;
+            document.getElementById('doc-specialization').textContent = meData.specialization;
+            const initials = meData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('doc-avatar').textContent = initials;
+
+            // Get today's appointments
+            const res = await fetch('/api/doctor/appointments');
+            const data = await res.json();
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayAppts = data.appointments.filter(a => a.date === todayStr);
+
+            // Populate patient selector
+            const selector = document.getElementById('patient-selector');
+            selector.innerHTML = '<option value="">-- Select a patient --</option>';
+
+            todayAppts.forEach(appt => {
+                selector.innerHTML += `
+                    <option value="${appt.patient_id}" 
+                        data-name="${appt.patient_name}"
+                        data-time="${appt.time_slot}"
+                        data-email="${appt.patient_email}">
+                        ${appt.patient_name} — ${appt.time_slot}
+                    </option>`;
+            });
+
+            if (todayAppts.length === 0) {
+                selector.innerHTML = '<option value="">No patients today</option>';
+            }
+        }
+
+
+        // ---- 3. When patient is selected, update patient card ----
+        document.getElementById('patient-selector').addEventListener('change', function() {
+            const selected = this.options[this.selectedIndex];
+
+            if (!this.value) {
+                document.getElementById('patient-card').style.display = 'none';
+                selectedPatientId = null;
+                selectedPatientName = null;
+                return;
+            }
+
+            selectedPatientId = this.value;
+            selectedPatientName = selected.dataset.name;
+            const time = selected.dataset.time;
+            const email = selected.dataset.email;
+
+            // Update patient card
+            const initials = selectedPatientName.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('patient-avatar').textContent = initials;
+            document.getElementById('patient-name').textContent = selectedPatientName;
+            document.getElementById('patient-contact').textContent = email;
+            document.getElementById('patient-time').textContent = time;
+            document.getElementById('patient-card').style.display = 'flex';
         });
 
 
-        // ---- 3. Add medicine row ----
+        // ---- 4. Show selected file name ----
+        document.getElementById('lab-report').addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : '';
+            document.getElementById('file-name').textContent = fileName ? '📎 ' + fileName : '';
+        });
+
+
+        // ---- 5. Add medicine row ----
         document.getElementById('add-row-btn').addEventListener('click', function() {
             const table = document.getElementById('prescription-table');
             const newRow = document.createElement('tr');
@@ -195,11 +274,10 @@
         });
 
 
-        // ---- 4. Remove medicine row ----
+        // ---- 6. Remove medicine row ----
         function removeRow(btn) {
             const row = btn.closest('tr');
             const table = document.getElementById('prescription-table');
-            // keep at least 1 data row
             const dataRows = table.querySelectorAll('tr:not(:first-child)');
             if (dataRows.length > 1) {
                 row.remove();
@@ -209,14 +287,35 @@
         }
 
 
-        // ---- 5. Form validation + save ----
-        document.getElementById('save-btn').addEventListener('click', function() {
+        // ---- 7. Collect prescription rows ----
+        function getPrescription() {
+            const rows = document.querySelectorAll('#prescription-table tr:not(:first-child)');
+            const prescription = [];
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const medicine = inputs[0].value.trim();
+                const dosage = inputs[1].value.trim();
+                const duration = inputs[2].value.trim();
+                if (medicine) {
+                    prescription.push({ medicine, dosage, duration });
+                }
+            });
+            return prescription;
+        }
+
+
+        // ---- 8. Save diagnosis — sends to backend ----
+        document.getElementById('save-btn').addEventListener('click', async function() {
             const notes = document.getElementById('diagnosis-notes').value.trim();
             const status = document.getElementById('patient-status').value;
 
             let valid = true;
 
-            // validate notes
+            if (!selectedPatientId) {
+                alert('Please select a patient first.');
+                return;
+            }
+
             if (notes === '') {
                 document.getElementById('notes-error').style.display = 'block';
                 valid = false;
@@ -224,7 +323,6 @@
                 document.getElementById('notes-error').style.display = 'none';
             }
 
-            // validate status
             if (status === '') {
                 document.getElementById('status-error').style.display = 'block';
                 valid = false;
@@ -234,47 +332,84 @@
 
             if (!valid) return;
 
-            // show success box
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-GB', {
-                hour: '2-digit', minute: '2-digit'
+            // Build report string including prescription
+            const prescription = getPrescription();
+            const prescriptionText = prescription.map(p =>
+                `${p.medicine} - ${p.dosage} for ${p.duration}`
+            ).join(', ');
+
+            const reportText = `Status: ${status}\nPrescription: ${prescriptionText}`;
+
+            // Send to backend
+            const res = await fetch(`/api/doctor/patient/${selectedPatientId}/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    diagnosis: notes,
+                    report: reportText
+                })
             });
 
-            document.getElementById('success-status').textContent = 'Status: ' + status;
-            document.getElementById('success-time').textContent =
-                'Saved on ' + now.toLocaleDateString('en-GB', options) + ' at ' + timeStr;
+            const data = await res.json();
 
-            document.querySelector('.diagnosis-form').style.display = 'none';
-            document.getElementById('success-box').style.display = 'block';
-        });
+            if (res.ok) {
+                // Show success box
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('success-patient').textContent = 'Patient: ' + selectedPatientName;
+                document.getElementById('success-status').textContent = 'Status: ' + status;
+                document.getElementById('success-time').textContent =
+                    'Saved on ' + now.toLocaleDateString('en-GB', options) + ' at ' + timeStr;
 
-
-        // ---- 6. Cancel button ----
-        document.getElementById('cancel-btn').addEventListener('click', function() {
-            const confirmed = confirm('Are you sure you want to cancel? All changes will be lost.');
-            if (confirmed) {
-                document.getElementById('diagnosis-notes').value = '';
-                document.getElementById('patient-status').value = '';
-                document.getElementById('lab-report').value = '';
-                document.getElementById('file-name').textContent = '';
-                document.getElementById('notes-error').style.display = 'none';
-                document.getElementById('status-error').style.display = 'none';
+                document.querySelector('.diagnosis-form').style.display = 'none';
+                document.getElementById('success-box').style.display = 'block';
+            } else {
+                alert('Error: ' + data.message);
             }
         });
 
 
-        // ---- 7. Add another entry ----
+        // ---- 9. Cancel button ----
+        document.getElementById('cancel-btn').addEventListener('click', function() {
+            const confirmed = confirm('Are you sure you want to cancel? All changes will be lost.');
+            if (confirmed) {
+                resetForm();
+            }
+        });
+
+
+        // ---- 10. Add another entry ----
         document.getElementById('new-btn').addEventListener('click', function() {
+            resetForm();
+            document.querySelector('.diagnosis-form').style.display = 'block';
+            document.getElementById('success-box').style.display = 'none';
+        });
+
+
+        // ---- 11. Reset form ----
+        function resetForm() {
             document.getElementById('diagnosis-notes').value = '';
             document.getElementById('patient-status').value = '';
             document.getElementById('lab-report').value = '';
             document.getElementById('file-name').textContent = '';
             document.getElementById('notes-error').style.display = 'none';
             document.getElementById('status-error').style.display = 'none';
-            document.querySelector('.diagnosis-form').style.display = 'block';
-            document.getElementById('success-box').style.display = 'none';
-        });
+            document.getElementById('patient-selector').value = '';
+            document.getElementById('patient-card').style.display = 'none';
+            selectedPatientId = null;
+            selectedPatientName = null;
+        }
 
+
+        // ---- 12. Logout ----
+        async function logout() {
+            await fetch('/api/doctor/logout', { method: 'POST' });
+            window.location.href = '/';
+        }
+
+
+        // ---- Run on page load ----
+        loadData();
     </script>
 
 </body>

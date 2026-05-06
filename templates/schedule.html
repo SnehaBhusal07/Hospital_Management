@@ -23,9 +23,10 @@
                 <a href="update-diagnosis.html">Report</a>
             </nav>
             <div class="doc-info">
-                <div class="avatar">AK</div>
-                <p>Name of doctor</p>
-                <p>Specialization</p>
+                <div class="avatar" id="doc-avatar">--</div>
+                <p id="doc-name">Loading...</p>
+                <p id="doc-specialization">Loading...</p>
+                <button onclick="logout()" style="margin-top:10px; cursor:pointer;">Logout</button>
             </div>
         </div>
 
@@ -129,81 +130,154 @@
     </div>
 
     <script>
-
         // ---- 1. Auto date ----
         const today = new Date();
-        const options = {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        };
+        const options = { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' };
         document.getElementById('current-date').textContent =
             today.toLocaleDateString('en-GB', options);
 
 
-        // ---- 2. Count visible appointments ----
+        // ---- 2. Load doctor info and appointments ----
+        async function loadSchedule() {
+            // Check login and get doctor info
+            const meRes = await fetch('/api/doctor/me');
+            if (meRes.status === 401 || meRes.status === 403) {
+                window.location.href = '/';
+                return;
+            }
+            const meData = await meRes.json();
+
+            // Update sidebar
+            document.getElementById('doc-name').textContent = meData.name;
+            document.getElementById('doc-specialization').textContent = meData.specialization;
+            const initials = meData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('doc-avatar').textContent = initials;
+
+            // Get appointments
+            const res = await fetch('/api/doctor/appointments');
+            const data = await res.json();
+
+            // Filter today's appointments only
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayAppts = data.appointments.filter(a => a.date === todayStr);
+
+            // Populate table
+            populateTable(todayAppts);
+        }
+
+
+        // ---- 3. Populate table with real data ----
+        function populateTable(appointments) {
+            const table = document.querySelector('table');
+
+            // Remove old data rows, keep header
+            table.querySelectorAll('tr[data-type]').forEach(row => row.remove());
+
+            const noResults = document.getElementById('no-results');
+
+            if (appointments.length === 0) {
+                noResults.style.display = 'block';
+                updateCount();
+                return;
+            }
+
+            noResults.style.display = 'none';
+
+            appointments.forEach(appt => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-type', 'all');
+                row.setAttribute('data-id', appt.appointment_id);
+                row.innerHTML = `
+                    <td>${appt.patient_name}</td>
+                    <td>--</td>
+                    <td>${appt.time_slot}</td>
+                    <td>Appointment</td>
+                    <td><span class="status ${getStatusClass(appt.status)}">${appt.status}</span></td>
+                    <td><button class="btn-save" style="padding:6px 14px; font-size:12px;">Update</button></td>
+                `;
+
+                // Update button click
+                row.querySelector('.btn-save').addEventListener('click', function() {
+                    const statusEl = row.querySelector('.status');
+                    if (statusEl.classList.contains('orange')) {
+                        statusEl.textContent = 'In Progress';
+                        statusEl.className = 'status green';
+                    } else if (statusEl.classList.contains('green')) {
+                        statusEl.textContent = 'Done';
+                        statusEl.className = 'status gray';
+                    } else {
+                        alert('This appointment is already marked as Done.');
+                    }
+                    updateCount();
+                });
+
+                table.appendChild(row);
+            });
+
+            updateCount();
+            reattachFilters();
+        }
+
+
+        // ---- 4. Helper: get CSS class for status ----
+        function getStatusClass(status) {
+            if (status === 'Booked') return 'orange';
+            if (status === 'In Progress') return 'green';
+            if (status === 'Completed') return 'gray';
+            return 'orange';
+        }
+
+
+        // ---- 5. Count visible appointments ----
         function updateCount() {
             const rows = document.querySelectorAll('table tr[data-type]');
             let count = 0;
-            rows.forEach(function(row) {
+            rows.forEach(row => {
                 if (row.style.display !== 'none') count++;
             });
             document.getElementById('appt-count').textContent = count;
         }
 
-        updateCount();
 
+        // ---- 6. Filter buttons ----
+        function reattachFilters() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const rows = document.querySelectorAll('table tr[data-type]');
+            const noResults = document.getElementById('no-results');
 
-        // ---- 3. Filter buttons ----
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const rows = document.querySelectorAll('table tr[data-type]');
-        const noResults = document.getElementById('no-results');
+            filterBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
 
-        filterBtns.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                // update active button
-                filterBtns.forEach(function(b) { b.classList.remove('active'); });
-                this.classList.add('active');
+                    const filter = this.dataset.filter;
+                    let visibleCount = 0;
 
-                const filter = this.dataset.filter;
-                let visibleCount = 0;
+                    rows.forEach(function(row) {
+                        if (filter === 'all') {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
 
-                rows.forEach(function(row) {
-                    if (filter === 'all' || row.dataset.type === filter) {
-                        row.style.display = '';
-                        visibleCount++;
-                    } else {
-                        row.style.display = 'none';
-                    }
+                    noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+                    updateCount();
                 });
-
-                noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-                updateCount();
             });
-        });
+        }
 
 
-        // ---- 4. Update button — cycle status ----
-        document.querySelectorAll('.btn-save').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                const row = this.closest('tr');
-                const statusEl = row.querySelector('.status');
+        // ---- 7. Logout ----
+        async function logout() {
+            await fetch('/api/doctor/logout', { method: 'POST' });
+            window.location.href = '/';
+        }
 
-                if (statusEl.classList.contains('orange')) {
-                    // Waiting → In Progress
-                    statusEl.textContent = 'In Progress';
-                    statusEl.className = 'status green';
-                } else if (statusEl.classList.contains('green')) {
-                    // In Progress → Done
-                    statusEl.textContent = 'Done';
-                    statusEl.className = 'status gray';
-                } else {
-                    alert('This appointment is already marked as Done.');
-                }
-            });
-        });
 
+        // ---- Run on page load ----
+        loadSchedule();
     </script>
 
 </body>
