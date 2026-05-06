@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Diagnosis</title>
-    <link rel="stylesheet" href="../static/doctors.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='doctors.css') }}">
 </head>
 <body>
     <div class="navbar">
@@ -17,10 +17,10 @@
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="doctors.html">DashBoard</a>
-                <a href="schedule.html">Schedule</a>
-                <a href="patient-history.html">Patients</a>
-                <a href="update-diagnosis.html" class="active">Report</a>
+                <a href="{{ url_for('pages_bp.doctor_dashboard') }}">DashBoard</a>
+                <a href="{{ url_for('pages_bp.schedule') }}">Schedule</a>
+                <a href="{{ url_for('pages_bp.patient_history') }}">Patients</a>
+                <a href="{{ url_for('pages_bp.update_diagnosis') }}" class="active">Report</a>
             </nav>
             <div class="doc-info">
                 <div class="avatar" id="doc-avatar">--</div>
