@@ -256,24 +256,24 @@
             if (currentRole === 'patient') {
                 const email = document.getElementById('login-email').value.trim();
                 if (!email) { showMsg('Please enter your email.', 'error'); return; }
-                url = '/api/patient/login';
+                url = '/api/login';                  
                 body = { email, password };
 
             } else if (currentRole === 'doctor') {
                 const email = document.getElementById('login-email').value.trim();
                 if (!email) { showMsg('Please enter your email.', 'error'); return; }
-                url = '/api/doctor/login';
+                url = '/api/doctor/login';          
                 body = { email, password };
 
             } else if (currentRole === 'admin') {
                 const username = document.getElementById('admin-username').value.trim();
                 if (!username) { showMsg('Please enter your username.', 'error'); return; }
-                url = '/api/admin/login';
+                url = '/api/admin/login';           
                 body = { username, password };
             }
 
             try {
-                const response = await fetch("http://127.0.0.1:5000/api/login", {
+                const response = await fetch(url, {          
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)

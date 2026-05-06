@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Dashboard</title>
-    <link rel="stylesheet" href="../static/doctors.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='doctors.css') }}">
 </head>
 <body>
     <div class="navbar">
@@ -17,10 +17,10 @@
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="doctors.html" class="active">DashBoard</a>
-                <a href="schedule.html">Schedule</a>
-                <a href="patient-history.html">Patients</a>
-                <a href="update-diagnosis.html">Report</a>
+                <a href="{{ url_for('pages_bp.doctor_dashboard') }}" class="active">DashBoard</a>
+                <a href="{{ url_for('pages_bp.schedule') }}">Schedule</a>
+                <a href="{{ url_for('pages_bp.patient_history') }}">Patients</a>
+                <a href="{{ url_for('pages_bp.update_diagnosis') }}">Report</a>
             </nav>
             <div class="doc-info">
                 <div class="avatar" id="doc-avatar">--</div>
@@ -124,33 +124,34 @@
         else if (hour >= 17) greeting = 'Good Evening';
 
 
-        // ---- 2. Load doctor info and appointments on page load ----
+        // ---- 2. Load doctor info and appointments ----
         async function loadDoctorData() {
-            // Add this inside loadDoctorData() after the appointments fetch
+            // Get doctor info
             const meRes = await fetch('/api/doctor/me');
+
+            if (meRes.status === 401 || meRes.status === 403) {
+                window.location.href = '/';
+                return;
+            }
+
             const meData = await meRes.json();
 
             // Update sidebar
             document.getElementById('doc-name').textContent = meData.name;
             document.getElementById('doc-specialization').textContent = meData.specialization;
-
-            // Update avatar initials
             const initials = meData.name.split(' ').map(n => n[0]).join('').toUpperCase();
             document.getElementById('doc-avatar').textContent = initials;
 
             // Update greeting
             document.querySelector('.topbar h2').textContent = greeting + ', ' + meData.name;
-            }
 
+            // Get appointments
+            const res = await fetch('/api/doctor/appointments');
             const data = await res.json();
             const appointments = data.appointments;
 
-            // Update greeting with doctor name from first appointment's doctor
-            // (We'll get doctor info from /api/me equivalent - for now use session)
-            updateGreeting(greeting);
-
             // Filter today's appointments
-            const todayStr = new Date().toISOString().split('T')[0];  // YYYY-MM-DD
+            const todayStr = new Date().toISOString().split('T')[0];
             const todayAppts = appointments.filter(a => a.date === todayStr);
             const completedAppts = todayAppts.filter(a => a.status === 'Completed');
 
@@ -166,8 +167,6 @@
         // ---- 3. Populate today's patient table ----
         function populateTable(appointments) {
             const table = document.querySelector('table');
-
-            // Keep header row, remove old data rows
             const rows = table.querySelectorAll('tr');
             rows.forEach((row, index) => { if (index > 0) row.remove(); });
 
@@ -186,7 +185,6 @@
                     <td><span class="status ${getStatusClass(appt.status)}">${appt.status}</span></td>
                 `;
 
-                // Click to update status
                 row.addEventListener('click', function() {
                     const statusEl = row.querySelector('.status');
                     if (statusEl.classList.contains('orange')) {
@@ -223,20 +221,14 @@
         }
 
 
-        // ---- 6. Update greeting ----
-        function updateGreeting(greeting) {
-            document.querySelector('.topbar h2').textContent = greeting + ', Doctor';
-        }
-
-
-        // ---- 7. Logout ----
+        // ---- 6. Logout ----
         async function logout() {
             await fetch('/api/doctor/logout', { method: 'POST' });
             window.location.href = '/';
         }
 
 
-        // ---- 8. Quick Action buttons ----
+        // ---- 7. Quick Action buttons ----
         const actionBtns = document.querySelectorAll('.actions button');
 
         actionBtns[0].addEventListener('click', function() {
@@ -256,11 +248,11 @@
         });
 
         actionBtns[1].addEventListener('click', function() {
-            window.location.href = "{{ url_for('pages_bp.update_diagnosis_page') }}";
+            window.location.href = "{{ url_for('pages_bp.update_diagnosis') }}";
         });
 
         actionBtns[2].addEventListener('click', function() {
-            window.location.href = "{{ url_for('pages_bp.schedule_page') }}";
+            window.location.href = "{{ url_for('pages_bp.schedule') }}";
         });
 
 
