@@ -1,39 +1,83 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
-from models import Doctor, Appointment, MedicalRecord
+from models import Doctor, Appointment, MedicalRecord, Patient
 from extensions import db
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 patient_bp = Blueprint('patient_bp', __name__)
 
 
-# to get doctors by department (called while selecting department by patient)
+# ---- DASHBOARD ----
+@patient_bp.route('/api/patient/dashboard', methods=['GET'])
+@login_required
+def dashboard():
+    if not current_user.get_id().startswith('patient_'):
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    patient = Patient.query.get(current_user.id)
+
+    appointments = Appointment.query.filter_by(
+        patient_id=current_user.id
+    ).order_by(Appointment.date.desc()).limit(5).all()
+
+    upcoming  = Appointment.query.filter_by(
+        patient_id=current_user.id, status='Booked').count()
+    completed = Appointment.query.filter_by(
+        patient_id=current_user.id, status='Completed').count()
+    pending   = Appointment.query.filter_by(
+        patient_id=current_user.id, status='Pending').count()
+
+    appt_list = []
+    for a in appointments:
+        doctor = Doctor.query.get(a.doctor_id)
+        appt_list.append({
+            'doctor_name'    : doctor.name,
+            'specialization' : doctor.specialization,
+            'date'           : str(a.date),
+            'time_slot'      : a.time_slot,
+            'status'         : a.status
+        })
+
+    return jsonify({
+        'name'         : patient.name,
+        'phone'        : patient.phone,
+        'upcoming'     : upcoming,
+        'completed'    : completed,
+        'pending'      : pending,
+        'appointments' : appt_list
+    }), 200
+
+
+# ---- GET ALL DOCTORS ----
 @patient_bp.route('/api/doctors', methods=['GET'])
 def get_doctors():
-    department = request.args.get('department')  # e.g. /doctors?department=cardiology
+    department = request.args.get('department')
 
-    if not department:
-        return jsonify({'message': 'Department is required'}), 400
-
-    doctors = Doctor.query.filter_by(department=department).all()
+    if department:
+        doctors = Doctor.query.filter_by(department=department).all()
+    else:
+        doctors = Doctor.query.all()
 
     result = []
     for doc in doctors:
         result.append({
-            'id': doc.id,
-            'name': doc.name,
+            'id'            : doc.id,
+            'name'          : doc.name,
             'specialization': doc.specialization,
-            'department': doc.department
+            'department'    : doc.department,
+            'working_days'  : doc.working_days,
+            'start_time'    : doc.start_time,
+            'end_time'      : doc.end_time
         })
 
     return jsonify({'doctors': result}), 200
 
 
-# to get available time slots
+# ---- GET AVAILABLE TIME SLOTS ----
 @patient_bp.route('/api/slots', methods=['GET'])
 def get_slots():
     doctor_id = request.args.get('doctor_id')
-    date_str = request.args.get('date')           # format: YYYY-MM-DD
+    date_str  = request.args.get('date')
 
     if not doctor_id or not date_str:
         return jsonify({'message': 'Doctor and date are required'}), 400
@@ -42,33 +86,33 @@ def get_slots():
     if not doctor:
         return jsonify({'message': 'Doctor not found'}), 404
 
-    # check doctor's working day
     selected_date = datetime.strptime(date_str, '%Y-%m-%d')
 
     if selected_date.date() < datetime.today().date():
         return jsonify({'message': 'Cannot check slots for a past date'}), 400
 
-    day_name = selected_date.strftime('%a')        # e.g. Mon, Tue, Wed
-
+    day_name = selected_date.strftime('%a')
     if doctor.working_days and day_name not in doctor.working_days.split(','):
-        return jsonify({'message': 'Doctor is not available on this day'}), 400
+        return jsonify({'message': 'Doctor not available on this day'}), 400
 
-    # generate 15-minute time slots
-    slots = generate_slots(doctor.start_time, doctor.end_time)
-
-    # check already booked slots for the day and remove them
-    booked = Appointment.query.filter_by(
+    all_slots    = generate_slots(doctor.start_time, doctor.end_time)
+    booked       = Appointment.query.filter_by(
         doctor_id=doctor_id,
         date=selected_date.date()
     ).all()
     booked_slots = [appt.time_slot for appt in booked]
 
-    available_slots = [s for s in slots if s not in booked_slots]
+    slot_list = []
+    for s in all_slots:
+        slot_list.append({
+            'time'   : s,
+            'booked' : s in booked_slots
+        })
 
-    return jsonify({'available_slots': available_slots}), 200
+    return jsonify({'slots': slot_list}), 200
 
 
-# booking appointment
+# ---- BOOK APPOINTMENT ----
 @patient_bp.route('/api/book', methods=['POST'])
 @login_required
 def book_appointment():
@@ -83,12 +127,13 @@ def book_appointment():
     selected_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
 
     if selected_date < datetime.today().date():
-        return jsonify({'message': 'Cannot book an appointment on a past date'}), 400
+        return jsonify({'message': 'Cannot book on a past date'}), 400
 
-    doctor = Doctor.query.get(data['doctor_id'])
-    day_name = selected_date.strftime('%a')        # Mon, Tue etc
+    doctor   = Doctor.query.get(data['doctor_id'])
+    day_name = selected_date.strftime('%a')
+
     if doctor.working_days and day_name not in doctor.working_days.split(','):
-        return jsonify({'message': 'Doctor is not available on this day'}), 400
+        return jsonify({'message': 'Doctor not available on this day'}), 400
 
     existing = Appointment.query.filter_by(
         doctor_id=data['doctor_id'],
@@ -112,7 +157,27 @@ def book_appointment():
     return jsonify({'message': 'Appointment booked successfully!'}), 201
 
 
-# viewing appointments
+# ---- CANCEL APPOINTMENT ----
+@patient_bp.route('/api/appointments/cancel/<int:appt_id>', methods=['POST'])
+@login_required
+def cancel_appointment(appt_id):
+    if not current_user.get_id().startswith('patient_'):
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    appointment = Appointment.query.get(appt_id)
+
+    if not appointment or appointment.patient_id != current_user.id:
+        return jsonify({'message': 'Appointment not found'}), 404
+
+    if appointment.status == 'Cancelled':
+        return jsonify({'message': 'Already cancelled'}), 400
+
+    appointment.status = 'Cancelled'
+    db.session.commit()
+    return jsonify({'message': 'Appointment cancelled'}), 200
+
+
+# ---- MY APPOINTMENTS ----
 @patient_bp.route('/api/my-appointments', methods=['GET'])
 @login_required
 def my_appointments():
@@ -121,41 +186,32 @@ def my_appointments():
 
     appointments = Appointment.query.filter_by(
         patient_id=current_user.id
-    ).all()
+    ).order_by(Appointment.date.desc()).all()
 
-    result = []
+    today    = date.today()
+    upcoming = []
+    past     = []
+
     for appt in appointments:
         doctor = Doctor.query.get(appt.doctor_id)
-        result.append({
+        item = {
             'appointment_id': appt.id,
-            'doctor_name': doctor.name,
-            'department': doctor.department,
-            'date': str(appt.date),
-            'time_slot': appt.time_slot,
-            'status': appt.status
-        })
+            'doctor_name'   : doctor.name,
+            'specialization': doctor.specialization,
+            'department'    : doctor.department,
+            'date'          : str(appt.date),
+            'time_slot'     : appt.time_slot,
+            'status'        : appt.status
+        }
+        if appt.date >= today and appt.status != 'Cancelled':
+            upcoming.append(item)
+        else:
+            past.append(item)
 
-    return jsonify({'appointments': result}), 200
-
-
-# 15 minute time slots generation
-def generate_slots(start_time, end_time):
-    slots = []
-    if not start_time or not end_time:
-        return slots
-
-    start = datetime.strptime(start_time, '%H:%M')
-    end = datetime.strptime(end_time, '%H:%M')
-
-    current = start
-    while current < end:
-        slots.append(current.strftime('%H:%M'))
-        current += timedelta(minutes=15)
-
-    return slots
+    return jsonify({'upcoming': upcoming, 'past': past}), 200
 
 
-# view medical history
+# ---- MEDICAL HISTORY ----
 @patient_bp.route('/api/my-history', methods=['GET'])
 @login_required
 def my_history():
@@ -164,48 +220,63 @@ def my_history():
 
     records = MedicalRecord.query.filter_by(
         patient_id=current_user.id
-    ).all()
-
-    if not records:
-        return jsonify({'message': 'No medical history found'}), 404
+    ).order_by(MedicalRecord.date.desc()).all()
 
     result = []
     for record in records:
         doctor = Doctor.query.get(record.doctor_id)
         result.append({
-            'date': str(record.date),
-            'doctor_name': doctor.name if doctor else 'Unknown',
-            'department': doctor.department if doctor else 'Unknown',
-            'diagnosis': record.diagnosis,
-            'report': record.report
+            'date'          : str(record.date),
+            'doctor_name'   : doctor.name if doctor else 'Unknown',
+            'specialization': doctor.specialization if doctor else 'Unknown',
+            'department'    : doctor.department if doctor else 'Unknown',
+            'diagnosis'     : record.diagnosis,
+            'report'        : record.report
         })
 
     return jsonify({'medical_history': result}), 200
 
 
-# view latest report
+# ---- REPORTS ----
 @patient_bp.route('/api/my-report', methods=['GET'])
 @login_required
 def my_report():
     if not current_user.get_id().startswith('patient_'):
         return jsonify({'message': 'Unauthorized'}), 403
 
-    # Get most recent record only
-    latest_record = MedicalRecord.query.filter_by(
+    records = MedicalRecord.query.filter_by(
         patient_id=current_user.id
-    ).order_by(MedicalRecord.date.desc()).first()
+    ).order_by(MedicalRecord.date.desc()).all()
 
-    if not latest_record:
-        return jsonify({'message': 'No reports found'}), 404
+    if not records:
+        return jsonify({'reports': []}), 200
 
-    doctor = Doctor.query.get(latest_record.doctor_id)
-
-    return jsonify({
-        'latest_report': {
-            'date': str(latest_record.date),
+    result = []
+    for record in records:
+        doctor = Doctor.query.get(record.doctor_id)
+        result.append({
+            'date'       : str(record.date),
             'doctor_name': doctor.name if doctor else 'Unknown',
-            'department': doctor.department if doctor else 'Unknown',
-            'diagnosis': latest_record.diagnosis,
-            'report': latest_record.report
-        }
-    }), 200
+            'department' : doctor.department if doctor else 'Unknown',
+            'diagnosis'  : record.diagnosis,
+            'report'     : record.report
+        })
+
+    return jsonify({'reports': result}), 200
+
+
+# ---- SLOT GENERATOR ----
+def generate_slots(start_time, end_time):
+    slots = []
+    if not start_time or not end_time:
+        return slots
+
+    start   = datetime.strptime(start_time, '%H:%M')
+    end     = datetime.strptime(end_time, '%H:%M')
+    current = start
+
+    while current < end:
+        slots.append(current.strftime('%H:%M'))
+        current += timedelta(minutes=15)
+
+    return slots

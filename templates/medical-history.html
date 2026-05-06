@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Doctors</title>
-    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\patients.css">
+    <title>Medical History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='patients.css') }}">
 </head>
 <body>
 
@@ -18,16 +18,24 @@
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="patients.html">Dashboard</a>
-                <a href="find-doctors.html" >Find Doctors</a>
-                <a href="my-appointments.html" >My Appointment</a>
-                <a href="medical-history.html" class="active" >Medical History</a>
-                <a href="reports.html" >Reports</a>
+                <a href="/patient/dashboard">Dashboard</a>
+                <a href="/patient/find-doctors">Find Doctors</a>
+                <a href="/patient/appointments">My Appointment</a>
+                <a href="/patient/medical-history" class="active">Medical History</a>
+                <a href="/patient/reports">Reports</a>
             </nav>
             <div class="doc-info">
-                <div class="avatar">RK</div>
-                <p>Rajesh Kumar</p>
+                <div class="avatar" id="patient-avatar">--</div>
+                <p id="patient-name">Loading...</p>
                 <p>Patient</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
             </div>
         </div>
 
@@ -36,199 +44,183 @@
 
             <div class="topbar">
                 <div>
-                    <p>Medical-History</p>
-                    <br>
-                    <p>Your Complete Health Timeline</p>
+                    <h2>Medical History</h2>
+                    <p>Your complete health timeline</p>
                 </div>
-                <p id="current-date">Mon, 4 May 2026</p>
+                <p id="current-date">-</p>
             </div>
-            <div class="patients-card">
-                <div class="doctor-avatar">RK</div>
+
+            <!-- Patient summary card -->
+            <div class="patient-card" id="patient-card">
+                <div class="doctor-avatar" id="card-avatar">--</div>
                 <div class="doctor-info">
-                    <h3>Rajesh Kumar</h3>
+                    <h3 id="card-name">Loading...</h3>
                     <div class="info-row">
-                        <span><strong>Age:</strong>35</span>
-                        <span><strong>Blood Group:</strong>0+</span>
-                        <span><strong>Contact:</strong>9800000001</span>
-                        <span><strong>Gender:</strong>Male</span>
+                        <span><strong>Phone:</strong>
+                            <span id="card-phone">-</span>
+                        </span>
+                        <span><strong>Total Visits:</strong>
+                            <span id="card-visits">-</span>
+                        </span>
                     </div>
                 </div>
             </div>
-            <div class="history-controls">
-                <input type="text" id="search-input" placeholder="Search by doctor or diagnosis..." />
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="completed">Completed</button>
-                <button class="filter-btn" data-filter="inprogress">In Progress</button>
-                <button id="print-btn">Print</button>
-            </div>
-            <p id="no-results" style="display:none;">No records found.</p>
 
+            <!-- Message box -->
+            <div id="page-msg" style="display:none; margin:0 20px;
+                padding:10px; border-radius:6px; font-size:13px;
+                text-align:center;">
+            </div>
+
+            <!-- Timeline section -->
             <div class="appointment-section">
                 <h3>Visit Timeline</h3>
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                    <div class="timeline-header">
-                        <span class="timeline-date">04 May 2026</span>
-                        <span class="status green">In Progress</span>
-                    </div>
-                    <h4>Dr Anil Kumar - Cardiologist</h4>
-                    <p>Diagnosis: Hypertension Follow-up</p>
-                    <p>Notes:blood pressure stable. Continue medication</p>
-                    </div>
-            </div>
-            </div>
-            
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <div class="timeline-header">
-                        <span class="timeline-date">20 Apr 2026</span>
-                        <span class="status gray">Completed</span>
-                    </div>
-                    <h4>Dr. Rama Pokharel — Neurologist</h4>
-                    <p>Diagnosis: Migraine Evaluation</p>
-                    <p>Notes: Prescribed Sumatriptan. Follow up in 2 weeks.</p>
-                    <div class="timeline-details">
-                        <p><strong>Additional Notes:</strong> Monitor weekly. Next ECG in 30 days.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <div class="timeline-header">
-                        <span class="timeline-date">01 Apr 2026</span>
-                        <span class="status gray">Completed</span>
-                    </div>
-                    <h4>Dr. Anil Kumar — Cardiologist</h4>
-                    <p>Diagnosis: Routine Cardiac Checkup</p>
-                    <p>Notes: ECG normal. No concerns found.</p>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <div class="timeline-header">
-                        <span class="timeline-date">15 Mar 2026</span>
-                        <span class="status gray">Completed</span>
-                    </div>
-                    <h4>Dr. Bikram Shrestha — Orthopedic</h4>
-                    <p>Diagnosis: Knee Pain Assessment</p>
-                    <p>Notes: Physiotherapy recommended for 4 weeks.</p>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <div class="timeline-header">
-                        <span class="timeline-date">10 Feb 2026</span>
-                        <span class="status gray">Completed</span>
-                    </div>
-                    <h4>Dr. Hari Bahadur — General Physician</h4>
-                    <p>Diagnosis: Fever and Cold</p>
-                    <p>Notes: Prescribed Paracetamol and rest for 3 days.</p>
+                <div class="timeline" id="timeline-container">
+                    <p style="color:#888; font-size:13px; padding:10px;">
+                        Loading history...
+                    </p>
                 </div>
             </div>
 
         </div>
     </div>
 
-</div>
-<script>
-    const today = new Date();
-    const options = {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    };
-    document.getElementById('current-date').textContent =
-        today.toLocaleDateString('en-GB', options);
-        const searchInput = document.getElementById('search-input');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const timelineItems = document.querySelectorAll('.timeline-item');
-        const noResults = document.getElementById('no-results');
+    <script>
 
-        let activeFilter = 'all';
+        // ---- 1. Auto date ----
+        const today = new Date();
+        const options = {
+            weekday: 'short', day: 'numeric',
+            month: 'long', year: 'numeric'
+        };
+        document.getElementById('current-date').textContent =
+            today.toLocaleDateString('en-GB', options);
 
-        function filterTimeline() {
-            const query = searchInput.value.toLowerCase().trim();
-            let visibleCount = 0;
 
-            timelineItems.forEach(function(item) {
-                const text = item.textContent.toLowerCase();
-                const status = item.querySelector('.status').textContent.toLowerCase();
+        // ---- 2. Load patient info ----
+        async function loadPatientInfo() {
+            try {
+                const res  = await fetch('/api/patient/dashboard');
+                const data = await res.json();
+                if (!res.ok) { window.location.href = '/'; return; }
 
-                const matchesSearch = text.includes(query);
-                const matchesFilter =
-                    activeFilter === 'all' ||
-                    (activeFilter === 'completed' && status.includes('completed')) ||
-                    (activeFilter === 'inprogress' && status.includes('in progress'));
+                // update sidebar
+                document.getElementById('patient-name').textContent = data.name;
+                const initials = data.name.split(' ')
+                    .map(function(n) { return n[0]; })
+                    .join('').toUpperCase();
+                document.getElementById('patient-avatar').textContent = initials;
 
-                if (matchesSearch && matchesFilter) {
-                    item.style.display = 'flex';
-                    visibleCount++;
-                } else {
-                    item.style.display = 'none';
+                // update patient card
+                document.getElementById('card-name').textContent = data.name;
+                document.getElementById('card-avatar').textContent = initials;
+                document.getElementById('card-phone').textContent =
+                    data.phone || 'N/A';
+                document.getElementById('card-visits').textContent =
+                    data.completed || 0;
+
+            } catch(e) { window.location.href = '/'; }
+        }
+
+
+        // ---- 3. Load medical history ----
+        async function loadHistory() {
+            try {
+                const res  = await fetch('/api/my-history');
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showPageMsg(data.message || 'Failed to load.', 'error');
+                    return;
                 }
-            });
 
-            // show/hide no results message
-            if (visibleCount === 0) {
-                noResults.style.display = 'block';
-            } else {
-                noResults.style.display = 'none';
+                buildTimeline(data.medical_history);
+
+            } catch(e) {
+                showPageMsg('Could not connect to server.', 'error');
             }
         }
 
-        searchInput.addEventListener('input', filterTimeline);
 
+        // ---- 4. Build timeline ----
+        function buildTimeline(records) {
+            const container = document.getElementById('timeline-container');
 
-        // ---- 3. Filter buttons (All / Completed / In Progress) ----
-        filterBtns.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                // remove active from all
-                filterBtns.forEach(function(b) { b.classList.remove('active'); });
+            if (records.length === 0) {
+                container.innerHTML =
+                    '<p style="color:#888; font-size:13px; padding:10px;">' +
+                    'No medical history found.</p>';
+                return;
+            }
 
-                // set active on clicked
-                this.classList.add('active');
-                activeFilter = this.dataset.filter;
+            container.innerHTML = '';
 
-                filterTimeline();
+            records.forEach(function(record) {
+
+                // format date nicely
+                const dateObj = new Date(record.date);
+                const dateOptions = {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                };
+                const formattedDate = dateObj.toLocaleDateString(
+                    'en-GB', dateOptions
+                );
+
+                // create timeline item
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.innerHTML =
+                    '<div class="timeline-dot"></div>' +
+                    '<div class="timeline-content">' +
+                        '<div class="timeline-header">' +
+                            '<span class="timeline-date">' +
+                                formattedDate +
+                            '</span>' +
+                            '<span class="status gray">Completed</span>' +
+                        '</div>' +
+                        '<h4>' + record.doctor_name +
+                            ' — ' + record.specialization + '</h4>' +
+                        '<p><strong>Department:</strong> ' +
+                            record.department + '</p>' +
+                        '<p><strong>Diagnosis:</strong> ' +
+                            (record.diagnosis || 'N/A') + '</p>' +
+                        '<p><strong>Notes:</strong> ' +
+                            (record.report || 'N/A') + '</p>' +
+                    '</div>';
+
+                container.appendChild(item);
             });
-        });
+        }
 
 
-        // ---- 4. Expand / collapse timeline items ----
-        timelineItems.forEach(function(item) {
-            const content = item.querySelector('.timeline-content');
-            const details = item.querySelector('.timeline-details');
-
-            content.addEventListener('click', function() {
-                const isExpanded = item.classList.contains('expanded');
-
-                // collapse all others
-                timelineItems.forEach(function(i) {
-                    i.classList.remove('expanded');
-                });
-
-                // toggle clicked item
-                if (!isExpanded) {
-                    item.classList.add('expanded');
-                }
-            });
-        });
+        // ---- 5. Logout ----
+        async function logout() {
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (!confirmed) return;
+            const res = await fetch('/api/logout', { method: 'POST' });
+            if (res.ok) window.location.href = '/';
+        }
 
 
-        // ---- 5. Print medical history ----
-        const printBtn = document.getElementById('print-btn');
+        // ---- Helpers ----
+        function showPageMsg(text, type) {
+            const msg = document.getElementById('page-msg');
+            msg.textContent      = text;
+            msg.style.display    = 'block';
+            msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+            msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
 
-        printBtn.addEventListener('click', function() {
-            window.print();
-        });
-</script>
+            setTimeout(function() {
+                msg.style.display = 'none';
+            }, 3000);
+        }
+
+
+        // ---- Init ----
+        loadPatientInfo();
+        loadHistory();
+
+    </script>
+
 </body>
 </html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Doctors</title>
-    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\patients.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='patients.css') }}">
 </head>
 <body>
 
@@ -18,16 +18,24 @@
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="patients.html">Dashboard</a>
-                <a href="find-doctors.html" class="active">Find Doctors</a>
-                <a href="my-appointments.html">My Appointment</a>
-                <a href="medical-history.html">Medical History</a>
-                <a href="reports.html">Reports</a>
+                <a href="/patient/dashboard">Dashboard</a>
+                <a href="/patient/find-doctors" class="active">Find Doctors</a>
+                <a href="/patient/appointments">My Appointment</a>
+                <a href="/patient/medical-history">Medical History</a>
+                <a href="/patient/reports">Reports</a>
             </nav>
             <div class="doc-info">
-                <div class="avatar">RK</div>
-                <p>Rajesh Kumar</p>
+                <div class="avatar" id="patient-avatar">--</div>
+                <p id="patient-name">Loading...</p>
                 <p>Patient</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
             </div>
         </div>
 
@@ -40,141 +48,388 @@
                     <br>
                     <p>Browse and book available doctors</p>
                 </div>
-                <p id="current-date">Mon, 4 May 2026</p>
+                <p id="current-date">-</p>
             </div>
 
+            <!-- Search -->
             <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Search by name or specialization...">
+                <input type="text" id="search-input"
+                    placeholder="Search by name or specialization..." />
             </div>
 
-            <!-- ALL 6 cards inside doctors-grid -->
+            <!-- Doctors Grid -->
             <div class="doctors-grid" id="doctors-grid">
-
-                <div class="doctor-card">
-                    <div class="doctor-avatar">AK</div>
-                    <div class="doctor-info">
-                        <h3>Dr. Anil Kumar</h3>
-                        <p class="specialization">Cardiologist</p>
-                        <p class="available">Available: Mon, Wed, Fri</p>
-                    </div>
-                    <a href="book-appointment.html">
-                        <button class="book-btn">Book</button>
-                    </a>
-                </div>
-
-                <div class="doctor-card">
-                    <div class="doctor-avatar">ST</div>
-                    <div class="doctor-info">
-                        <h3>Dr. Sita Thapa</h3>
-                        <p class="specialization">Dermatologist</p>
-                        <p class="available">Available: Tue, Thu</p>
-                    </div>
-                    <a href="book-appointment.html">
-                        <button class="book-btn">Book</button>
-                    </a>
-                </div>
-
-                <div class="doctor-card">
-                    <div class="doctor-avatar">RP</div>
-                    <div class="doctor-info">
-                        <h3>Dr. Rama Pokharel</h3>
-                        <p class="specialization">Neurologist</p>
-                        <p class="available">Available: Mon, Thu, Sat</p>
-                    </div>
-                    <a href="book-appointment.html">
-                        <button class="book-btn">Book</button>
-                    </a>
-                </div>
-
-                <div class="doctor-card">
-                    <div class="doctor-avatar">BS</div>
-                    <div class="doctor-info">
-                        <h3>Dr. Bikram Shrestha</h3>
-                        <p class="specialization">Orthopedic</p>
-                        <p class="available">Available: Wed, Fri</p>
-                    </div>
-                    <a href="book-appointment.html">
-                        <button class="book-btn">Book</button>
-                    </a>
-                </div>
-
-                <div class="doctor-card">
-                    <div class="doctor-avatar">PM</div>
-                    <div class="doctor-info">
-                        <h3>Dr. Priya Maharjan</h3>
-                        <p class="specialization">Pediatrician</p>
-                        <p class="available">Available: Mon, Tue, Wed</p>
-                    </div>
-                    <a href="book-appointment.html">
-                        <button class="book-btn">Book</button>
-                    </a>
-                </div>
-
-                <div class="doctor-card">
-                    <div class="doctor-avatar">HB</div>
-                    <div class="doctor-info">
-                        <h3>Dr. Hari Bahadur</h3>
-                        <p class="specialization">General Physician</p>
-                        <p class="available">Available: Mon to Fri</p>
-                    </div>
-                    <a href="book-appointment.html">
-                        <button class="book-btn">Book</button>
-                    </a>
-                </div>
-
+                <p style="color:#888; font-size:13px;">Loading doctors...</p>
             </div>
-            <p id="no-results" style="display:none; 
-            text-align:center; color:#888; 
-            padding:20px; font-size:14px;">
+
+            <p id="no-results" style="display:none; text-align:center;
+                color:#888; padding:20px; font-size:14px;">
                 No doctors found matching your search.
             </p>
+
         </div>
     </div>
-<script>
 
-    const today = new Date();
-    const options = { 
-        weekday: 'short', 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-    };
-    document.getElementById('current-date').textContent = 
-        today.toLocaleDateString('en-GB', options);
+    <!-- BOOKING MODAL OVERLAY -->
+    <div id="booking-overlay" style="display:none; position:fixed;
+        top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.5); z-index:999;"
+        onclick="closeModal()"></div>
+
+    <!-- BOOKING MODAL -->
+    <div id="booking-modal" style="display:none; position:fixed;
+        top:50%; left:50%; transform:translate(-50%,-50%);
+        background:white; border-radius:10px; padding:28px;
+        width:480px; z-index:1000;
+        box-shadow:0 4px 20px rgba(0,0,0,0.2);
+        max-height:90vh; overflow-y:auto;">
+
+        <h3 style="color:#0F4C5C; margin-bottom:4px;" id="modal-doctor-name"></h3>
+        <p style="font-size:12px; color:#888; margin-bottom:16px;"
+            id="modal-doctor-info"></p>
+
+        <!-- message -->
+        <div id="modal-msg" style="display:none; padding:10px;
+            border-radius:6px; font-size:13px;
+            margin-bottom:12px; text-align:center;"></div>
+
+        <!-- Date picker -->
+        <label style="font-size:13px; font-weight:bold; color:#333;">
+            Select Date
+        </label>
+        <input type="date" id="appt-date" style="
+            display:block; width:100%; padding:10px;
+            border:1px solid #ccc; border-radius:6px;
+            font-size:13px; margin-top:6px; margin-bottom:16px;" />
+
+        <!-- Time slots -->
+        <label style="font-size:13px; font-weight:bold; color:#333;">
+            Select Time Slot
+        </label>
+
+        <div id="slots-container" style="margin-top:10px; min-height:50px;">
+            <p style="color:#888; font-size:13px;">
+                Select a date to see available slots.
+            </p>
+        </div>
+
+        <!-- legend -->
+        <div style="display:flex; gap:12px; margin-top:10px; font-size:12px;">
+            <span style="padding:3px 10px; border:1px solid #0F4C5C;
+                border-radius:4px; color:#0F4C5C;">Available</span>
+            <span style="padding:3px 10px; background:#eee;
+                border-radius:4px; color:#aaa;">Booked</span>
+            <span style="padding:3px 10px; background:#0F4C5C;
+                border-radius:4px; color:white;">Selected</span>
+        </div>
+
+        <!-- Buttons -->
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="confirmBooking()" style="
+                flex:1; padding:10px; background:#0F4C5C;
+                color:white; border:none; border-radius:6px;
+                font-size:14px; cursor:pointer;">
+                Confirm Booking
+            </button>
+            <button onclick="closeModal()" style="
+                flex:1; padding:10px; background:white;
+                color:#0F4C5C; border:1px solid #0F4C5C;
+                border-radius:6px; font-size:14px; cursor:pointer;">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <script>
+
+        let allDoctors      = [];
+        let selectedSlot    = null;
+        let selectedDoctorId = null;
 
 
-    const searchInput = document.getElementById('search-input');
-    const doctorCards = document.querySelectorAll('.doctor-card');
-    const noResults = document.getElementById('no-results');
+        // ---- 1. Auto date ----
+        const today = new Date();
+        const options = {
+            weekday: 'short', day: 'numeric',
+            month: 'long', year: 'numeric'
+        };
+        document.getElementById('current-date').textContent =
+            today.toLocaleDateString('en-GB', options);
 
-    searchInput.addEventListener('keyup', function() {
+        // set min date to today
+        document.getElementById('appt-date').min =
+            today.toISOString().split('T')[0];
 
-        const searchText = this.value.toLowerCase();
-        let visibleCount = 0;
+
+        // ---- 2. Load patient info ----
+        async function loadPatientInfo() {
+            try {
+                const res  = await fetch('/api/patient/dashboard');
+                const data = await res.json();
+                if (!res.ok) { window.location.href = '/'; return; }
+
+                document.getElementById('patient-name').textContent = data.name;
+                const initials = data.name.split(' ')
+                    .map(function(n) { return n[0]; })
+                    .join('').toUpperCase();
+                document.getElementById('patient-avatar').textContent = initials;
+
+            } catch(e) { window.location.href = '/'; }
+        }
 
 
-        doctorCards.forEach(function(card) {
+        // ---- 3. Load doctors from database ----
+        async function loadDoctors() {
+            try {
+                const res  = await fetch('/api/doctors');
+                const data = await res.json();
 
-            const cardText = card.textContent.toLowerCase();
+                if (!res.ok) {
+                    document.getElementById('doctors-grid').innerHTML =
+                        '<p style="color:red;">Failed to load doctors.</p>';
+                    return;
+                }
 
-            if (cardText.includes(searchText)) {
-                card.style.display = 'flex';  
-                visibleCount++;               
-            } else {
-                card.style.display = 'none';  
+                allDoctors = data.doctors;
+                renderDoctors(allDoctors);
+
+            } catch(e) {
+                document.getElementById('doctors-grid').innerHTML =
+                    '<p style="color:red;">Could not connect to server.</p>';
+            }
+        }
+
+
+        // ---- 4. Render doctor cards ----
+        function renderDoctors(doctors) {
+            const grid      = document.getElementById('doctors-grid');
+            const noResults = document.getElementById('no-results');
+
+            if (doctors.length === 0) {
+                grid.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            grid.innerHTML = '';
+
+            doctors.forEach(function(doc) {
+                // get initials from name
+                const initials = doc.name.split(' ')
+                    .map(function(n) { return n[0]; })
+                    .join('').toUpperCase();
+
+                const days = doc.working_days || 'N/A';
+                const time = (doc.start_time && doc.end_time)
+                    ? doc.start_time + ' – ' + doc.end_time
+                    : 'N/A';
+
+                const card = document.createElement('div');
+                card.className = 'doctor-card';
+                card.innerHTML = `
+                    <div class="doctor-avatar">${initials}</div>
+                    <div class="doctor-info">
+                        <h3>${doc.name}</h3>
+                        <p class="specialization">${doc.specialization}</p>
+                        <p class="available">📅 ${days}</p>
+                        <p class="available">🕐 ${time}</p>
+                    </div>
+                    <button class="book-btn">Book</button>
+                `;
+
+                // book button click
+                card.querySelector('.book-btn').addEventListener('click', function() {
+                    openBooking(doc.id, doc.name, doc.specialization, doc.department);
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+
+        // ---- 5. Search ----
+        document.getElementById('search-input').addEventListener('keyup', function() {
+            const query = this.value.toLowerCase().trim();
+
+            const filtered = allDoctors.filter(function(doc) {
+                return doc.name.toLowerCase().includes(query) ||
+                       doc.specialization.toLowerCase().includes(query) ||
+                       doc.department.toLowerCase().includes(query);
+            });
+
+            renderDoctors(filtered);
+        });
+
+
+        // ---- 6. Open booking modal ----
+        function openBooking(doctorId, name, specialization, department) {
+            selectedDoctorId = doctorId;
+            selectedSlot     = null;
+
+            document.getElementById('modal-doctor-name').textContent = name;
+            document.getElementById('modal-doctor-info').textContent =
+                specialization + ' • ' + department;
+            document.getElementById('appt-date').value = '';
+            document.getElementById('slots-container').innerHTML =
+                '<p style="color:#888; font-size:13px;">Select a date to see slots.</p>';
+
+            hideModalMsg();
+            document.getElementById('booking-modal').style.display   = 'block';
+            document.getElementById('booking-overlay').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('booking-modal').style.display   = 'none';
+            document.getElementById('booking-overlay').style.display = 'none';
+            selectedSlot     = null;
+            selectedDoctorId = null;
+        }
+
+
+        // ---- 7. Load slots when date is selected ----
+        document.getElementById('appt-date').addEventListener('change', async function() {
+            const dateVal = this.value;
+            if (!dateVal || !selectedDoctorId) return;
+
+            selectedSlot = null;
+            document.getElementById('slots-container').innerHTML =
+                '<p style="color:#888; font-size:13px;">Loading slots...</p>';
+
+            try {
+                const res  = await fetch(
+                    `/api/slots?doctor_id=${selectedDoctorId}&date=${dateVal}`
+                );
+                const data = await res.json();
+
+                if (!res.ok) {
+                    document.getElementById('slots-container').innerHTML =
+                        `<p style="color:#c0392b; font-size:13px;">
+                            ⚠ ${data.message}
+                        </p>`;
+                    return;
+                }
+
+                renderSlots(data.slots);
+
+            } catch(e) {
+                document.getElementById('slots-container').innerHTML =
+                    '<p style="color:red;">Failed to load slots.</p>';
             }
         });
 
 
-        if (visibleCount === 0) {
-            noResults.style.display = 'block';
-        } else {
-            noResults.style.display = 'none';
+        // ---- 8. Render time slots ----
+        function renderSlots(slots) {
+            const container = document.getElementById('slots-container');
+
+            if (!slots || slots.length === 0) {
+                container.innerHTML =
+                    '<p style="color:#888; font-size:13px;">No slots available.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'slots-grid';
+            container.appendChild(grid);
+
+            slots.forEach(function(slot) {
+                const btn = document.createElement('button');
+                btn.textContent = slot.time;
+                btn.className   = 'slot' + (slot.booked ? ' booked' : '');
+                btn.disabled    = slot.booked;
+
+                if (!slot.booked) {
+                    btn.addEventListener('click', function() {
+                        // deselect all slots
+                        document.querySelectorAll('.slot').forEach(function(s) {
+                            s.classList.remove('selected');
+                        });
+                        // select this one
+                        btn.classList.add('selected');
+                        selectedSlot = slot.time;
+                        hideModalMsg();
+                    });
+                }
+
+                grid.appendChild(btn);
+            });
         }
-    });
 
-</script>
 
-</script>
+        // ---- 9. Confirm booking ----
+        async function confirmBooking() {
+            hideModalMsg();
+
+            const dateVal = document.getElementById('appt-date').value;
+
+            if (!dateVal) {
+                showModalMsg('Please select a date.', 'error');
+                return;
+            }
+            if (!selectedSlot) {
+                showModalMsg('Please select a time slot.', 'error');
+                return;
+            }
+
+            try {
+                const res  = await fetch('/api/book', {
+                    method : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({
+                        doctor_id : selectedDoctorId,
+                        date      : dateVal,
+                        time_slot : selectedSlot
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    showModalMsg('✅ Appointment booked!', 'success');
+                    setTimeout(function() {
+                        closeModal();
+                        window.location.href = '/patient/appointments';
+                    }, 1500);
+                } else {
+                    showModalMsg(data.message || 'Booking failed.', 'error');
+                }
+
+            } catch(e) {
+                showModalMsg('Could not connect to server.', 'error');
+            }
+        }
+
+
+        // ---- 10. Logout ----
+        async function logout() {
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (!confirmed) return;
+            const res = await fetch('/api/logout', { method: 'POST' });
+            if (res.ok) window.location.href = '/';
+        }
+
+
+        // ---- Helpers ----
+        function showModalMsg(text, type) {
+            const msg = document.getElementById('modal-msg');
+            msg.textContent      = text;
+            msg.style.display    = 'block';
+            msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+            msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+        }
+
+        function hideModalMsg() {
+            document.getElementById('modal-msg').style.display = 'none';
+        }
+
+
+        // ---- Init ----
+        loadPatientInfo();
+        loadDoctors();
+
+    </script>
+
 </body>
 </html>

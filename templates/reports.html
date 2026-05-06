@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports</title>
-    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\patients.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='patients.css') }}">
 </head>
 <body>
 
@@ -18,216 +18,394 @@
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="patients.html">Dashboard</a>
-                <a href="find-doctors.html">Find Doctors</a>
-                <a href="my-appointments.html">My Appointment</a>
-                <a href="medical-history.html">Medical History</a>
-                <a href="reports.html" class="active">Reports</a>
+                <a href="/patient/dashboard">Dashboard</a>
+                <a href="/patient/find-doctors">Find Doctors</a>
+                <a href="/patient/appointments">My Appointment</a>
+                <a href="/patient/medical-history">Medical History</a>
+                <a href="/patient/reports" class="active">Reports</a>
             </nav>
             <div class="doc-info">
-                <div class="avatar">RK</div>
-                <p>Rajesh Kumar</p>
+                <div class="avatar" id="patient-avatar">--</div>
+                <p id="patient-name">Loading...</p>
                 <p>Patient</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
             </div>
         </div>
 
-    
+        <!-- MAIN -->
         <div class="main">
 
-         
             <div class="topbar">
                 <div>
                     <h2>My Reports</h2>
                     <p>View and download your lab reports</p>
                 </div>
-                <p id="current-date"></p>
+                <p id="current-date">-</p>
             </div>
 
-           
-            <div class="filter-bar">
-                <input
-                    type="text"
-                    id="search-input"
-                    placeholder="Search reports..."
-                    style="padding:8px 14px; border:1px solid #0F4C5C; border-radius:20px; font-size:13px; outline:none; min-width:200px;"
-                />
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="new">New</button>
-                <button class="filter-btn" data-filter="seen">Seen</button>
-                <button class="filter-btn" data-filter="Lab Test">Lab Test</button>
-                <button class="filter-btn" data-filter="Cardiac">Cardiac</button>
-                <button class="filter-btn" data-filter="Radiology">Radiology</button>
+            <!-- Message box -->
+            <div id="page-msg" style="display:none; margin:0 20px;
+                padding:10px; border-radius:6px; font-size:13px;
+                text-align:center;">
             </div>
 
-           
+            <!-- Reports section -->
             <div class="appointment-section">
-                <h3>Recent Reports <span id="report-count"></span></h3>
-                <table>
+                <h3>Recent Reports
+                    <span id="report-count" style="
+                        font-size:12px; background-color:#0F4C5C;
+                        color:white; padding:2px 8px;
+                        border-radius:12px; margin-left:8px;">
+                    </span>
+                </h3>
+                <table id="reports-table">
                     <tr>
-                        <th>Report Name</th>
                         <th>Date</th>
-                        <th>Type</th>
-                        <th>Status</th>
+                        <th>Doctor</th>
+                        <th>Department</th>
+                        <th>Diagnosis</th>
+                        <th>Report</th>
                         <th>Action</th>
                     </tr>
-                    <tr data-status="new" data-type="Lab Test">
-                        <td>Blood Test Report</td>
-                        <td>04 May 2026</td>
-                        <td>Lab Test</td>
-                        <td><span class="status green">New</span></td>
-                        <td>
-                            <button class="view-btn">View</button>
-                            <button class="download-btn">Download</button>
-                        </td>
-                    </tr>
-                    <tr data-status="seen" data-type="Cardiac">
-                        <td>ECG Report</td>
-                        <td>01 Apr 2026</td>
-                        <td>Cardiac</td>
-                        <td><span class="status gray">Seen</span></td>
-                        <td>
-                            <button class="view-btn">View</button>
-                            <button class="download-btn">Download</button>
-                        </td>
-                    </tr>
-                    <tr data-status="seen" data-type="Radiology">
-                        <td>X-Ray Report</td>
-                        <td>15 Mar 2026</td>
-                        <td>Radiology</td>
-                        <td><span class="status gray">Seen</span></td>
-                        <td>
-                            <button class="view-btn">View</button>
-                            <button class="download-btn">Download</button>
-                        </td>
-                    </tr>
-                    <tr data-status="seen" data-type="Radiology">
-                        <td>MRI Scan Report</td>
-                        <td>10 Feb 2026</td>
-                        <td>Radiology</td>
-                        <td><span class="status gray">Seen</span></td>
-                        <td>
-                            <button class="view-btn">View</button>
-                            <button class="download-btn">Download</button>
-                        </td>
-                    </tr>
-                    <tr data-status="new" data-type="Lab Test">
-                        <td>Urine Test Report</td>
-                        <td>20 Jan 2026</td>
-                        <td>Lab Test</td>
-                        <td><span class="status green">New</span></td>
-                        <td>
-                            <button class="view-btn">View</button>
-                            <button class="download-btn">Download</button>
-                        </td>
-                    </tr>
                 </table>
-                <p id="no-results" style="display:none; text-align:center; padding:20px; color:#888; font-size:13px;">
-                    No reports found.
-                </p>
+
+                <!-- Empty state -->
+                <div id="no-reports" style="display:none;
+                    text-align:center; padding:30px; color:#888;">
+                    <p style="font-size:14px;">No reports found.</p>
+                </div>
             </div>
 
         </div>
     </div>
 
+    <!-- Report detail modal overlay -->
+    <div id="report-overlay" style="display:none; position:fixed;
+        top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.5); z-index:999;"
+        onclick="closeReport()">
+    </div>
+
+    <!-- Report detail modal -->
+    <div id="report-modal" style="display:none; position:fixed;
+        top:50%; left:50%; transform:translate(-50%,-50%);
+        background:white; border-radius:10px; padding:28px;
+        width:500px; z-index:1000;
+        box-shadow:0 4px 20px rgba(0,0,0,0.2);
+        max-height:90vh; overflow-y:auto;">
+
+        <h3 style="color:#0F4C5C; margin-bottom:4px;">
+            Report Details
+        </h3>
+        <p style="font-size:12px; color:#888; margin-bottom:16px;"
+            id="modal-report-date"></p>
+
+        <div style="display:flex; flex-direction:column; gap:12px;">
+
+            <div style="background:#f9f9f9; padding:12px;
+                border-radius:6px; border-left:4px solid #0F4C5C;">
+                <p style="font-size:12px; color:#888;">Doctor</p>
+                <p style="font-size:14px; font-weight:bold;
+                    color:#333;" id="modal-doctor"></p>
+            </div>
+
+            <div style="background:#f9f9f9; padding:12px;
+                border-radius:6px; border-left:4px solid #0F4C5C;">
+                <p style="font-size:12px; color:#888;">Department</p>
+                <p style="font-size:14px; color:#333;"
+                    id="modal-department"></p>
+            </div>
+
+            <div style="background:#f9f9f9; padding:12px;
+                border-radius:6px; border-left:4px solid #0F4C5C;">
+                <p style="font-size:12px; color:#888;">Diagnosis</p>
+                <p style="font-size:14px; color:#333;"
+                    id="modal-diagnosis"></p>
+            </div>
+
+            <div style="background:#f9f9f9; padding:12px;
+                border-radius:6px; border-left:4px solid #0F4C5C;">
+                <p style="font-size:12px; color:#888;">Report / Notes</p>
+                <p style="font-size:14px; color:#333;"
+                    id="modal-report"></p>
+            </div>
+
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="printReport()" style="
+                flex:1; padding:10px; background:#0F4C5C;
+                color:white; border:none; border-radius:6px;
+                font-size:14px; cursor:pointer;">
+                Print Report
+            </button>
+            <button onclick="closeReport()" style="
+                flex:1; padding:10px; background:white;
+                color:#0F4C5C; border:1px solid #0F4C5C;
+                border-radius:6px; font-size:14px; cursor:pointer;">
+                Close
+            </button>
+        </div>
+
+    </div>
+
     <script>
 
+        // ---- 1. Auto date ----
         const today = new Date();
         const options = {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
+            weekday: 'short', day: 'numeric',
+            month: 'long', year: 'numeric'
         };
         document.getElementById('current-date').textContent =
             today.toLocaleDateString('en-GB', options);
 
 
-        function updateCount() {
-            const rows = document.querySelectorAll('table tr[data-status]');
-            let count = 0;
-            rows.forEach(function(row) {
-                if (row.style.display !== 'none') count++;
-            });
-            document.getElementById('report-count').textContent = count;
+        // ---- 2. Load patient info ----
+        async function loadPatientInfo() {
+            try {
+                const res  = await fetch('/api/patient/dashboard');
+                const data = await res.json();
+                if (!res.ok) { window.location.href = '/'; return; }
+
+                document.getElementById('patient-name').textContent = data.name;
+                const initials = data.name.split(' ')
+                    .map(function(n) { return n[0]; })
+                    .join('').toUpperCase();
+                document.getElementById('patient-avatar').textContent = initials;
+
+            } catch(e) { window.location.href = '/'; }
         }
 
-        updateCount();
 
+        // ---- 3. Load reports ----
+        async function loadReports() {
+            try {
+                const res  = await fetch('/api/my-report');
+                const data = await res.json();
 
-
-        const searchInput = document.getElementById('search-input');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const rows = document.querySelectorAll('table tr[data-status]');
-        const noResults = document.getElementById('no-results');
-
-        let activeFilter = 'all';
-
-        function filterReports() {
-            const query = searchInput.value.toLowerCase().trim();
-            let visibleCount = 0;
-
-            rows.forEach(function(row) {
-                const text = row.textContent.toLowerCase();
-                const status = row.dataset.status;
-                const type = row.dataset.type;
-
-                const matchesSearch = text.includes(query);
-                const matchesFilter =
-                    activeFilter === 'all' ||
-                    activeFilter === status ||
-                    activeFilter === type;
-
-                if (matchesSearch && matchesFilter) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
+                if (!res.ok) {
+                    showPageMsg(data.message || 'Failed to load.', 'error');
+                    return;
                 }
-            });
 
-            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-            updateCount();
+                buildReportsTable(data.reports);
+
+            } catch(e) {
+                showPageMsg('Could not connect to server.', 'error');
+            }
         }
 
-        searchInput.addEventListener('input', filterReports);
 
+        // ---- 4. Build reports table ----
+        function buildReportsTable(reports) {
+            const table    = document.getElementById('reports-table');
+            const noReport = document.getElementById('no-reports');
 
-        filterBtns.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                filterBtns.forEach(function(b) { b.classList.remove('active'); });
-                this.classList.add('active');
-                activeFilter = this.dataset.filter;
-                filterReports();
+            // remove old rows except header
+            const oldRows = table.querySelectorAll('tr:not(:first-child)');
+            oldRows.forEach(function(row) { row.remove(); });
+
+            // update count badge
+            document.getElementById('report-count').textContent =
+                reports.length;
+
+            if (reports.length === 0) {
+                noReport.style.display = 'block';
+                return;
+            }
+
+            noReport.style.display = 'none';
+
+            reports.forEach(function(report, index) {
+
+                // format date
+                const dateObj = new Date(report.date);
+                const dateOptions = {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                };
+                const formattedDate = dateObj.toLocaleDateString(
+                    'en-GB', dateOptions
+                );
+
+                // shorten diagnosis for table
+                const shortDiagnosis = report.diagnosis
+                    ? (report.diagnosis.length > 30
+                        ? report.diagnosis.substring(0, 30) + '...'
+                        : report.diagnosis)
+                    : 'N/A';
+
+                const row = document.createElement('tr');
+                row.innerHTML =
+                    '<td>' + formattedDate + '</td>' +
+                    '<td>' + report.doctor_name + '</td>' +
+                    '<td>' + report.department + '</td>' +
+                    '<td>' + shortDiagnosis + '</td>' +
+                    '<td>' +
+                        '<span class="status green">Available</span>' +
+                    '</td>' +
+                    '<td>' +
+                        '<button class="view-btn" data-index="' +
+                            index + '">View</button> ' +
+                        '<button class="download-btn" data-index="' +
+                            index + '">Print</button>' +
+                    '</td>';
+
+                table.appendChild(row);
             });
-        });
+
+            // store reports globally for modal
+            window.allReports = reports;
+
+            // attach view buttons
+            attachViewButtons();
+        }
 
 
-        
-        document.querySelectorAll('.view-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                const row = this.closest('tr');
-                const reportName = row.cells[0].textContent;
-                const date = row.cells[1].textContent;
-                const type = row.cells[2].textContent;
-
-                alert('Report: ' + reportName + '\nDate: ' + date + '\nType: ' + type + '\n\n(In a real system, this would open the report.)');
-
-                // mark as seen
-                const statusSpan = row.querySelector('.status');
-                statusSpan.textContent = 'Seen';
-                statusSpan.className = 'status gray';
-                row.dataset.status = 'seen';
+        // ---- 5. Attach view buttons ----
+        function attachViewButtons() {
+            document.querySelectorAll('.view-btn').forEach(function(btn) {
+                btn.onclick = function() {
+                    const index  = this.dataset.index;
+                    const report = window.allReports[index];
+                    openReport(report);
+                };
             });
-        });
 
-
-        document.querySelectorAll('.download-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                const row = this.closest('tr');
-                const reportName = row.cells[0].textContent;
-                alert('Downloading: ' + reportName + '\n\n(In a real system, this would download the PDF.)');
+            document.querySelectorAll('.download-btn').forEach(function(btn) {
+                btn.onclick = function() {
+                    const index  = this.dataset.index;
+                    const report = window.allReports[index];
+                    openReport(report);
+                    // auto trigger print after modal opens
+                    setTimeout(function() { printReport(); }, 300);
+                };
             });
-        });
+        }
+
+
+        // ---- 6. Open report modal ----
+        function openReport(report) {
+            const dateObj = new Date(report.date);
+            const dateOptions = {
+                day: 'numeric', month: 'long', year: 'numeric'
+            };
+
+            document.getElementById('modal-report-date').textContent =
+                dateObj.toLocaleDateString('en-GB', dateOptions);
+            document.getElementById('modal-doctor').textContent =
+                report.doctor_name;
+            document.getElementById('modal-department').textContent =
+                report.department;
+            document.getElementById('modal-diagnosis').textContent =
+                report.diagnosis || 'N/A';
+            document.getElementById('modal-report').textContent =
+                report.report || 'N/A';
+
+            document.getElementById('report-modal').style.display  = 'block';
+            document.getElementById('report-overlay').style.display = 'block';
+        }
+
+        function closeReport() {
+            document.getElementById('report-modal').style.display   = 'none';
+            document.getElementById('report-overlay').style.display = 'none';
+        }
+
+
+        // ---- 7. Print report ----
+        function printReport() {
+            const doctor     = document.getElementById('modal-doctor').textContent;
+            const department = document.getElementById('modal-department').textContent;
+            const date       = document.getElementById('modal-report-date').textContent;
+            const diagnosis  = document.getElementById('modal-diagnosis').textContent;
+            const report     = document.getElementById('modal-report').textContent;
+            const patient    = document.getElementById('patient-name').textContent;
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Medical Report</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; }
+                        h1   { color: #0F4C5C; }
+                        .section { margin-bottom: 20px; }
+                        .label   { font-size: 12px; color: #888; }
+                        .value   { font-size: 15px; color: #333; font-weight: bold; }
+                        hr { border: 1px solid #eee; margin: 20px 0; }
+                    </style>
+                </head>
+                <body>
+                    <h1>MediPortal — Medical Report</h1>
+                    <hr>
+                    <div class="section">
+                        <p class="label">Patient</p>
+                        <p class="value">${patient}</p>
+                    </div>
+                    <div class="section">
+                        <p class="label">Date</p>
+                        <p class="value">${date}</p>
+                    </div>
+                    <div class="section">
+                        <p class="label">Doctor</p>
+                        <p class="value">${doctor}</p>
+                    </div>
+                    <div class="section">
+                        <p class="label">Department</p>
+                        <p class="value">${department}</p>
+                    </div>
+                    <div class="section">
+                        <p class="label">Diagnosis</p>
+                        <p class="value">${diagnosis}</p>
+                    </div>
+                    <div class="section">
+                        <p class="label">Report / Notes</p>
+                        <p class="value">${report}</p>
+                    </div>
+                    <hr>
+                    <p style="font-size:11px; color:#aaa;">
+                        Generated by MediPortal Hospital System
+                    </p>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+
+        // ---- 8. Logout ----
+        async function logout() {
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (!confirmed) return;
+            const res = await fetch('/api/logout', { method: 'POST' });
+            if (res.ok) window.location.href = '/';
+        }
+
+
+        // ---- Helpers ----
+        function showPageMsg(text, type) {
+            const msg = document.getElementById('page-msg');
+            msg.textContent      = text;
+            msg.style.display    = 'block';
+            msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+            msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+            setTimeout(function() {
+                msg.style.display = 'none';
+            }, 3000);
+        }
+
+
+        // ---- Init ----
+        loadPatientInfo();
+        loadReports();
 
     </script>
 

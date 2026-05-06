@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Doctors</title>
-    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\patients.css">
+    <title>My Appointments</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='patients.css') }}">
 </head>
 <body>
 
@@ -18,16 +18,24 @@
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="patients.html">Dashboard</a>
-                <a href="find-doctors.html" >Find Doctors</a>
-                <a href="my-appointments.html" class="active">My Appointment</a>
-                <a href="medical-history.html">Medical History</a>
-                <a href="reports.html">Reports</a>
+                <a href="/patient/dashboard">Dashboard</a>
+                <a href="/patient/find-doctors">Find Doctors</a>
+                <a href="/patient/appointments" class="active">My Appointment</a>
+                <a href="/patient/medical-history">Medical History</a>
+                <a href="/patient/reports">Reports</a>
             </nav>
             <div class="doc-info">
-                <div class="avatar">RK</div>
-                <p>Rajesh Kumar</p>
+                <div class="avatar" id="patient-avatar">--</div>
+                <p id="patient-name">Loading...</p>
                 <p>Patient</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
             </div>
         </div>
 
@@ -36,12 +44,13 @@
 
             <div class="topbar">
                 <div>
-                    <p>My Appointments</p>
-                    <br>
+                    <h2>My Appointments</h2>
                     <p>View and manage your appointments</p>
                 </div>
-                <p id="current-date">Mon, 4 May 2026</p>
+                <p id="current-date">-</p>
             </div>
+
+            <!-- Filter bar -->
             <div class="filter-bar">
                 <button class="filter-btn active" id="btn-upcoming">
                     Upcoming
@@ -51,9 +60,21 @@
                 </button>
             </div>
 
-            <div class="appointment-section" id="appointment-section">
-                <h3>Upcomming Appointments</h3>
-                    <span id="upcoming-count"></span>
+            <!-- Message box -->
+            <div id="page-msg" style="display:none; margin:0 20px;
+                padding:10px; border-radius:6px; font-size:13px;
+                text-align:center;">
+            </div>
+
+            <!-- Upcoming appointments -->
+            <div class="appointment-section" id="upcoming-section">
+                <h3>Upcoming Appointments
+                    <span id="upcoming-count" style="
+                        font-size:12px; background-color:#0F4C5C;
+                        color:white; padding:2px 8px;
+                        border-radius:12px; margin-left:8px;">
+                    </span>
+                </h3>
                 <table id="upcoming-table">
                     <tr>
                         <th>Doctor</th>
@@ -63,142 +84,251 @@
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
+                </table>
+            </div>
+
+            <!-- Past appointments -->
+            <div class="appointment-section" id="past-section"
+                style="display:none;">
+                <h3>Past Appointments</h3>
+                <table id="past-table">
                     <tr>
-                        <td>Dr. Anil Kumar</td>
-                        <td>Cardiologist</td>
-                        <td>05 May 2026</td>
-                        <td>10:00 AM</td>
-                        <td><span class="status green">Confirmed</span></td>
-                        <td><button class="cancel-btn">Cancel</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Sita Thapa</td>
-                        <td>Dermatologist</td>
-                        <td>10 May 2026</td>
-                        <td>02:00 PM</td>
-                        <td><span class="status orange">Pending</span></td>
-                        <td><button class="cancel-btn">Cancel</button></td>
+                        <th>Doctor</th>
+                        <th>Specialization</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
                     </tr>
                 </table>
             </div>
 
-               <div class="appointment-section" id="past-section" style="display:none;">
-        <h3>Past Appointments</h3>
-        <table>
-            <tr>
-                <th>Doctor</th>
-                <th>Specialization</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-            </tr>
-            <tr>
-                <td>Dr. Rama Pokharel</td>
-                <td>Neurologist</td>
-                <td>20 Apr 2026</td>
-                <td>11:00 AM</td>
-                <td><span class="status gray">Completed</span></td>
-            </tr>
-            <tr>
-                <td>Dr. Anil Kumar</td>
-                <td>Cardiologist</td>
-                <td>01 Apr 2026</td>
-                <td>09:00 AM</td>
-                <td><span class="status gray">Completed</span></td>
-            </tr>
-            <tr>
-                <td>Dr. Bikram Shrestha</td>
-                <td>Orthopedic</td>
-                <td>15 Mar 2026</td>
-                <td>03:00 PM</td>
-                <td><span class="status red">Cancelled</span></td>
-            </tr>
-        </table>
+        </div>
     </div>
 
-</div>
-<script>
+    <script>
 
-    // ---- 1. Auto date ----
-    const today = new Date();
-    const options = { 
-        weekday: 'short', 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-    };
-    document.getElementById('current-date').textContent = 
-        today.toLocaleDateString('en-GB', options);
+        // ---- 1. Auto date ----
+        const today = new Date();
+        const options = {
+            weekday: 'short', day: 'numeric',
+            month: 'long', year: 'numeric'
+        };
+        document.getElementById('current-date').textContent =
+            today.toLocaleDateString('en-GB', options);
 
 
-    // ---- 2. Count upcoming appointments ----
-    function updateCount() {
-        const rows = document.querySelectorAll(
-            '#upcoming-table tr:not(:first-child)'
-        );
+        // ---- 2. Load patient info ----
+        async function loadPatientInfo() {
+            try {
+                const res  = await fetch('/api/patient/dashboard');
+                const data = await res.json();
+                if (!res.ok) { window.location.href = '/'; return; }
 
-        // filter only visible rows
-        let count = 0;
-        rows.forEach(function(row) {
-            if (row.style.display !== 'none') {
-                count++;
+                document.getElementById('patient-name').textContent = data.name;
+                const initials = data.name.split(' ')
+                    .map(function(n) { return n[0]; })
+                    .join('').toUpperCase();
+                document.getElementById('patient-avatar').textContent = initials;
+
+            } catch(e) { window.location.href = '/'; }
+        }
+
+
+        // ---- 3. Load appointments ----
+        async function loadAppointments() {
+            try {
+                const res  = await fetch('/api/my-appointments');
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showPageMsg(data.message || 'Failed to load.', 'error');
+                    return;
+                }
+
+                buildUpcomingTable(data.upcoming);
+                buildPastTable(data.past);
+
+            } catch(e) {
+                showPageMsg('Could not connect to server.', 'error');
             }
+        }
+
+
+        // ---- 4. Build upcoming table ----
+        function buildUpcomingTable(appointments) {
+            const table = document.getElementById('upcoming-table');
+
+            // remove old rows except header
+            const oldRows = table.querySelectorAll('tr:not(:first-child)');
+            oldRows.forEach(function(row) { row.remove(); });
+
+            if (appointments.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML =
+                    '<td colspan="6" style="text-align:center; color:#888;">' +
+                    'No upcoming appointments</td>';
+                table.appendChild(row);
+
+            } else {
+                appointments.forEach(function(appt) {
+
+                    let statusClass = 'green';
+                    if (appt.status === 'Pending')   statusClass = 'orange';
+                    if (appt.status === 'Cancelled') statusClass = 'red';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML =
+                        '<td>' + appt.doctor_name + '</td>' +
+                        '<td>' + appt.specialization + '</td>' +
+                        '<td>' + appt.date + '</td>' +
+                        '<td>' + appt.time_slot + '</td>' +
+                        '<td><span class="status ' + statusClass + '">' +
+                            appt.status + '</span></td>' +
+                        '<td><button class="cancel-btn" data-id="' +
+                            appt.appointment_id + '">Cancel</button></td>';
+
+                    table.appendChild(row);
+                });
+            }
+
+            // update count badge
+            document.getElementById('upcoming-count').textContent =
+                appointments.length;
+
+            // attach cancel buttons
+            attachCancelButtons();
+        }
+
+
+        // ---- 5. Build past table ----
+        function buildPastTable(appointments) {
+            const table = document.getElementById('past-table');
+
+            // remove old rows except header
+            const oldRows = table.querySelectorAll('tr:not(:first-child)');
+            oldRows.forEach(function(row) { row.remove(); });
+
+            if (appointments.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML =
+                    '<td colspan="5" style="text-align:center; color:#888;">' +
+                    'No past appointments</td>';
+                table.appendChild(row);
+
+            } else {
+                appointments.forEach(function(appt) {
+
+                    let statusClass = 'gray';
+                    if (appt.status === 'Cancelled') statusClass = 'red';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML =
+                        '<td>' + appt.doctor_name + '</td>' +
+                        '<td>' + appt.specialization + '</td>' +
+                        '<td>' + appt.date + '</td>' +
+                        '<td>' + appt.time_slot + '</td>' +
+                        '<td><span class="status ' + statusClass + '">' +
+                            appt.status + '</span></td>';
+
+                    table.appendChild(row);
+                });
+            }
+        }
+
+
+        // ---- 6. Cancel appointment ----
+        function attachCancelButtons() {
+            const cancelBtns = document.querySelectorAll('.cancel-btn');
+
+            cancelBtns.forEach(function(btn) {
+                btn.onclick = async function() {
+
+                    const confirmed = confirm(
+                        'Are you sure you want to cancel this appointment?'
+                    );
+                    if (!confirmed) return;
+
+                    const apptId = this.dataset.id;
+
+                    try {
+                        const res  = await fetch(
+                            '/api/appointments/cancel/' + apptId,
+                            {
+                                method : 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                            }
+                        );
+                        const data = await res.json();
+
+                        if (res.ok) {
+                            showPageMsg(
+                                'Appointment cancelled successfully!',
+                                'success'
+                            );
+                            // reload from server
+                            loadAppointments();
+                        } else {
+                            showPageMsg(data.message || 'Cancel failed.', 'error');
+                        }
+
+                    } catch(e) {
+                        showPageMsg('Could not connect to server.', 'error');
+                    }
+                };
+            });
+        }
+
+
+        // ---- 7. Filter buttons ----
+        const btnUpcoming = document.getElementById('btn-upcoming');
+        const btnPast     = document.getElementById('btn-past');
+        const upcomingSection = document.getElementById('upcoming-section');
+        const pastSection     = document.getElementById('past-section');
+
+        btnUpcoming.addEventListener('click', function() {
+            upcomingSection.style.display = 'block';
+            pastSection.style.display     = 'none';
+            btnUpcoming.classList.add('active');
+            btnPast.classList.remove('active');
         });
 
-        document.getElementById('upcoming-count').textContent = count;
-    }
-
-    // run on page load
-    updateCount();
-
-
-    // ---- 3. Filter buttons ----
-    const btnUpcoming = document.getElementById('btn-upcoming');
-    const btnPast = document.getElementById('btn-past');
-    const upcomingSection = document.getElementById('upcoming-section');
-    const pastSection = document.getElementById('past-section');
-
-    btnUpcoming.addEventListener('click', function() {
-        // show upcoming, hide past
-        upcomingSection.style.display = 'block';
-        pastSection.style.display = 'none';
-
-        // update active button style
-        btnUpcoming.classList.add('active');
-        btnPast.classList.remove('active');
-    });
-
-    btnPast.addEventListener('click', function() {
-        // show past, hide upcoming
-        pastSection.style.display = 'block';
-        upcomingSection.style.display = 'none';
-
-        // update active button style
-        btnPast.classList.add('active');
-        btnUpcoming.classList.remove('active');
-    });
-
-
-    // ---- 4. Cancel appointment ----
-    const cancelBtns = document.querySelectorAll('.cancel-btn');
-
-    cancelBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-
-            const confirmed = confirm(
-                'Are you sure you want to cancel this appointment?'
-            );
-
-            if (confirmed) {
-                // hide the row
-                this.closest('tr').style.display = 'none';
-
-                // update the count
-                updateCount();
-            }
+        btnPast.addEventListener('click', function() {
+            pastSection.style.display     = 'block';
+            upcomingSection.style.display = 'none';
+            btnPast.classList.add('active');
+            btnUpcoming.classList.remove('active');
         });
-    });
 
-</script>
+
+        // ---- 8. Logout ----
+        async function logout() {
+            const confirmed = confirm('Are you sure you want to logout?');
+            if (!confirmed) return;
+            const res = await fetch('/api/logout', { method: 'POST' });
+            if (res.ok) window.location.href = '/';
+        }
+
+
+        // ---- Helpers ----
+        function showPageMsg(text, type) {
+            const msg = document.getElementById('page-msg');
+            msg.textContent      = text;
+            msg.style.display    = 'block';
+            msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+            msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+
+            // hide after 3 seconds
+            setTimeout(function() {
+                msg.style.display = 'none';
+            }, 3000);
+        }
+
+
+        // ---- Init ----
+        loadPatientInfo();
+        loadAppointments();
+
+    </script>
+
 </body>
 </html>

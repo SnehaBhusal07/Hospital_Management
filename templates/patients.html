@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\patients.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='patients.css') }}">
 </head>
 <body>
 
@@ -18,16 +18,21 @@
     <div class="sidebar">
         <div class="logo">MediPortal</div>
         <nav>
-            <a href="patients.html" class="active">Dashboard</a>
-            <a href="find-doctors.html">Find Doctors</a>
-            <a href="my-appointments.html">My Appointment</a>
-            <a href="medical-history.html">Medical History</a>
-            <a href="reports.html">Reports</a>
+            <a href="/patient/dashboard" class="active">Dashboard</a>
+            <a href="/patient/find-doctors">Find Doctors</a>
+            <a href="/patient/my-appointments">My Appointment</a>
+            <a href="/patient/medical-history">Medical History</a>
+            <a href="/patient/reports">Reports</a>
         </nav>
         <div class="doc-info">
-            <div class="avatar">RK</div>
-            <p>Rajesh Kumar</p>
+            <div class="avatar" id="patients-avatar">--</div>
+            <p id="patients-name">loading...</p>
             <p>Patient</p>
+        </div>
+        <div style="padding: 20px 22px 20px;">
+            <button onclick="logout()" style="
+                width: 100%; padding: 8px; background-color: white; border:1px solid #c0392b;border-radius: 6px; font-size: 13px; cursor: pointer;">logout</button>
+
         </div>
     </div>  
    
@@ -35,36 +40,32 @@
 
         <div class="topbar">
             <div>
-                <h2 id="greeting">Hello, Rajesh!</h2>
+                <h2 id="greeting"><span id="topbar-name">...</span></h2>
                 <br>
                 <p>Here's your health overview for today</p>
             </div>
-            <p id="current-date">Mon, 4 May 2026</p>
+            <p id="current-date">...</p>
         </div>
     
 
         <div class="stats-row">
             <div class="card">
-                <h3>2</h3>
+                <h3 id="stat-upcoming">-</h3>
                 <p>Upcoming Appointments</p>
             </div>
             <div class="card">
-                <h3>8</h3>
-                <p>Total Visits</p>
+                <h3 id="stat-completed">-</h3>
+                <p>Completed Visits</p>
             </div>
             <div class="card">
-                <h3>3</h3>
-                <p>New Reports</p>
-            </div>
-            <div class="card">
-                <h3>2</h3>
-                <p>Active Prescription</p>
+                <h3 id="stat-pending">-</h3>
+                <p>Pending Appointments</p>
             </div>
         </div>
 
         <div class="bottom-row">
             <div class="patient-list">
-                <h3>Upcoming Appointments</h3>
+                <h3>Recent Appointments</h3>
                 <table>
                     <tr>
                         <th>Doctor</th>
@@ -73,27 +74,21 @@
                         <th>Time</th>
                         <th>Status</th>
                     </tr>
-                    <tr>
-                        <td>Dr. Anil Kumar</td>
-                        <td>Cardiologist</td>
-                        <td>05 May 2026</td>
-                        <td>10:00 AM</td>
-                        <td><span class="status green">Confirmed</span></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Sita Thapa</td>
-                        <td>Dermatologist</td>
-                        <td>10 May 2026</td>
-                        <td>02:00 PM</td>
-                        <td><span class="status orange">Pending</span></td>
-                    </tr>
+                    <tbody id="appointments-tbody">
+                        <tr>
+                            <td colspan="5"style="text-align:center; color:#888;">
+                                loading
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
+
             <div class="actions">
                 <h3>Quick Actions</h3>
-                <button>Book Appointment</button>
-                <button>View Reports</button>
-                <button>Medical History</button>
+                <button onclick="window.location.href='/patient/book-appointments'">Book Appointment</button>
+                <button onclick="window.location.href='/patient/reports'">View Reports</button>
+                <button onclick="window.location.href='/patient/medical-history'">Medical History</button>
             </div>
         </div>
 
@@ -102,7 +97,7 @@
 </div> 
 <script>
 
-    // ---- 1. Show today's date automatically ----
+    //Date
     const today = new Date();
     const options = { 
         weekday: 'short', 
@@ -128,24 +123,76 @@
 
     document.getElementById('greeting').textContent = greeting;
 
+    async function loadDashboard(){
+        try{
+            const response= await fetch('/api/patient/dashboard');
+            const data=await response.json();
 
-    const cancelBtns = document.querySelectorAll('.cancel-btn');
-
-   
-    cancelBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-
-            
-            const confirmed = confirm(
-                'Are you sure you want to cancel this appointment?'
-            );
-
-            if (confirmed) {
-            
-                this.closest('tr').style.display = 'none';
+            if(!response.ok){
+                window.location.href='/';
+                return;
             }
+            document.getElementById('Patient-name').textContent=data.name;
+            document.getElementById('topbar-name').textContent=data.name;
+            document.getElementById('stat-upcoming').textContent = data.upcoming;
+            document.getElementById('stat-completed').textContent = data.completed;
+            document.getElementById('stat-pending').textContent = data.pending;
+
+
+            const tbody=document.getElementById('appointments-tbody');
+
+            if (data.appointments.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align:center; color:#888;">
+                                No appointments yet.
+                                <a href="/patient/find-doctors"
+                                    style="color:#0F4C5C; font-weight:bold;">
+                                    Book one now
+                                </a>
+                            </td>
+                        </tr>`;
+                    return;
+                }
+            
+                tbody.innerHTML='';
+                data.appointments.forEach(function(appt){
+                    const statusClass=
+                    appt.status==='Confirmed'?'green':
+                    appt.status==='Pending'?'orange':
+                    appt.status==='Cancelled'?'red':'gray';
+                
+                tbody.innerHTML += `
+                <tr>
+                    <td>${appt.doctor_name}</td>
+                    <td>${appt.specialization}</td>
+                    <td>${appt.date}</td>
+                    <td>${appt.time_slot}</td>
+                    <td>
+                        <span class="status ${statusClass}">
+                            ${appt.status}
+                        </span>
+                    </td>
+                </tr>`;
+                });
+        }catch(err){
+            console.error("Failed to load dashboard:",err);
+        }
+    }
+    loadDashboard();
+
+    async function logout(){
+        const confirmed=confirm('Are you sure you want to logout');
+        if(!confirmed) return;
+
+        const response=await fetch('/api/logout',{
+            method:'POST'
         });
-    });
+        if(response.ok){
+            window.location.href='/'
+        }
+    }
+
 
 
 </script>
