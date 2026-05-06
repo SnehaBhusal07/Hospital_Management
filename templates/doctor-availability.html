@@ -3,31 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management  Portal</title>
-    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\management.css">
+    <title>Doctor Availability</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='management.css') }}">
 </head>
 <body>
+
     <div class="navbar">
         <div id="name">Hospital Appointment and Patient Management System</div>
     </div>
+
     <div class="page">
 
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="management.html" >Dashboard</a>
-                <a href="manage-doctors.html" >Manage Doctors</a>
-                <a href="doctor-availability.html" class="active">Availability</a>
-                <a href="appointments-monitor.html">Appointments</a>
-                <a href="daily-schedule.html">Daily Schedule</a>
-                <a href="system-settings.html">Settings</a>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/manage-doctors">Manage Doctors</a>
+                <a href="/admin/availability" class="active">Availability</a>
+                <a href="/admin/appointments">Appointments</a>
+                <a href="/admin/daily-schedule">Daily Schedule</a>
+                <a href="/admin/settings">Settings</a>
             </nav>
             <div class="doc-info">
                 <div class="avatar">AD</div>
                 <p>Admin</p>
-                <p>Managementt</p>
+                <p>Management</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
             </div>
         </div>
+
         <div class="main">
 
             <div class="topbar">
@@ -35,352 +46,298 @@
                     <h2>Doctor Availability</h2>
                     <p>Manage working days and hours for each doctor</p>
                 </div>
-                <p id="current-date">Mon,4 May 2026</p>
+                <p id="current-date">-</p>
             </div>
 
+            <!-- Message box -->
+            <div id="page-msg" style="display:none; margin:0 20px;
+                padding:10px; border-radius:6px; font-size:13px;
+                text-align:center;">
+            </div>
+
+            <!-- Availability table -->
             <div class="appointment-section">
                 <h3>Current Availability</h3>
-                <table>
+                <table id="availability-table">
                     <tr>
                         <th>Doctor</th>
                         <th>Specialization</th>
                         <th>Working Days</th>
                         <th>Start Time</th>
                         <th>End Time</th>
-                        <th>Status</th>
                         <th>Action</th>
-                    </tr>
-                    <tr>
-                        <td>Dr. Anil Kumar</td>
-                        <td>Cardiologist</td>
-                        <td>Mon, Wed, Fri</td>
-                        <td>09:00 AM</td>
-                        <td>05:00 PM</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="edit-btn">Edit</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Sita Thapa</td>
-                        <td>Dermatologist</td>
-                        <td>Tue, Thu</td>
-                        <td>10:00 AM</td>
-                        <td>04:00 PM</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="edit-btn">Edit</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Rama Pokharel</td>
-                        <td>Neurologist</td>
-                        <td>Mon, Thu, Sat</td>
-                        <td>08:00 AM</td>
-                        <td>03:00 PM</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="edit-btn">Edit</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Bikram Shrestha</td>
-                        <td>Orthopedic</td>
-                        <td>Wed, Fri</td>
-                        <td>09:00 AM</td>
-                        <td>05:00 PM</td>
-                        <td><span class="status orange">On Leave</span></td>
-                        <td><button class="edit-btn">Edit</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Priya Maharjan</td>
-                        <td>Pediatrician</td>
-                        <td>Mon, Tue, Wed</td>
-                        <td>09:00 AM</td>
-                        <td>05:00 PM</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="edit-btn">Edit</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Hari Bahadur</td>
-                        <td>General Physician</td>
-                        <td>Mon to Fri</td>
-                        <td>08:00 AM</td>
-                        <td>06:00 PM</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="edit-btn">Edit</button></td>
                     </tr>
                 </table>
             </div>
 
+            <!-- Edit form -->
             <div class="appointment-section">
                 <h3>Update Availability</h3>
                 <p style="font-size:13px; color:#888; margin-bottom:15px;">
-                    Select a doctor and updtae their schedule below
+                    Click Edit on a doctor above to fill this form
                 </p>
                 <div class="add-doctor-form">
+
                     <div class="form-group">
-                        <label>Select Doctor</label>
-                        <select>
-                            <option>Select a doctor</option>
-                            <option>Dr. Anil Kumar</option>
-                            <option>Dr. Sita Thapa</option>
-                            <option>Dr. Rama Pokharel</option>
-                            <option>Dr. Bikram Shrestha</option>
-                            <option>Dr. Priya Maharjan</option>
-                            <option>Dr. Hari Bahadur</option>
-                        </select>
+                        <label>Selected Doctor</label>
+                        <input type="text" id="selected-doctor"
+                            placeholder="Click Edit on a doctor above"
+                            readonly style="background:#f9f9f9;">
+                        <input type="hidden" id="selected-doctor-id">
                     </div>
+
                     <div class="form-group">
                         <label>Working Days</label>
                         <div class="days-row">
                             <label class="day-checkbox">
-                                <input type="checkbox"> Mon
+                                <input type="checkbox" value="Mon"> Mon
                             </label>
                             <label class="day-checkbox">
-                                <input type="checkbox"> Tue
+                                <input type="checkbox" value="Tue"> Tue
                             </label>
                             <label class="day-checkbox">
-                                <input type="checkbox"> Wed
+                                <input type="checkbox" value="Wed"> Wed
                             </label>
                             <label class="day-checkbox">
-                                <input type="checkbox"> Thu
+                                <input type="checkbox" value="Thu"> Thu
                             </label>
                             <label class="day-checkbox">
-                                <input type="checkbox"> Fri
+                                <input type="checkbox" value="Fri"> Fri
                             </label>
                             <label class="day-checkbox">
-                                <input type="checkbox"> Sat
+                                <input type="checkbox" value="Sat"> Sat
                             </label>
                             <label class="day-checkbox">
-                                <input type="checkbox"> Sun
+                                <input type="checkbox" value="Sun"> Sun
                             </label>
                         </div>
                     </div>
 
-                    <!-- Working hours -->
                     <div class="form-row">
                         <div class="form-group">
                             <label>Start Time</label>
-                            <input type="time" value="09:00">
+                            <input type="time" id="edit-start" value="09:00">
                         </div>
                         <div class="form-group">
                             <label>End Time</label>
-                            <input type="time" value="17:00">
+                            <input type="time" id="edit-end" value="17:00">
                         </div>
                     </div>
 
-                    <!-- Status -->
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select>
-                            <option>Active</option>
-                            <option>On Leave</option>
-                            <option>Inactive</option>
-                        </select>
-                    </div>
-
-                    <!-- Buttons -->
                     <div class="form-buttons">
-                        <button class="btn-save">Update Availability</button>
-                        <button class="btn-cancel">Cancel</button>
+                        <button class="btn-save" id="update-btn">
+                            Update Availability
+                        </button>
+                        <button class="btn-cancel" id="cancel-btn">
+                            Cancel
+                        </button>
                     </div>
 
                 </div>
             </div>
 
         </div>
-               
+    </div>
+
 <script>
 
     // ---- 1. Auto date ----
     const today = new Date();
-    const options = { 
-        weekday: 'short', 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
+    const options = {
+        weekday: 'short', day: 'numeric',
+        month: 'long', year: 'numeric'
     };
-    document.getElementById('current-date').textContent = 
+    document.getElementById('current-date').textContent =
         today.toLocaleDateString('en-GB', options);
 
 
-    // ---- store which row is being edited ----
-    let currentRow = null;
+    // ---- 2. Load doctors ----
+    async function loadDoctors() {
+        try {
+            const res  = await fetch('/api/admin/doctors');
+            const data = await res.json();
 
-
-    // ---- 2. Edit button ----
-    const editBtns = document.querySelectorAll('.edit-btn');
-
-    editBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-
-            // save reference to this row
-            currentRow = this.closest('tr');
-
-            // get data from row cells
-            const name = currentRow.cells[0].textContent.trim();
-            const days = currentRow.cells[2].textContent.trim();
-            const startTime = currentRow.cells[3].textContent.trim();
-            const endTime = currentRow.cells[4].textContent.trim();
-            const status = currentRow.cells[5].textContent.trim();
-
-            // fill doctor dropdown
-            const doctorSelect = document.querySelectorAll(
-                '.add-doctor-form select'
-            )[0];
-            const allOptions = doctorSelect.querySelectorAll('option');
-            allOptions.forEach(function(option) {
-                if (option.textContent.trim() === name) {
-                    option.selected = true;
-                }
-            });
-
-            // check matching days
-            const dayCheckboxes = document.querySelectorAll(
-                '.day-checkbox input'
-            );
-            dayCheckboxes.forEach(function(cb) {
-                const dayLabel = cb.parentElement.textContent.trim();
-                cb.checked = days.includes(dayLabel);
-            });
-
-            // convert time to 24hr format for input
-            function convertTo24Hr(timeStr) {
-                const parts = timeStr.split(' ');
-                const time = parts[0];
-                const modifier = parts[1];
-                let hours = time.split(':')[0];
-                const minutes = time.split(':')[1];
-                if (modifier === 'PM' && hours !== '12') {
-                    hours = parseInt(hours) + 12;
-                }
-                if (modifier === 'AM' && hours === '12') {
-                    hours = '00';
-                }
-                return hours + ':' + minutes;
+            if (!res.ok) {
+                showMsg(data.message || 'Failed to load.', 'error');
+                return;
             }
 
-            // fill time inputs
-            const timeInputs = document.querySelectorAll(
-                '.add-doctor-form input[type="time"]'
-            );
-            timeInputs[0].value = convertTo24Hr(startTime);
-            timeInputs[1].value = convertTo24Hr(endTime);
+            buildTable(data.doctors);
 
-            // fill status dropdown
-            const statusSelect = document.querySelectorAll(
-                '.add-doctor-form select'
-            )[1];
-            const statusOptions = statusSelect.querySelectorAll('option');
-            statusOptions.forEach(function(option) {
-                if (option.textContent.trim() === status) {
-                    option.selected = true;
-                }
-            });
-
-            // scroll to form smoothly
-            document.querySelector('.add-doctor-form').scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
+        } catch(e) {
+            showMsg('Could not connect to server.', 'error');
+        }
+    }
 
 
-    // ---- 3. Update button — saves back to table ----
-    const updateBtn = document.querySelector('.btn-save');
+    // ---- 3. Build table ----
+    function buildTable(doctors) {
+        const table = document.getElementById('availability-table');
 
-    updateBtn.addEventListener('click', function() {
+        const oldRows = table.querySelectorAll('tr:not(:first-child)');
+        oldRows.forEach(function(row) { row.remove(); });
 
-        // check a doctor is selected
-        const doctorSelect = document.querySelectorAll(
-            '.add-doctor-form select'
-        )[0];
-        if (doctorSelect.selectedIndex === 0) {
-            alert('Please select a doctor!');
+        if (doctors.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML =
+                '<td colspan="6" style="text-align:center; color:#888;">' +
+                'No doctors found.</td>';
+            table.appendChild(row);
             return;
         }
 
-        // check at least one day selected
+        doctors.forEach(function(doc) {
+            const row = document.createElement('tr');
+            row.innerHTML =
+                '<td>' + doc.name + '</td>' +
+                '<td>' + doc.specialization + '</td>' +
+                '<td>' + (doc.working_days || 'N/A') + '</td>' +
+                '<td>' + (doc.start_time || '-') + '</td>' +
+                '<td>' + (doc.end_time || '-') + '</td>' +
+                '<td><button class="edit-btn" data-id="' + doc.id + '"' +
+                    ' data-name="' + doc.name + '"' +
+                    ' data-days="' + (doc.working_days || '') + '"' +
+                    ' data-start="' + (doc.start_time || '09:00') + '"' +
+                    ' data-end="' + (doc.end_time || '17:00') + '">' +
+                    'Edit</button></td>';
+
+            table.appendChild(row);
+        });
+
+        attachEditButtons();
+    }
+
+
+    // ---- 4. Edit button fills form ----
+    function attachEditButtons() {
+        document.querySelectorAll('.edit-btn').forEach(function(btn) {
+            btn.onclick = function() {
+
+                // fill form with doctor data
+                document.getElementById('selected-doctor').value =
+                    this.dataset.name;
+                document.getElementById('selected-doctor-id').value =
+                    this.dataset.id;
+                document.getElementById('edit-start').value =
+                    this.dataset.start;
+                document.getElementById('edit-end').value =
+                    this.dataset.end;
+
+                // check matching days
+                const days = this.dataset.days.split(',');
+                document.querySelectorAll('.day-checkbox input')
+                    .forEach(function(cb) {
+                        cb.checked = days.includes(cb.value.trim());
+                    });
+
+                // scroll to form
+                document.getElementById('selected-doctor')
+                    .scrollIntoView({ behavior: 'smooth' });
+            };
+        });
+    }
+
+
+    // ---- 5. Update button ----
+    document.getElementById('update-btn').addEventListener(
+        'click', async function() {
+
+        const doctorId = document.getElementById('selected-doctor-id').value;
+        const name     = document.getElementById('selected-doctor').value;
+
+        if (!doctorId) {
+            showMsg('Please click Edit on a doctor first!', 'error');
+            return;
+        }
+
         const checkedDays = document.querySelectorAll(
             '.day-checkbox input:checked'
         );
         if (checkedDays.length === 0) {
-            alert('Please select at least one working day!');
+            showMsg('Please select at least one working day!', 'error');
             return;
         }
 
-        // collect selected days as string
-        let days = '';
-        checkedDays.forEach(function(cb) {
-            days += cb.parentElement.textContent.trim() + ', ';
-        });
-        days = days.slice(0, -2);
+        // collect days as "Mon,Tue,Wed"
+        let days = [];
+        checkedDays.forEach(function(cb) { days.push(cb.value); });
+        const workingDays = days.join(',');
 
-        // get time inputs
-        const timeInputs = document.querySelectorAll(
-            '.add-doctor-form input[type="time"]'
-        );
-        const startTime = timeInputs[0].value;
-        const endTime = timeInputs[1].value;
+        const startTime = document.getElementById('edit-start').value;
+        const endTime   = document.getElementById('edit-end').value;
 
-        // convert 24hr to 12hr for display
-        function convertTo12Hr(time24) {
-            let hours = parseInt(time24.split(':')[0]);
-            const minutes = time24.split(':')[1];
-            const modifier = hours >= 12 ? 'PM' : 'AM';
-            if (hours > 12) hours = hours - 12;
-            if (hours === 0) hours = 12;
-            return hours + ':' + minutes + ' ' + modifier;
+        if (startTime >= endTime) {
+            showMsg('End time must be after start time!', 'error');
+            return;
         }
 
-        // get selected status
-        const statusSelect = document.querySelectorAll(
-            '.add-doctor-form select'
-        )[1];
-        const statusValue = statusSelect.value;
+        try {
+            const res = await fetch(
+                '/api/admin/update-doctor/' + doctorId,
+                {
+                    method : 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({
+                        working_days: workingDays,
+                        start_time  : startTime,
+                        end_time    : endTime
+                    })
+                }
+            );
 
-        // set status color
-        let statusClass = 'green';
-        if (statusValue === 'On Leave') statusClass = 'orange';
-        if (statusValue === 'Inactive') statusClass = 'gray';
+            const data = await res.json();
 
-        // if a row is being edited — update it
-        if (currentRow) {
-            currentRow.cells[2].textContent = days;
-            currentRow.cells[3].textContent = convertTo12Hr(startTime);
-            currentRow.cells[4].textContent = convertTo12Hr(endTime);
-            currentRow.cells[5].innerHTML = 
-                '<span class="status ' + statusClass + '">' + 
-                statusValue + '</span>';
+            if (res.ok) {
+                showMsg(name + ' availability updated!', 'success');
+                clearForm();
+                loadDoctors();
+            } else {
+                showMsg(data.message || 'Update failed.', 'error');
+            }
 
-            alert('Availability updated successfully!');
-            currentRow = null;
-
-        } else {
-            alert('Please click Edit on a doctor first!');
+        } catch(e) {
+            showMsg('Could not connect to server.', 'error');
         }
     });
 
 
-    // ---- 4. Cancel button ----
-    const cancelBtn = document.querySelector('.btn-cancel');
+    // ---- 6. Cancel button ----
+    document.getElementById('cancel-btn').addEventListener(
+        'click', clearForm
+    );
 
-    cancelBtn.addEventListener('click', function() {
-
-        document.querySelectorAll('.add-doctor-form select')[0]
-            .selectedIndex = 0;
-
+    function clearForm() {
+        document.getElementById('selected-doctor').value    = '';
+        document.getElementById('selected-doctor-id').value = '';
+        document.getElementById('edit-start').value         = '09:00';
+        document.getElementById('edit-end').value           = '17:00';
         document.querySelectorAll('.day-checkbox input')
-            .forEach(function(cb) {
-                cb.checked = false;
-            });
+            .forEach(function(cb) { cb.checked = false; });
+    }
 
-        const timeInputs = document.querySelectorAll(
-            '.add-doctor-form input[type="time"]'
-        );
-        timeInputs[0].value = '09:00';
-        timeInputs[1].value = '17:00';
 
-        document.querySelectorAll('.add-doctor-form select')[1]
-            .selectedIndex = 0;
+    // ---- 7. Logout ----
+    async function logout() {
+        const confirmed = confirm('Are you sure you want to logout?');
+        if (!confirmed) return;
+        const res = await fetch('/api/admin/logout', { method: 'POST' });
+        if (res.ok) window.location.href = '/';
+    }
 
-        currentRow = null;
-    });
+
+    // ---- Helper ----
+    function showMsg(text, type) {
+        const msg = document.getElementById('page-msg');
+        msg.textContent      = text;
+        msg.style.display    = 'block';
+        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+        setTimeout(function() { msg.style.display = 'none'; }, 3000);
+    }
+
+
+    // ---- Init ----
+    loadDoctors();
 
 </script>
 </body>

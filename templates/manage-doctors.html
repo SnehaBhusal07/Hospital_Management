@@ -3,307 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management  Portal</title>
-    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\management.css">
+    <title>Manage Doctors</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='management.css') }}">
 </head>
 <body>
+
     <div class="navbar">
         <div id="name">Hospital Appointment and Patient Management System</div>
     </div>
+
     <div class="page">
 
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="management.html" >Dashboard</a>
-                <a href="manage-doctors.html" class="active">Manage Doctors</a>
-                <a href="doctor-availability.html">Availability</a>
-                <a href="appointments-monitor.html">Appointments</a>
-                <a href="daily-schedule.html">Daily Schedule</a>
-                <a href="system-settings.html">Settings</a>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/manage-doctors" class="active">Manage Doctors</a>
+                <a href="/admin/availability">Availability</a>
+                <a href="/admin/appointments">Appointments</a>
+                <a href="/admin/daily-schedule">Daily Schedule</a>
+                <a href="/admin/settings">Settings</a>
             </nav>
             <div class="doc-info">
                 <div class="avatar">AD</div>
                 <p>Admin</p>
                 <p>Management</p>
             </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
+            </div>
         </div>
+
         <div class="main">
 
             <div class="topbar">
                 <div>
                     <h2>Manage Doctors</h2>
-                    <p>Add View and Remove Doctors</p>
+                    <p>Add, view and remove doctors</p>
                 </div>
-                <p id="current-date">Mon, 4 May 2026</p>
+                <p id="current-date">-</p>
             </div>
 
+            <!-- Message box -->
+            <div id="page-msg" style="display:none; margin:0 20px;
+                padding:10px; border-radius:6px; font-size:13px;
+                text-align:center;">
+            </div>
+
+            <!-- Doctors table -->
             <div class="appointment-section">
-                <h3>All Doctors</h3>
-                <table>
+                <h3>All Doctors
+                    <span id="doctor-count" style="
+                        font-size:12px; background-color:#1a3c4d;
+                        color:white; padding:2px 8px;
+                        border-radius:12px; margin-left:8px;">
+                    </span>
+                </h3>
+                <table id="doctors-table">
                     <tr>
                         <th>Name</th>
                         <th>Specialization</th>
+                        <th>Department</th>
                         <th>Working Days</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                    <tr>
-                        <td>Dr. Anil Kumar</td>
-                        <td>Cardiologist</td>
-                        <td>Mon, Wed, Fri</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="cancel-btn">Remove</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Sita Thapa</td>
-                        <td>Dermatologist</td>
-                        <td>Tue, Thu</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="cancel-btn">Remove</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Rama Pokharel</td>
-                        <td>Neurologist</td>
-                        <td>Mon, Thu, Sat</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="cancel-btn">Remove</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Bikram Shrestha</td>
-                        <td>Orthopedic</td>
-                        <td>Wed, Fri</td>
-                        <td><span class="status orange">On Leave</span></td>
-                        <td><button class="cancel-btn">Remove</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Priya Maharjan</td>
-                        <td>Pediatrician</td>
-                        <td>Mon, Tue, Wed</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="cancel-btn">Remove</button></td>
-                    </tr>
-                    <tr>
-                        <td>Dr. Hari Bahadur</td>
-                        <td>General Physician</td>
-                        <td>Mon to Fri</td>
-                        <td><span class="status green">Active</span></td>
-                        <td><button class="cancel-btn">Remove</button></td>
+                        <th>Hours</th>
+                        <th>Action</th>
                     </tr>
                 </table>
-                </div>
-                <div class="appointment-section">
-                    <h3>Add New Doctor</h3>
-                    <div class="add-doctor-form">
+            </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Full Name</label>
-                                <input type="text" placeholder="e.g. Dr. John Smith">
-                            </div>
-                            <div class="form-group">
-                                <label>Specialization</label>
-                                <input type="text" placeholder="e.g. Cardiologist">
-                            </div>
-                        </div>
+            <!-- Add new doctor form -->
+            <div class="appointment-section">
+                <h3>Add New Doctor</h3>
+                <div class="add-doctor-form">
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" placeholder="e.g. doctor@hospital.com">
-                            </div>
-                            <div class="form-group">
-                                <label>Phone</label>
-                                <input type="text" placeholder="e.g. 9800000000">
-                            </div>
-                        </div>
-
+                    <div class="form-row">
                         <div class="form-group">
-                            <label>Working Days</label>
-                            <div class="days-row">
-                                <label class="day-checkbox">
-                                    <input type="checkbox"> Mon
-                                </label>
-                                <label class="day-checkbox">
-                                    <input type="checkbox"> Tue
-                                </label>
-                                <label class="day-checkbox">
-                                    <input type="checkbox"> Wed
-                                </label>
-                                <label class="day-checkbox">
-                                    <input type="checkbox"> Thu
-                                </label>
-                                <label class="day-checkbox">
-                                    <input type="checkbox"> Fri
-                                </label>
-                                <label class="day-checkbox">
-                                    <input type="checkbox"> Sat
-                                </label>
-                                <label class="day-checkbox">
-                                    <input type="checkbox"> Sun
-                                </label>
-                            </div>
+                            <label>Full Name</label>
+                            <input type="text" id="doc-name"
+                            placeholder="e.g. Dr. John Smith">
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Start Time</label>
-                                <input type="time" value="09:00">
-                            </div>
-                            <div class="form-group">
-                                <label>End Time</label>
-                                <input type="time" value="17:00">
-                            </div>
+                        <div class="form-group">
+                            <label>Specialization</label>
+                            <input type="text" id="doc-spec"
+                            placeholder="e.g. Cardiologist">
                         </div>
-
-                        <div class="form-buttons">
-                            <button class="btn-save">Add Doctor</button>
-                            <button class="btn-cancel">Cancel</button>
-                        </div>
-
                     </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Department</label>
+                            <input type="text" id="doc-dept"
+                            placeholder="e.g. Cardiology">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="doc-email"
+                            placeholder="e.g. doctor@hospital.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="doc-password"
+                            placeholder="Set login password">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" id="doc-phone"
+                            placeholder="e.g. 9800000000">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Working Days</label>
+                        <div class="days-row">
+                            <label class="day-checkbox">
+                                <input type="checkbox" value="Mon"> Mon
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" value="Tue"> Tue
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" value="Wed"> Wed
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" value="Thu"> Thu
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" value="Fri"> Fri
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" value="Sat"> Sat
+                            </label>
+                            <label class="day-checkbox">
+                                <input type="checkbox" value="Sun"> Sun
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Time</label>
+                            <input type="time" id="doc-start" value="09:00">
+                        </div>
+                        <div class="form-group">
+                            <label>End Time</label>
+                            <input type="time" id="doc-end" value="17:00">
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button class="btn-save" id="add-btn">
+                            Add Doctor
+                        </button>
+                        <button class="btn-cancel" id="clear-btn">
+                            Clear
+                        </button>
+                    </div>
+
                 </div>
+            </div>
+
         </div>
-        </div>
-    
+    </div>
+
 <script>
 
     // ---- 1. Auto date ----
     const today = new Date();
-    const options = { 
-        weekday: 'short', 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
+    const options = {
+        weekday: 'short', day: 'numeric',
+        month: 'long', year: 'numeric'
     };
-    document.getElementById('current-date').textContent = 
+    document.getElementById('current-date').textContent =
         today.toLocaleDateString('en-GB', options);
 
 
-    // ---- 2. Remove doctor button ----
+    // ---- 2. Load doctors ----
+    async function loadDoctors() {
+        try {
+            const res  = await fetch('/api/admin/doctors');
+            const data = await res.json();
+
+            if (!res.ok) {
+                showMsg(data.message || 'Failed to load.', 'error');
+                return;
+            }
+
+            buildDoctorsTable(data.doctors);
+
+        } catch(e) {
+            showMsg('Could not connect to server.', 'error');
+        }
+    }
+
+
+    // ---- 3. Build doctors table ----
+    function buildDoctorsTable(doctors) {
+        const table = document.getElementById('doctors-table');
+
+        // remove old rows except header
+        const oldRows = table.querySelectorAll('tr:not(:first-child)');
+        oldRows.forEach(function(row) { row.remove(); });
+
+        document.getElementById('doctor-count').textContent = doctors.length;
+
+        if (doctors.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML =
+                '<td colspan="6" style="text-align:center; color:#888;">' +
+                'No doctors found.</td>';
+            table.appendChild(row);
+            return;
+        }
+
+        doctors.forEach(function(doc) {
+            const row = document.createElement('tr');
+            row.innerHTML =
+                '<td>' + doc.name + '</td>' +
+                '<td>' + doc.specialization + '</td>' +
+                '<td>' + doc.department + '</td>' +
+                '<td>' + (doc.working_days || 'N/A') + '</td>' +
+                '<td>' + (doc.start_time || '-') + ' – ' +
+                    (doc.end_time || '-') + '</td>' +
+                '<td><button class="cancel-btn" data-id="' +
+                    doc.id + '">Remove</button></td>';
+            table.appendChild(row);
+        });
+
+        attachRemoveButtons();
+    }
+
+
+    // ---- 4. Remove doctor ----
     function attachRemoveButtons() {
-        const removeBtns = document.querySelectorAll('.cancel-btn');
-        removeBtns.forEach(function(btn) {
-            btn.onclick = function() {
+        document.querySelectorAll('.cancel-btn').forEach(function(btn) {
+            btn.onclick = async function() {
                 const confirmed = confirm(
                     'Are you sure you want to remove this doctor?'
                 );
-                if (confirmed) {
-                    this.closest('tr').style.display = 'none';
+                if (!confirmed) return;
+
+                const docId = this.dataset.id;
+
+                try {
+                    const res  = await fetch(
+                        '/api/admin/remove-doctor/' + docId,
+                        { method: 'DELETE' }
+                    );
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        showMsg('Doctor removed successfully!', 'success');
+                        loadDoctors();
+                    } else {
+                        showMsg(data.message || 'Failed to remove.', 'error');
+                    }
+                } catch(e) {
+                    showMsg('Could not connect to server.', 'error');
                 }
             };
         });
     }
 
-    attachRemoveButtons();
 
+    // ---- 5. Add doctor ----
+    document.getElementById('add-btn').addEventListener('click', async function() {
 
-    // ---- 3. Add doctor form validation ----
-    const addBtn = document.querySelector('.btn-save');
+        const name     = document.getElementById('doc-name').value.trim();
+        const spec     = document.getElementById('doc-spec').value.trim();
+        const dept     = document.getElementById('doc-dept').value.trim();
+        const email    = document.getElementById('doc-email').value.trim();
+        const password = document.getElementById('doc-password').value.trim();
+        const start    = document.getElementById('doc-start').value;
+        const end      = document.getElementById('doc-end').value;
 
-    addBtn.addEventListener('click', function() {
-
-        const allInputs = document.querySelectorAll('.form-group input[type="text"]');
-        const emailInput = document.querySelector('.form-group input[type="email"]');
-
-        const name = allInputs[0].value.trim();
-        const spec = allInputs[1].value.trim();
-        const phone = allInputs[2].value.trim();
-        const email = emailInput.value.trim();
-
-        if (!name) {
-            alert('Please enter doctor name!');
-            return;
-        }
-        if (!spec) {
-            alert('Please enter specialization!');
-            return;
-        }
-        if (!email) {
-            alert('Please enter email!');
-            return;
-        }
-        if (!phone) {
-            alert('Please enter phone number!');
+        // validate fields
+        if (!name || !spec || !dept || !email || !password) {
+            showMsg('Please fill in all required fields!', 'error');
             return;
         }
 
+        // get checked days
         const checkedDays = document.querySelectorAll(
             '.day-checkbox input:checked'
         );
         if (checkedDays.length === 0) {
-            alert('Please select at least one working day!');
+            showMsg('Please select at least one working day!', 'error');
             return;
         }
 
-        // collect selected days
-        let days = '';
+        // join days as "Mon,Tue,Wed"
+        let days = [];
         checkedDays.forEach(function(cb) {
-            days += cb.parentElement.textContent.trim() + ', ';
+            days.push(cb.value);
         });
-        days = days.slice(0, -2);
+        const workingDays = days.join(',');
 
-        // find the table and add new row
-        const table = document.querySelector('.appointment-section table');
+        try {
+            const res  = await fetch('/api/admin/add-doctor', {
+                method : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body   : JSON.stringify({
+                    name        : name,
+                    specialization: spec,
+                    department  : dept,
+                    email       : email,
+                    password    : password,
+                    working_days: workingDays,
+                    start_time  : start,
+                    end_time    : end
+                })
+            });
 
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = 
-            '<td>' + name + '</td>' +
-            '<td>' + spec + '</td>' +
-            '<td>' + days + '</td>' +
-            '<td><span class="status green">Active</span></td>' +
-            '<td><button class="cancel-btn">Remove</button></td>';
+            const data = await res.json();
 
-        table.appendChild(newRow);
-
-        // attach remove to new button
-        newRow.querySelector('.cancel-btn').onclick = function() {
-            const confirmed = confirm(
-                'Are you sure you want to remove this doctor?'
-            );
-            if (confirmed) {
-                newRow.style.display = 'none';
+            if (res.ok) {
+                showMsg('Doctor added successfully!', 'success');
+                clearForm();
+                loadDoctors();
+            } else {
+                showMsg(data.message || 'Failed to add.', 'error');
             }
-        };
 
-        // clear the form
-        allInputs.forEach(function(input) {
-            input.value = '';
-        });
-        emailInput.value = '';
-        checkedDays.forEach(function(cb) {
-            cb.checked = false;
-        });
-
-        alert(name + ' added successfully!');
-    });
-
-
-    // ---- 4. Cancel form button ----
-    const cancelBtn = document.querySelector('.btn-cancel');
-
-    cancelBtn.addEventListener('click', function() {
-
-        const textInputs = document.querySelectorAll(
-            '.add-doctor-form input[type="text"]'
-        );
-        const emailInput = document.querySelector(
-            '.add-doctor-form input[type="email"]'
-        );
-
-        textInputs.forEach(function(input) {
-            input.value = '';
-        });
-
-        if (emailInput) {
-            emailInput.value = '';
+        } catch(e) {
+            showMsg('Could not connect to server.', 'error');
         }
-
-        const checkboxes = document.querySelectorAll('.day-checkbox input');
-        checkboxes.forEach(function(cb) {
-            cb.checked = false;
-        });
     });
+
+
+    // ---- 6. Clear form ----
+    function clearForm() {
+        document.getElementById('doc-name').value     = '';
+        document.getElementById('doc-spec').value     = '';
+        document.getElementById('doc-dept').value     = '';
+        document.getElementById('doc-email').value    = '';
+        document.getElementById('doc-password').value = '';
+        document.getElementById('doc-phone').value    = '';
+        document.getElementById('doc-start').value    = '09:00';
+        document.getElementById('doc-end').value      = '17:00';
+        document.querySelectorAll('.day-checkbox input')
+            .forEach(function(cb) { cb.checked = false; });
+    }
+
+    document.getElementById('clear-btn').addEventListener('click', clearForm);
+
+
+    // ---- 7. Logout ----
+    async function logout() {
+        const confirmed = confirm('Are you sure you want to logout?');
+        if (!confirmed) return;
+        const res = await fetch('/api/admin/logout', { method: 'POST' });
+        if (res.ok) window.location.href = '/';
+    }
+
+
+    // ---- Helper ----
+    function showMsg(text, type) {
+        const msg = document.getElementById('page-msg');
+        msg.textContent      = text;
+        msg.style.display    = 'block';
+        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+        setTimeout(function() { msg.style.display = 'none'; }, 3000);
+    }
+
+
+    // ---- Init ----
+    loadDoctors();
 
 </script>
 </body>

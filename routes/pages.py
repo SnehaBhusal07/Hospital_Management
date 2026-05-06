@@ -54,26 +54,26 @@ def update_diagnosis():
 
 
 # ---- MANAGEMENT ----
-@pages_bp.route('/management/dashboard')
-def management_dashboard():
+@pages_bp.route('/admin/dashboard')
+def admin_dashboard():
     return render_template('management.html')
 
-@pages_bp.route('/management/manage-doctors')
-def manage_doctors():
+@pages_bp.route('/admin/manage-doctors')
+def admin_manage_doctors():
     return render_template('manage-doctors.html')
 
-@pages_bp.route('/management/appointments-monitor')
-def appointments_monitor():
+@pages_bp.route('/admin/appointments')
+def admin_appointments():
     return render_template('appointments-monitor.html')
 
-@pages_bp.route('/management/daily-schedule')
-def daily_schedule():
-    return render_template('daily-schedule.html')
-
-@pages_bp.route('/management/doctor-availability')
-def doctor_availability():
+@pages_bp.route('/admin/availability')
+def admin_availability():
     return render_template('doctor-availability.html')
 
-@pages_bp.route('/management/system-settings')
-def system_settings():
+@pages_bp.route('/admin/daily-schedule')
+def admin_daily_schedule():
+    return render_template('daily-schedule.html')
+
+@pages_bp.route('/admin/settings')
+def admin_settings():
     return render_template('system-settings.html')

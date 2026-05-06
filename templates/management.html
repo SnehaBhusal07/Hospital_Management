@@ -17,17 +17,25 @@
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="management.html" class="active">Dashboard</a>
-                <a href="manage-doctors.html">Manage Doctors</a>
-                <a href="doctor-availability.html">Availability</a>
-                <a href="appointments-monitor.html">Appointments</a>
-                <a href="daily-schedule.html">Daily Schedule</a>
-                <a href="system-settings.html">Settings</a>
+                <a href="/admin/dashboard" class="active">Dashboard</a>
+                <a href="/admin/manage-doctors">Manage Doctors</a>
+                <a href="/admin/availability">Availability</a>
+                <a href="/admin/appointments">Appointments</a>
+                <a href="/admin/daily-schedule">Daily Schedule</a>
+                <a href="/admin/settings">Settings</a>
             </nav>
             <div class="doc-info">
                 <div class="avatar">AD</div>
                 <p>Admin</p>
                 <p>Management</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
             </div>
         </div>
 
@@ -36,29 +44,34 @@
 
             <div class="topbar">
                 <div>
-                    <h2>Namaste, Admin</h2>
+                    <h2 id="greeting">Namaste, Admin</h2>
                     <p>Here's today's system overview</p>
                 </div>
                 <p id="current-date"></p>
             </div>
 
+            <div id="page-msg" style="display:none; margin:0 20px;
+                padding:10px; border-radius:6px; font-size:13px;
+                text-align:center;">
+            </div>
+
             <!-- Stat Cards -->
             <div class="stats-row">
                 <div class="card">
-                    <h3>14</h3>
+                    <h3 id="stat-doctors">-</h3>
                     <p>Total Doctors</p>
                 </div>
                 <div class="card">
-                    <h3>48</h3>
-                    <p>Appointments Today</p>
+                    <h3 id="stat-appointments">-</h3>
+                    <p>Total Appointment</p>
                 </div>
                 <div class="card">
-                    <h3>320</h3>
+                    <h3 id="stat-patients">-</h3>
                     <p>Total Patients</p>
                 </div>
                 <div class="card">
-                    <h3 id="pending-count">5</h3>
-                    <p>Pending Approvals</p>
+                    <h3 id="stat-pending">-</h3>
+                    <p>Pending Appointments</p>
                 </div>
             </div>
 
@@ -67,7 +80,7 @@
 
                 <div class="patient-list">
                     <h3>Today's Appointments Overview</h3>
-                    <table>
+                    <tbody>
                         <tr>
                             <th>Patient</th>
                             <th>Doctor</th>
@@ -75,64 +88,12 @@
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
+                        </tbody id="appointments-tbody">
                         <tr>
-                            <td>Rajesh Kumar</td>
-                            <td>Dr. Anil Kumar</td>
-                            <td>09:00 AM</td>
-                            <td><span class="status orange">Pending</span></td>
-                            <td>
-                                <button class="edit-btn approve-btn">Approve</button>
-                                <button class="cancel-btn" style="margin-left:5px;">Cancel</button>
-                            </td>
+                            <td colspan="5" style="text-align: center; color: #888;">loading...</td>
                         </tr>
-                        <tr>
-                            <td>Sita Rai</td>
-                            <td>Dr. Sita Thapa</td>
-                            <td>10:00 AM</td>
-                            <td><span class="status orange">Pending</span></td>
-                            <td>
-                                <button class="edit-btn approve-btn">Approve</button>
-                                <button class="cancel-btn" style="margin-left:5px;">Cancel</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Bikash Thapa</td>
-                            <td>Dr. Rama Pokharel</td>
-                            <td>11:00 AM</td>
-                            <td><span class="status green">Confirmed</span></td>
-                            <td>
-                                <button class="edit-btn approve-btn" disabled
-                                    style="opacity:0.5; cursor:not-allowed;">Approve</button>
-                                <button class="cancel-btn" style="margin-left:5px;">Cancel</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Hari Bahadur</td>
-                            <td>Dr. Bikram Shrestha</td>
-                            <td>12:00 PM</td>
-                            <td><span class="status orange">Pending</span></td>
-                            <td>
-                                <button class="edit-btn approve-btn">Approve</button>
-                                <button class="cancel-btn" style="margin-left:5px;">Cancel</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Mina Shrestha</td>
-                            <td>Dr. Anil Kumar</td>
-                            <td>02:00 PM</td>
-                            <td><span class="status gray">Completed</span></td>
-                            <td>
-                                <button class="edit-btn approve-btn" disabled
-                                    style="opacity:0.5; cursor:not-allowed;">Approve</button>
-                                <button class="cancel-btn" style="margin-left:5px;">Cancel</button>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <p id="no-results" style="display:none; text-align:center;
-                        padding:20px; color:#888; font-size:13px;">
-                        No appointments found.
-                    </p>
+                    </tbody>
+                </table>
                 </div>
 
                 <!-- Quick Actions -->
@@ -148,95 +109,129 @@
         </div>
     </div>
 
-    <script>
+ <script>
 
-        // ---- 1. Auto date + greeting ----
-        const today = new Date();
-        const options = {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        };
-        document.getElementById('current-date').textContent =
-            today.toLocaleDateString('en-GB', options);
+    // ---- 1. Auto date and greeting ----
+    const today = new Date();
+    const options = {
+        weekday: 'short', day: 'numeric',
+        month: 'long', year: 'numeric'
+    };
+    document.getElementById('current-date').textContent =
+        today.toLocaleDateString('en-GB', options);
 
-        const hour = today.getHours();
-        let greeting = 'Namaste';
-        if (hour < 12) greeting = 'Good Morning, Admin';
-        else if (hour < 17) greeting = 'Good Afternoon, Admin';
-        else greeting = 'Good Evening, Admin';
-        document.querySelector('.topbar h2').textContent = greeting;
+    const hour = today.getHours();
+    let greetWord = '';
+    if (hour < 12)      greetWord = 'Good Morning';
+    else if (hour < 17) greetWord = 'Good Afternoon';
+    else                greetWord = 'Good Evening';
+    document.getElementById('greeting').textContent =
+        greetWord + ', Admin!';
 
 
-        // ---- 2. Pending count ----
-        function updatePendingCount() {
-            const pendingSpans = document.querySelectorAll('table .status.orange');
-            document.getElementById('pending-count').textContent = pendingSpans.length;
+    // ---- 2. Load dashboard data ----
+    async function loadDashboard() {
+        try {
+
+            // load doctors
+            const docRes  = await fetch('/api/admin/doctors');
+            const docData = await docRes.json();
+            if (!docRes.ok) {
+                showMsg(docData.message || 'Failed to load.', 'error');
+                return;
+            }
+            document.getElementById('stat-doctors').textContent =
+                docData.doctors.length;
+
+
+            // load appointments
+            const apptRes  = await fetch('/api/admin/appointments');
+            const apptData = await apptRes.json();
+            if (!apptRes.ok) {
+                showMsg(apptData.message || 'Failed to load.', 'error');
+                return;
+            }
+
+            document.getElementById('stat-appointments').textContent =
+                apptData.appointments.length;
+
+            // count pending
+            const pending = apptData.appointments.filter(function(a) {
+                return a.status === 'Booked' || a.status === 'Pending';
+            }).length;
+            document.getElementById('stat-pending').textContent = pending;
+
+            // build appointments table — show last 5
+            const tbody  = document.getElementById('appointments-tbody');
+            const recent = apptData.appointments.slice(0, 5);
+
+            if (recent.length === 0) {
+                tbody.innerHTML =
+                    '<tr><td colspan="5" style="text-align:center;' +
+                    'color:#888;">No appointments yet.</td></tr>';
+            } else {
+                tbody.innerHTML = '';
+                recent.forEach(function(appt) {
+
+                    let statusClass = 'gray';
+                    if (appt.status === 'Booked')    statusClass = 'green';
+                    if (appt.status === 'Pending')   statusClass = 'orange';
+                    if (appt.status === 'Cancelled') statusClass = 'red';
+
+                    tbody.innerHTML +=
+                        '<tr>' +
+                        '<td>' + appt.patient_name + '</td>' +
+                        '<td>' + appt.doctor_name + '</td>' +
+                        '<td>' + appt.date + '</td>' +
+                        '<td>' + appt.time_slot + '</td>' +
+                        '<td><span class="status ' + statusClass + '">' +
+                            appt.status + '</span></td>' +
+                        '</tr>';
+                });
+            }
+
+
+            // load patients
+            const patRes  = await fetch('/api/admin/patients');
+            const patData = await patRes.json();
+            if (!patRes.ok) {
+                showMsg(patData.message || 'Failed to load.', 'error');
+                return;
+            }
+            document.getElementById('stat-patients').textContent =
+                patData.patients.length;
+
+        } catch(e) {
+            showMsg('Could not connect to server.', 'error');
         }
+    }
 
-        updatePendingCount();
-
-
-        // ---- 3. Approve appointment ----
-        document.querySelectorAll('.approve-btn').forEach(function(btn) {
-            if (btn.disabled) return;
-
-            btn.addEventListener('click', function() {
-                const row = this.closest('tr');
-                const statusEl = row.querySelector('.status');
-
-                statusEl.textContent = 'Confirmed';
-                statusEl.className = 'status green';
-
-                // disable approve button after confirming
-                this.disabled = true;
-                this.style.opacity = '0.5';
-                this.style.cursor = 'not-allowed';
-
-                updatePendingCount();
-            });
-        });
+    loadDashboard();
 
 
-        // ---- 4. Cancel appointment ----
-        document.querySelectorAll('.cancel-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                const confirmed = confirm('Are you sure you want to cancel this appointment?');
-                if (confirmed) {
-                    const row = this.closest('tr');
-                    const statusEl = row.querySelector('.status');
-
-                    // if it was pending, reduce count before hiding
-                    if (statusEl.classList.contains('orange')) {
-                        // will update after row hidden
-                    }
-
-                    row.style.display = 'none';
-                    updatePendingCount();
-                }
-            });
-        });
+    // ---- 3. Logout ----
+    async function logout() {
+        const confirmed = confirm('Are you sure you want to logout?');
+        if (!confirmed) return;
+        const res = await fetch('/api/admin/logout', { method: 'POST' });
+        if (res.ok) window.location.href = '/';
+    }
 
 
-        // ---- 5. Quick Action buttons ----
-        document.getElementById('btn-add-doctor').addEventListener('click', function() {
-            window.location.href = 'manage-doctors.html';
-        });
+    // ---- Helper ----
+    function showMsg(text, type) {
+        const msg = document.getElementById('page-msg');
+        msg.textContent      = text;
+        msg.style.display    = 'block';
+        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+        setTimeout(function() {
+            msg.style.display = 'none';
+        }, 3000);
+    }
 
-        document.getElementById('btn-monitor').addEventListener('click', function() {
-            window.location.href = 'appointments-monitor.html';
-        });
-
-        document.getElementById('btn-schedule').addEventListener('click', function() {
-            window.location.href = 'daily-schedule.html';
-        });
-
-        document.getElementById('btn-settings').addEventListener('click', function() {
-            window.location.href = 'system-settings.html';
-        });
-
-    </script>
-
+</script>
 </body>
 </html>
+
+<
