@@ -13,252 +13,286 @@
 
     <div class="page">
 
-        <!-- SIDEBAR -->
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="{{ url_for('pages_bp.doctor_dashboard') }}" class="active">DashBoard</a>
-                <a href="{{ url_for('pages_bp.schedule') }}">Schedule</a>
-                <a href="{{ url_for('pages_bp.patient_history') }}">Patients</a>
-                <a href="{{ url_for('pages_bp.update_diagnosis') }}">Report</a>
+                <a href="/doctor/dashboard" class="active">Dashboard</a>
+                <a href="/doctor/schedule">Schedule</a>
+                <a href="/doctor/patient-history">Patients</a>
+                <a href="/doctor/update-diagnosis">Report</a>
             </nav>
             <div class="doc-info">
                 <div class="avatar" id="doc-avatar">--</div>
                 <p id="doc-name">Loading...</p>
-                <p id="doc-specialization">Loading...</p>
-                <button onclick="logout()" style="margin-top:10px; cursor:pointer;">Logout</button>
+                <p id="doc-spec">Loading...</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
             </div>
         </div>
 
-        <!-- MAIN -->
         <div class="main">
 
             <div class="topbar">
                 <div>
-                    <h2>Good Morning, Dr Kumar</h2>
+                    <h2 id="greeting">Good Morning!</h2>
                     <p>Here's your overview for today</p>
                 </div>
-                <p>Mon, 4 May 2026</p>
+                <p id="current-date">-</p>
             </div>
 
-            <!-- Stat Cards -->
+            <!-- Message box -->
+            <div id="page-msg" style="display:none; margin:0 20px;
+                padding:10px; border-radius:6px; font-size:13px;
+                text-align:center;">
+            </div>
+
+            <!-- Stat cards -->
             <div class="stats-row">
                 <div class="card">
-                    <h3>12</h3>
-                    <p>Today's Appointment</p>
+                    <h3 id="stat-today">-</h3>
+                    <p>Today's Appointments</p>
                 </div>
                 <div class="card">
-                    <h3>5</h3>
-                    <p>Pending Report</p>
+                    <h3 id="stat-waiting">-</h3>
+                    <p>Waiting</p>
                 </div>
                 <div class="card">
-                    <h3>8</h3>
+                    <h3 id="stat-completed">-</h3>
                     <p>Completed Today</p>
                 </div>
                 <div class="card">
-                    <h3>3</h3>
-                    <p>New Lab Results</p>
+                    <h3 id="stat-total">-</h3>
+                    <p>Total Appointments</p>
                 </div>
             </div>
 
-            <!-- Bottom Row: Patient List + Quick Actions -->
+            <!-- Bottom row -->
             <div class="bottom-row">
 
                 <div class="patient-list">
                     <h3>Today's Patients</h3>
-                    <table>
+                    <table id="patients-table">
                         <tr>
                             <th>Name</th>
-                            <th>Age</th>
                             <th>Time</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
-                        <tr>
-                            <td>Ravi Sharma</td>
-                            <td>42</td>
-                            <td>09:00 AM</td>
-                            <td><span class="status green">In Progress</span></td>
-                        </tr>
-                        <tr>
-                            <td>Priya Maharjan</td>
-                            <td>29</td>
-                            <td>10:00 AM</td>
-                            <td><span class="status orange">Waiting</span></td>
-                        </tr>
-                        <tr>
-                            <td>Bikash Thapa</td>
-                            <td>55</td>
-                            <td>08:00 AM</td>
-                            <td><span class="status gray">Done</span></td>
-                        </tr>
-                        <tr>
-                            <td>Sita Rai</td>
-                            <td>36</td>
-                            <td>11:00 AM</td>
-                            <td><span class="status orange">Waiting</span></td>
-                        </tr>
+                        <tbody id="patients-tbody">
+                            <tr>
+                                <td colspan="4" style="text-align:center;
+                                    color:#888;">Loading...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
 
                 <div class="actions">
                     <h3>Quick Actions</h3>
-                    <button>Search Patients</button>
-                    <button>Update Diagnostic</button>
-                    <button>Pending Reports</button>
+                    <button onclick="window.location.href='/doctor/schedule'">
+                        View Schedule
+                    </button>
+                    <button onclick="window.location.href='/doctor/patient-history'">
+                        Patient History
+                    </button>
+                    <button onclick="window.location.href='/doctor/update-diagnosis'">
+                        Update Diagnosis
+                    </button>
                 </div>
 
             </div>
         </div>
     </div>
 
-    <script>
-        // ---- 1. Auto date and greeting ----
-        const today = new Date();
-        const options = { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' };
-        document.querySelector('.topbar p').textContent =
-            today.toLocaleDateString('en-GB', options);
+<script>
 
-        const hour = today.getHours();
-        let greeting = 'Good Morning';
-        if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
-        else if (hour >= 17) greeting = 'Good Evening';
+    // ---- 1. Auto date and greeting ----
+    const today = new Date();
+    const options = {
+        weekday: 'short', day: 'numeric',
+        month: 'long', year: 'numeric'
+    };
+    document.getElementById('current-date').textContent =
+        today.toLocaleDateString('en-GB', options);
+
+    const hour = today.getHours();
+    let greetWord = 'Good Morning';
+    if (hour >= 12 && hour < 17) greetWord = 'Good Afternoon';
+    else if (hour >= 17)         greetWord = 'Good Evening';
 
 
-        // ---- 2. Load doctor info and appointments ----
-        async function loadDoctorData() {
-            // Get doctor info
+    // ---- 2. Load doctor data ----
+    async function loadDoctorData() {
+        try {
+
+            // get doctor info
             const meRes = await fetch('/api/doctor/me');
-
-            if (meRes.status === 401 || meRes.status === 403) {
-                window.location.href = '/';
-                return;
-            }
-
+            if (!meRes.ok) { window.location.href = '/'; return; }
             const meData = await meRes.json();
 
-            // Update sidebar
-            document.getElementById('doc-name').textContent = meData.name;
-            document.getElementById('doc-specialization').textContent = meData.specialization;
-            const initials = meData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            // update sidebar
+            document.getElementById('doc-name').textContent =
+                meData.name;
+            document.getElementById('doc-spec').textContent =
+                meData.specialization;
+            const initials = meData.name.split(' ')
+                .map(function(n) { return n[0]; })
+                .join('').toUpperCase();
             document.getElementById('doc-avatar').textContent = initials;
 
-            // Update greeting
-            document.querySelector('.topbar h2').textContent = greeting + ', ' + meData.name;
-
-            // Get appointments
-            const res = await fetch('/api/doctor/appointments');
-            const data = await res.json();
-            const appointments = data.appointments;
-
-            // Filter today's appointments
-            const todayStr = new Date().toISOString().split('T')[0];
-            const todayAppts = appointments.filter(a => a.date === todayStr);
-            const completedAppts = todayAppts.filter(a => a.status === 'Completed');
-
-            // Update stat cards
-            document.querySelectorAll('.card h3')[0].textContent = todayAppts.length;
-            document.querySelectorAll('.card h3')[2].textContent = completedAppts.length;
-
-            // Populate patient table
-            populateTable(todayAppts);
-        }
+            // update greeting
+            document.getElementById('greeting').textContent =
+                greetWord + ', ' + meData.name + '!';
 
 
-        // ---- 3. Populate today's patient table ----
-        function populateTable(appointments) {
-            const table = document.querySelector('table');
-            const rows = table.querySelectorAll('tr');
-            rows.forEach((row, index) => { if (index > 0) row.remove(); });
-
-            if (appointments.length === 0) {
-                table.innerHTML += '<tr><td colspan="4">No appointments today</td></tr>';
+            // get appointments
+            const apptRes = await fetch('/api/doctor/appointments');
+            if (!apptRes.ok) {
+                showMsg('Failed to load appointments.', 'error');
                 return;
             }
+            const apptData = await apptRes.json();
+            const allAppts = apptData.appointments;
 
-            appointments.forEach(appt => {
-                const row = document.createElement('tr');
-                row.style.cursor = 'pointer';
-                row.innerHTML = `
-                    <td>${appt.patient_name}</td>
-                    <td>--</td>
-                    <td>${appt.time_slot}</td>
-                    <td><span class="status ${getStatusClass(appt.status)}">${appt.status}</span></td>
-                `;
-
-                row.addEventListener('click', function() {
-                    const statusEl = row.querySelector('.status');
-                    if (statusEl.classList.contains('orange')) {
-                        statusEl.textContent = 'In Progress';
-                        statusEl.className = 'status green';
-                    } else if (statusEl.classList.contains('green')) {
-                        statusEl.textContent = 'Done';
-                        statusEl.className = 'status gray';
-                        updateCompletedCount();
-                    }
-                });
-
-                table.appendChild(row);
+            // filter today's appointments
+            const todayStr = today.toISOString().split('T')[0];
+            const todayAppts = allAppts.filter(function(a) {
+                return a.date === todayStr;
             });
+
+            // count stats
+            const waiting = todayAppts.filter(function(a) {
+                return a.status === 'Booked';
+            }).length;
+            const completed = todayAppts.filter(function(a) {
+                return a.status === 'Completed';
+            }).length;
+
+            document.getElementById('stat-today').textContent =
+                todayAppts.length;
+            document.getElementById('stat-waiting').textContent =
+                waiting;
+            document.getElementById('stat-completed').textContent =
+                completed;
+            document.getElementById('stat-total').textContent =
+                allAppts.length;
+
+            // build patient table
+            buildPatientTable(todayAppts);
+
+        } catch(e) {
+            showMsg('Could not connect to server.', 'error');
+        }
+    }
+
+
+    // ---- 3. Build patient table ----
+    function buildPatientTable(appointments) {
+        const tbody = document.getElementById('patients-tbody');
+
+        if (appointments.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="4" style="text-align:center; color:#888;">' +
+                'No appointments today.</td></tr>';
+            return;
         }
 
+        tbody.innerHTML = '';
+        appointments.forEach(function(appt) {
 
-        // ---- 4. Helper: get CSS class for status ----
-        function getStatusClass(status) {
-            if (status === 'Booked') return 'orange';
-            if (status === 'In Progress') return 'green';
-            if (status === 'Completed') return 'gray';
-            return 'orange';
+            let statusClass = 'orange';
+            let statusText  = 'Waiting';
+            if (appt.status === 'Completed') {
+                statusClass = 'gray';
+                statusText  = 'Done';
+            }
+            if (appt.status === 'In Progress') {
+                statusClass = 'green';
+                statusText  = 'In Progress';
+            }
+
+            const row = document.createElement('tr');
+            row.innerHTML =
+                '<td>' + appt.patient_name + '</td>' +
+                '<td>' + appt.time_slot + '</td>' +
+                '<td><span class="status ' + statusClass + '">' +
+                    statusText + '</span></td>' +
+                '<td>' +
+                    '<button class="view-btn" data-id="' +
+                        appt.patient_id + '" data-name="' +
+                        appt.patient_name + '">View</button>' +
+                '</td>';
+
+            tbody.appendChild(row);
+        });
+
+        // attach view buttons
+        document.querySelectorAll('.view-btn').forEach(function(btn) {
+            btn.style.cssText =
+                'padding:5px 12px; background:#0F4C5C; color:white;' +
+                'border:none; border-radius:4px; font-size:12px; cursor:pointer;';
+            btn.onclick = function() {
+                const patientId = this.dataset.id;
+                window.location.href =
+                    '/doctor/patient-history?patient_id=' + patientId;
+            };
+        });
+    }
+
+
+    // ---- 4. Logout ----
+    async function logout() {
+    const confirmed = confirm('Are you sure you want to logout?');
+    if (!confirmed) return;
+
+    try {
+        // check if admin session
+        const sessionRes  = await fetch('/api/check-session');
+        const sessionData = await sessionRes.json();
+
+        let url = '/api/logout';
+        if (sessionData.role === 'admin') {
+            url = '/api/admin/logout';
         }
 
+        const res = await fetch(url, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-        // ---- 5. Update completed count ----
-        function updateCompletedCount() {
-            let done = 0;
-            document.querySelectorAll('table .status').forEach(function(s) {
-                if (s.classList.contains('gray')) done++;
-            });
-            document.querySelectorAll('.card h3')[2].textContent = done;
-        }
-
-
-        // ---- 6. Logout ----
-        async function logout() {
-            await fetch('/api/doctor/logout', { method: 'POST' });
+        if (res.ok) {
+            window.location.href = '/';
+        } else {
             window.location.href = '/';
         }
 
-
-        // ---- 7. Quick Action buttons ----
-        const actionBtns = document.querySelectorAll('.actions button');
-
-        actionBtns[0].addEventListener('click', function() {
-            const name = prompt('Enter patient name to search:');
-            if (name) {
-                let found = false;
-                document.querySelectorAll('table tr').forEach(function(row) {
-                    const cell = row.cells[0];
-                    if (cell && cell.textContent.toLowerCase().includes(name.toLowerCase())) {
-                        row.style.backgroundColor = '#e1f5ee';
-                        found = true;
-                        setTimeout(function() { row.style.backgroundColor = ''; }, 2000);
-                    }
-                });
-                if (!found) alert('No patient found with name: ' + name);
-            }
-        });
-
-        actionBtns[1].addEventListener('click', function() {
-            window.location.href = "{{ url_for('pages_bp.update_diagnosis') }}";
-        });
-
-        actionBtns[2].addEventListener('click', function() {
-            window.location.href = "{{ url_for('pages_bp.schedule') }}";
-        });
+    } catch(e) {
+        
+        window.location.href = '/';
+    }
+}
 
 
-        // ---- Run on page load ----
-        loadDoctorData();
-    </script>
+    // ---- Helper ----
+    function showMsg(text, type) {
+        const msg = document.getElementById('page-msg');
+        msg.textContent      = text;
+        msg.style.display    = 'block';
+        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+        setTimeout(function() { msg.style.display = 'none'; }, 3000);
+    }
 
+
+    // ---- Init ----
+    loadDoctorData();
+
+</script>
 </body>
 </html>

@@ -1,198 +1,241 @@
-from flask import Blueprint, request, jsonify, session, current_app
-from models import Doctor, Appointment, Patient
+from flask import Blueprint, request, jsonify, session
 from extensions import db
+from models import Doctor, Patient, Appointment, MedicalRecord
 from werkzeug.security import generate_password_hash
-from functools import wraps
+from datetime import date, datetime
 
 management_bp = Blueprint('management_bp', __name__)
 
 
-# checks if admin is logged in
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('is_admin'):
-            return jsonify({'message': 'Admin login required'}), 403
-        return f(*args, **kwargs)
-    return decorated_function
+# ---- ADMIN CHECK HELPER ----
+def is_admin():
+    return session.get('admin') is True
 
 
-# admin login
-@management_bp.route('/api/admin/login', methods=['POST'])
-def admin_login():
-    data = request.get_json()
+# ---- DASHBOARD STATS ----
+@management_bp.route('/api/admin/stats', methods=['GET'])
+def admin_stats():
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
 
-    if not data.get('username') or not data.get('password'):
-        return jsonify({'message': 'Username and password are required'}), 400
+    total_doctors      = Doctor.query.count()
+    total_patients     = Patient.query.count()
+    today_appointments = Appointment.query.filter_by(date=date.today()).count()
+    pending            = Appointment.query.filter_by(status='Booked').count()
 
-    if (data['username'] == current_app.config['ADMIN_USERNAME'] and
-            data['password'] == current_app.config['ADMIN_PASSWORD']):
-        session['is_admin'] = True
-        return jsonify({'message': 'Admin login successful!'}), 200
-
-    return jsonify({'message': 'Invalid admin credentials'}), 401
-
-
-# admin logout
-@management_bp.route('/api/admin/logout', methods=['POST'])
-@admin_required
-def admin_logout():
-    session.pop('is_admin', None)
-    return jsonify({'message': 'Admin logged out successfully!'}), 200
+    return jsonify({
+        'total_doctors'     : total_doctors,
+        'total_patients'    : total_patients,
+        'today_appointments': today_appointments,
+        'pending_approvals' : pending
+    }), 200
 
 
-# add doctor
+# ---- GET ALL DOCTORS ----
+@management_bp.route('/api/admin/doctors', methods=['GET'])
+def get_all_doctors():
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
+
+    doctors = Doctor.query.all()
+    result  = []
+    for d in doctors:
+        result.append({
+            'id'            : d.id,
+            'name'          : d.name,
+            'specialization': d.specialization,
+            'department'    : d.department,
+            'email'         : d.email,
+            'working_days'  : d.working_days,
+            'start_time'    : d.start_time,
+            'end_time'      : d.end_time
+        })
+    return jsonify({'doctors': result}), 200
+
+
+# ---- ADD DOCTOR ----
 @management_bp.route('/api/admin/add-doctor', methods=['POST'])
-@admin_required
 def add_doctor():
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
+
     data = request.get_json()
 
-    required = ['name', 'specialization', 'department', 'email', 'password',
-                'working_days', 'start_time', 'end_time']
+    required = ['name', 'specialization', 'department', 'email', 'password']
     for field in required:
         if not data.get(field):
             return jsonify({'message': f'{field} is required'}), 400
 
-    existing = Doctor.query.filter_by(email=data['email']).first()
-    if existing:
-        return jsonify({'message': 'Doctor with this email already exists'}), 400
+    if Doctor.query.filter_by(email=data['email']).first():
+        return jsonify({'message': 'Email already registered'}), 400
 
-    new_doctor = Doctor(
-        name=data['name'],
-        specialization=data['specialization'],
-        department=data['department'],
-        email=data['email'],
-        password=generate_password_hash(data['password']),
-        working_days=data['working_days'],    # e.g. "Mon,Tue,Wed,Thu,Fri"
-        start_time=data['start_time'],        # e.g. "09:00"
-        end_time=data['end_time']             # e.g. "17:00"
+    doctor = Doctor(
+        name           = data['name'],
+        specialization = data['specialization'],
+        department     = data['department'],
+        email          = data['email'],
+        password       = generate_password_hash(data['password']),
+        working_days   = data.get('working_days', ''),
+        start_time     = data.get('start_time', ''),
+        end_time       = data.get('end_time', '')
     )
-    db.session.add(new_doctor)
+    db.session.add(doctor)
     db.session.commit()
-
-    return jsonify({'message': 'Doctor added successfully!'}), 201
-
-
-# remove doctor
-@management_bp.route('/api/admin/remove-doctor/<int:doctor_id>', methods=['DELETE'])
-@admin_required
-def remove_doctor(doctor_id):
-    doctor = Doctor.query.get(doctor_id)
-    if not doctor:
-        return jsonify({'message': 'Doctor not found'}), 404
-
-    # remove doctor's appointments first
-    Appointment.query.filter_by(doctor_id=doctor_id).delete()
-    db.session.delete(doctor)
-    db.session.commit()
-
-    return jsonify({'message': 'Doctor removed successfully!'}), 200
+    return jsonify({'message': 'Doctor added successfully'}), 201
 
 
-# view all doctors
-@management_bp.route('/api/admin/doctors', methods=['GET'])
-@admin_required
-def view_doctors():
-    doctors = Doctor.query.all()
-
-    result = []
-    for doc in doctors:
-        result.append({
-            'id': doc.id,
-            'name': doc.name,
-            'specialization': doc.specialization,
-            'department': doc.department,
-            'email': doc.email,
-            'working_days': doc.working_days,
-            'start_time': doc.start_time,
-            'end_time': doc.end_time
-        })
-
-    return jsonify({'doctors': result}), 200
-
-
-# update doctor schedule
+# ---- UPDATE DOCTOR ----
 @management_bp.route('/api/admin/update-doctor/<int:doctor_id>', methods=['PUT'])
-@admin_required
 def update_doctor(doctor_id):
-    doctor = Doctor.query.get(doctor_id)
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
+
+    doctor = db.session.get(Doctor, doctor_id)
     if not doctor:
         return jsonify({'message': 'Doctor not found'}), 404
 
     data = request.get_json()
 
+    doctor.name           = data.get('name', doctor.name)
+    doctor.specialization = data.get('specialization', doctor.specialization)
+    doctor.department     = data.get('department', doctor.department)
+    doctor.working_days   = data.get('working_days', doctor.working_days)
+    doctor.start_time     = data.get('start_time', doctor.start_time)
+    doctor.end_time       = data.get('end_time', doctor.end_time)
 
-    if data.get('working_days'):
-        doctor.working_days = data['working_days']
-    if data.get('start_time'):
-        doctor.start_time = data['start_time']
-    if data.get('end_time'):
-        doctor.end_time = data['end_time']
-    if data.get('specialization'):
-        doctor.specialization = data['specialization']
-    if data.get('department'):
-        doctor.department = data['department']
+    if data.get('password'):
+        doctor.password = generate_password_hash(data['password'])
 
     db.session.commit()
+    return jsonify({'message': 'Doctor updated successfully'}), 200
 
-    return jsonify({'message': 'Doctor updated successfully!'}), 200
+
+# ---- DELETE DOCTOR ----
+@management_bp.route('/api/admin/delete-doctor/<int:doctor_id>', methods=['DELETE'])
+def delete_doctor(doctor_id):
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
+
+    doctor = db.session.get(Doctor, doctor_id)
+    if not doctor:
+        return jsonify({'message': 'Doctor not found'}), 404
+
+    db.session.delete(doctor)
+    db.session.commit()
+    return jsonify({'message': 'Doctor deleted successfully'}), 200
 
 
-# view all appointments
+# ---- GET ALL APPOINTMENTS ----
 @management_bp.route('/api/admin/appointments', methods=['GET'])
-@admin_required
-def view_appointments():
-    appointments = Appointment.query.all()
+def get_all_appointments():
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
+
+    status_filter = request.args.get('status')
+
+    if status_filter and status_filter != 'all':
+        appointments = Appointment.query.filter_by(
+            status=status_filter
+        ).order_by(Appointment.date.desc()).all()
+    else:
+        appointments = Appointment.query.order_by(
+            Appointment.date.desc()
+        ).all()
 
     result = []
-    for appt in appointments:
-        patient = Patient.query.get(appt.patient_id)
-        doctor = Doctor.query.get(appt.doctor_id)
+    for a in appointments:
+        patient = db.session.get(Patient, a.patient_id)
+        doctor  = db.session.get(Doctor, a.doctor_id)
         result.append({
-            'appointment_id': appt.id,
+            'id'          : a.id,
             'patient_name': patient.name if patient else 'Unknown',
-            'doctor_name': doctor.name if doctor else 'Unknown',
-            'department': doctor.department if doctor else 'Unknown',
-            'date': str(appt.date),
-            'time_slot': appt.time_slot,
-            'status': appt.status
+            'doctor_name' : doctor.name if doctor else 'Unknown',
+            'department'  : doctor.department if doctor else 'Unknown',
+            'date'        : str(a.date),
+            'time_slot'   : a.time_slot,
+            'status'      : a.status
         })
 
     return jsonify({'appointments': result}), 200
 
 
-# view all patients
-@management_bp.route('/api/admin/patients', methods=['GET'])
-@admin_required
-def view_patients():
-    patients = Patient.query.all()
+# ---- APPROVE APPOINTMENT ----
+@management_bp.route('/api/admin/appointments/approve/<int:appt_id>', methods=['POST'])
+def approve_appointment(appt_id):
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
+
+    appointment = db.session.get(Appointment, appt_id)
+    if not appointment:
+        return jsonify({'message': 'Appointment not found'}), 404
+
+    appointment.status = 'Confirmed'
+    db.session.commit()
+    return jsonify({'message': 'Appointment confirmed'}), 200
+
+
+# ---- CANCEL APPOINTMENT ----
+@management_bp.route('/api/admin/appointments/cancel/<int:appt_id>', methods=['POST'])
+def cancel_appointment(appt_id):
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
+
+    appointment = db.session.get(Appointment, appt_id)
+    if not appointment:
+        return jsonify({'message': 'Appointment not found'}), 404
+
+    appointment.status = 'Cancelled'
+    db.session.commit()
+    return jsonify({'message': 'Appointment cancelled'}), 200
+
+
+# ---- GET TODAY'S SCHEDULE ----
+@management_bp.route('/api/admin/schedule/today', methods=['GET'])
+def today_schedule():
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
+
+    appointments = Appointment.query.filter_by(
+        date=date.today()
+    ).order_by(Appointment.time_slot).all()
 
     result = []
-    for p in patients:
+    for a in appointments:
+        patient = db.session.get(Patient, a.patient_id)
+        doctor  = db.session.get(Doctor, a.doctor_id)
         result.append({
-            'id': p.id,
-            'name': p.name,
-            'email': p.email,
-            'phone': p.phone
+            'id'          : a.id,
+            'patient_name': patient.name if patient else 'Unknown',
+            'doctor_name' : doctor.name if doctor else 'Unknown',
+            'department'  : doctor.department if doctor else 'Unknown',
+            'time_slot'   : a.time_slot,
+            'status'      : a.status
         })
 
+    return jsonify({'schedule': result}), 200
+
+
+# ---- GET ALL PATIENTS ----
+@management_bp.route('/api/admin/patients', methods=['GET'])
+def get_all_patients():
+    if not is_admin():
+        return jsonify({'message': 'Admin login required'}), 403
+
+    patients = Patient.query.all()
+    result   = []
+    for p in patients:
+        result.append({
+            'id'   : p.id,
+            'name' : p.name,
+            'email': p.email,
+            'phone': p.phone or ''
+        })
     return jsonify({'patients': result}), 200
 
-# view single doctor
-@management_bp.route('/api/admin/doctors/<int:doctor_id>', methods=['GET'])
-@admin_required
-def view_single_doctor(doctor_id):
-    doctor = Doctor.query.get(doctor_id)
-    if not doctor:
-        return jsonify({'message': 'Doctor not found'}), 404
 
-    return jsonify({
-        'id': doctor.id,
-        'name': doctor.name,
-        'specialization': doctor.specialization,
-        'department': doctor.department,
-        'email': doctor.email,
-        'working_days': doctor.working_days,
-        'start_time': doctor.start_time,
-        'end_time': doctor.end_time
-    }), 200
+# ---- ADMIN LOGOUT ----
+@management_bp.route('/api/admin/logout', methods=['POST'])
+def admin_logout():
+    session.pop('admin', None)
+    session.clear()
+    return jsonify({'message': 'Admin logged out'}), 200

@@ -97,7 +97,7 @@
 </div> 
 <script>
 
-    //Date
+    // ---- 1. Auto date ----
     const today = new Date();
     const options = { 
         weekday: 'short', 
@@ -105,95 +105,118 @@
         month: 'long', 
         year: 'numeric' 
     };
-    const dateString = today.toLocaleDateString('en-GB', options);
-    document.getElementById('current-date').textContent = dateString;
+    document.getElementById('current-date').textContent = 
+        today.toLocaleDateString('en-GB', options);
 
 
-    // ---- 2. Change greeting based on time of day ----
-    const hour = today.getHours();
-    let greeting = '';
+    // ---- 2. Load dashboard from API ----
+    async function loadDashboard() {
+        try {
+            const response = await fetch('/api/patient/dashboard');
+            const data     = await response.json();
 
-    if (hour < 12) {
-        greeting = 'Good Morning, Rajesh!';
-    } else if (hour < 17) {
-        greeting = 'Good Afternoon, Rajesh!';
-    } else {
-        greeting = 'Good Evening, Rajesh!';
-    }
-
-    document.getElementById('greeting').textContent = greeting;
-
-    async function loadDashboard(){
-        try{
-            const response= await fetch('/api/patient/dashboard');
-            const data=await response.json();
-
-            if(!response.ok){
-                window.location.href='/';
+            if (!response.ok) {
+                window.location.href = '/';
                 return;
             }
-            document.getElementById('Patient-name').textContent=data.name;
-            document.getElementById('topbar-name').textContent=data.name;
-            document.getElementById('stat-upcoming').textContent = data.upcoming;
-            document.getElementById('stat-completed').textContent = data.completed;
-            document.getElementById('stat-pending').textContent = data.pending;
 
+            // update sidebar name and avatar
+            document.getElementById('patients-name').textContent = data.name;
+            const initials = data.name.split(' ')
+                .map(function(n) { return n[0]; })
+                .join('').toUpperCase();
+            document.getElementById('patients-avatar').textContent = initials;
 
-            const tbody=document.getElementById('appointments-tbody');
+            // update greeting with real name
+            const hour = new Date().getHours();
+            let greetWord = '';
+            if (hour < 12)      greetWord = 'Good Morning';
+            else if (hour < 17) greetWord = 'Good Afternoon';
+            else                greetWord = 'Good Evening';
+
+            document.getElementById('greeting').textContent = 
+                greetWord + ', ' + data.name + '!';
+
+            // update stat cards
+            document.getElementById('stat-upcoming').textContent = 
+                data.upcoming;
+            document.getElementById('stat-completed').textContent = 
+                data.completed;
+            document.getElementById('stat-pending').textContent = 
+                data.pending;
+
+            // update appointments table
+            const tbody = document.getElementById('appointments-tbody');
 
             if (data.appointments.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="5" style="text-align:center; color:#888;">
-                                No appointments yet.
-                                <a href="/patient/find-doctors"
-                                    style="color:#0F4C5C; font-weight:bold;">
-                                    Book one now
-                                </a>
-                            </td>
-                        </tr>`;
-                    return;
-                }
-            
-                tbody.innerHTML='';
-                data.appointments.forEach(function(appt){
-                    const statusClass=
-                    appt.status==='Confirmed'?'green':
-                    appt.status==='Pending'?'orange':
-                    appt.status==='Cancelled'?'red':'gray';
-                
-                tbody.innerHTML += `
-                <tr>
-                    <td>${appt.doctor_name}</td>
-                    <td>${appt.specialization}</td>
-                    <td>${appt.date}</td>
-                    <td>${appt.time_slot}</td>
-                    <td>
-                        <span class="status ${statusClass}">
-                            ${appt.status}
-                        </span>
-                    </td>
-                </tr>`;
-                });
-        }catch(err){
-            console.error("Failed to load dashboard:",err);
+                tbody.innerHTML = 
+                    '<tr><td colspan="5" style="text-align:center; color:#888;">' +
+                    'No appointments yet. ' +
+                    '<a href="/patient/find-doctors" ' +
+                    'style="color:#0F4C5C; font-weight:bold;">' +
+                    'Book one now</a></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.appointments.forEach(function(appt) {
+
+                let statusClass = 'gray';
+                if (appt.status === 'Booked')     statusClass = 'green';
+                if (appt.status === 'Pending')    statusClass = 'orange';
+                if (appt.status === 'Cancelled')  statusClass = 'red';
+
+                tbody.innerHTML +=
+                    '<tr>' +
+                    '<td>' + appt.doctor_name + '</td>' +
+                    '<td>' + appt.specialization + '</td>' +
+                    '<td>' + appt.date + '</td>' +
+                    '<td>' + appt.time_slot + '</td>' +
+                    '<td><span class="status ' + statusClass + '">' +
+                        appt.status + '</span></td>' +
+                    '</tr>';
+            });
+
+        } catch(err) {
+            console.error('Failed to load dashboard:', err);
         }
     }
+
     loadDashboard();
 
-    async function logout(){
-        const confirmed=confirm('Are you sure you want to logout');
-        if(!confirmed) return;
 
-        const response=await fetch('/api/logout',{
-            method:'POST'
-        });
-        if(response.ok){
-            window.location.href='/'
+    // ---- 3. Logout ----
+    async function logout() {
+    const confirmed = confirm('Are you sure you want to logout?');
+    if (!confirmed) return;
+
+    try {
+        // check if admin session
+        const sessionRes  = await fetch('/api/check-session');
+        const sessionData = await sessionRes.json();
+
+        let url = '/api/logout';
+        if (sessionData.role === 'admin') {
+            url = '/api/admin/logout';
         }
+
+        const res = await fetch(url, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (res.ok) {
+            window.location.href = '/';
+        } else {
+            // force redirect anyway
+            window.location.href = '/';
+        }
+
+    } catch(e) {
+        // force redirect even if fetch fails
+        window.location.href = '/';
     }
-
-
+}
 
 </script>
 </body>

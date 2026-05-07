@@ -3,29 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management Portal</title>
-    <link rel="stylesheet" href="C:\Users\Spandan\OneDrive\Desktop\Hospital_Management\static\management.css">
+    <title>System Settings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='management.css') }}">
 </head>
 <body>
+
     <div class="navbar">
         <div id="name">Hospital Appointment and Patient Management System</div>
     </div>
+
     <div class="page">
 
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="management.html">Dashboard</a>
-                <a href="manage-doctors.html">Manage Doctors</a>
-                <a href="doctor-availability.html">Availability</a>
-                <a href="appointments-monitor.html">Appointments</a>
-                <a href="daily-schedule.html">Daily Schedule</a>
-                <a href="system-settings.html" class="active">Settings</a>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/manage-doctors">Manage Doctors</a>
+                <a href="/admin/availability">Availability</a>
+                <a href="/admin/appointments">Appointments</a>
+                <a href="/admin/daily-schedule">Daily Schedule</a>
+                <a href="/admin/settings" class="active">Settings</a>
             </nav>
             <div class="doc-info">
                 <div class="avatar">AD</div>
                 <p>Admin</p>
                 <p>Management</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
             </div>
         </div>
 
@@ -36,10 +46,16 @@
                     <h2>System Settings</h2>
                     <p>Update hospital and system information</p>
                 </div>
-                <p id="current-date">Mon, 4 May 2026</p>
+                <p id="current-date">-</p>
             </div>
 
-            <!-- Hospital information -->
+            <!-- Message box -->
+            <div id="page-msg" style="display:none; margin:0 20px;
+                padding:10px; border-radius:6px; font-size:13px;
+                text-align:center;">
+            </div>
+
+            <!-- Hospital info -->
             <div class="appointment-section">
                 <h3>Hospital Information</h3>
                 <div class="add-doctor-form">
@@ -76,18 +92,12 @@
                         value="Kathmandu, Bagmati Province, Nepal">
                     </div>
 
-                    <div class="form-group">
-                        <label>Website</label>
-                        <input type="text" id="hospital-website"
-                        value="www.mediportal.com">
-                    </div>
-
                     <div class="form-buttons">
                         <button class="btn-save" id="save-hospital">
                             Save Changes
                         </button>
                         <button class="btn-cancel" id="cancel-hospital">
-                            Cancel
+                            Reset
                         </button>
                     </div>
 
@@ -110,8 +120,8 @@
                         </div>
                         <div class="form-group">
                             <label>Max Appointments Per Doctor</label>
-                            <input type="number" id="max-appointments" 
-                            value="32">
+                            <input type="number" id="max-appointments"
+                            value="32" min="1">
                         </div>
                     </div>
 
@@ -158,7 +168,7 @@
                             Save Preferences
                         </button>
                         <button class="btn-cancel" id="cancel-prefs">
-                            Cancel
+                            Reset
                         </button>
                     </div>
 
@@ -208,13 +218,11 @@
 
     // ---- 1. Auto date ----
     const today = new Date();
-    const options = { 
-        weekday: 'short', 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
+    const options = {
+        weekday: 'short', day: 'numeric',
+        month: 'long', year: 'numeric'
     };
-    document.getElementById('current-date').textContent = 
+    document.getElementById('current-date').textContent =
         today.toLocaleDateString('en-GB', options);
 
 
@@ -222,46 +230,33 @@
     document.getElementById('save-hospital').addEventListener(
         'click', function() {
 
-        const name = document.getElementById('hospital-name').value.trim();
-        const email = document.getElementById('hospital-email').value.trim();
-        const phone = document.getElementById('hospital-phone').value.trim();
+        const name    = document.getElementById('hospital-name').value.trim();
+        const email   = document.getElementById('hospital-email').value.trim();
+        const phone   = document.getElementById('hospital-phone').value.trim();
         const address = document.getElementById('hospital-address').value.trim();
 
-        if (!name) {
-            alert('Hospital name cannot be empty!');
-            return;
-        }
-        if (!email) {
-            alert('Email cannot be empty!');
-            return;
-        }
-        if (!phone) {
-            alert('Phone cannot be empty!');
-            return;
-        }
-        if (!address) {
-            alert('Address cannot be empty!');
+        if (!name || !email || !phone || !address) {
+            showMsg('Please fill in all fields!', 'error');
             return;
         }
 
         // update navbar title
-        document.getElementById('name').textContent = 
+        document.getElementById('name').textContent =
             name + ' — Appointment and Patient Management System';
 
-        alert('Hospital information saved successfully!');
+        showMsg('Hospital information saved!', 'success');
     });
 
 
-    // ---- 3. Cancel hospital info ----
+    // ---- 3. Reset hospital info ----
     document.getElementById('cancel-hospital').addEventListener(
         'click', function() {
-        document.getElementById('hospital-name').value = 'MediPortal Hospital';
-        document.getElementById('reg-number').value = 'REG-2024-001';
-        document.getElementById('hospital-email').value = 'info@mediportal.com';
-        document.getElementById('hospital-phone').value = '01-4000000';
-        document.getElementById('hospital-address').value = 
+        document.getElementById('hospital-name').value    = 'MediPortal Hospital';
+        document.getElementById('reg-number').value       = 'REG-2024-001';
+        document.getElementById('hospital-email').value   = 'info@mediportal.com';
+        document.getElementById('hospital-phone').value   = '01-4000000';
+        document.getElementById('hospital-address').value =
             'Kathmandu, Bagmati Province, Nepal';
-        document.getElementById('hospital-website').value = 'www.mediportal.com';
     });
 
 
@@ -269,17 +264,16 @@
     document.getElementById('save-prefs').addEventListener(
         'click', function() {
 
-        const maxAppt = document.getElementById('max-appointments').value;
-        const openTime = document.getElementById('open-time').value;
-        const closeTime = document.getElementById('close-time').value;
+        const max   = document.getElementById('max-appointments').value;
+        const open  = document.getElementById('open-time').value;
+        const close = document.getElementById('close-time').value;
 
-        if (!maxAppt || maxAppt < 1) {
-            alert('Please enter a valid number of appointments!');
+        if (!max || max < 1) {
+            showMsg('Please enter valid max appointments!', 'error');
             return;
         }
-
-        if (openTime >= closeTime) {
-            alert('Closing time must be after opening time!');
+        if (open >= close) {
+            showMsg('Closing time must be after opening time!', 'error');
             return;
         }
 
@@ -287,61 +281,52 @@
             '.day-checkbox input:checked'
         );
         if (checkedDays.length === 0) {
-            alert('Please select at least one working day!');
+            showMsg('Please select at least one working day!', 'error');
             return;
         }
 
-        alert('System preferences saved successfully!');
+        showMsg('Preferences saved successfully!', 'success');
     });
 
 
-    // ---- 5. Cancel preferences ----
+    // ---- 5. Reset preferences ----
     document.getElementById('cancel-prefs').addEventListener(
         'click', function() {
         document.getElementById('max-appointments').value = '32';
-        document.getElementById('open-time').value = '08:00';
-        document.getElementById('close-time').value = '18:00';
+        document.getElementById('open-time').value        = '08:00';
+        document.getElementById('close-time').value       = '18:00';
         document.getElementById('slot-duration').selectedIndex = 0;
     });
 
 
     // ---- 6. Update password ----
     document.getElementById('save-password').addEventListener(
-        'click', function() {
+        'click', async function() {
 
-        const currentPass = document.getElementById('current-pass').value;
+        const current = document.getElementById('current-pass').value;
         const newPass = document.getElementById('new-pass').value;
-        const confirmPass = document.getElementById('confirm-pass').value;
+        const confirm = document.getElementById('confirm-pass').value;
 
-        if (!currentPass) {
-            alert('Please enter your current password!');
-            return;
+        if (!current) {
+            showMsg('Please enter current password!', 'error'); return;
         }
-
         if (!newPass) {
-            alert('Please enter a new password!');
-            return;
+            showMsg('Please enter new password!', 'error'); return;
         }
-
         if (newPass.length < 6) {
-            alert('New password must be at least 6 characters!');
-            return;
+            showMsg('Password must be at least 6 characters!', 'error'); return;
+        }
+        if (newPass !== confirm) {
+            showMsg('Passwords do not match!', 'error'); return;
+        }
+        if (current === newPass) {
+            showMsg('New password must be different!', 'error'); return;
         }
 
-        if (newPass !== confirmPass) {
-            alert('New passwords do not match!');
-            return;
-        }
-
-        if (currentPass === newPass) {
-            alert('New password must be different from current password!');
-            return;
-        }
-
-        alert('Password updated successfully!');
-
+        // when password API is ready connect here
+        showMsg('Password updated successfully!', 'success');
         document.getElementById('current-pass').value = '';
-        document.getElementById('new-pass').value = '';
+        document.getElementById('new-pass').value     = '';
         document.getElementById('confirm-pass').value = '';
     });
 
@@ -350,9 +335,54 @@
     document.getElementById('cancel-password').addEventListener(
         'click', function() {
         document.getElementById('current-pass').value = '';
-        document.getElementById('new-pass').value = '';
+        document.getElementById('new-pass').value     = '';
         document.getElementById('confirm-pass').value = '';
     });
+
+
+    // ---- 8. Logout ----
+    async function logout() {
+    const confirmed = confirm('Are you sure you want to logout?');
+    if (!confirmed) return;
+
+    try {
+        // check if admin session
+        const sessionRes  = await fetch('/api/check-session');
+        const sessionData = await sessionRes.json();
+
+        let url = '/api/logout';
+        if (sessionData.role === 'admin') {
+            url = '/api/admin/logout';
+        }
+
+        const res = await fetch(url, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (res.ok) {
+            window.location.href = '/';
+        } else {
+            // force redirect anyway
+            window.location.href = '/';
+        }
+
+    } catch(e) {
+        // force redirect even if fetch fails
+        window.location.href = '/';
+    }
+}
+
+
+    // ---- Helper ----
+    function showMsg(text, type) {
+        const msg = document.getElementById('page-msg');
+        msg.textContent      = text;
+        msg.style.display    = 'block';
+        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+        setTimeout(function() { msg.style.display = 'none'; }, 3000);
+    }
 
 </script>
 </body>

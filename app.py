@@ -13,10 +13,14 @@ app.config['SECRET_KEY'] = 'aspataal'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hospital.db'
 app.config['ADMIN_USERNAME'] = 'admin'
 app.config['ADMIN_PASSWORD'] = 'admin123'
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['REMEMBER_COOKIE_DURATION'] = 0
+app.config['SESSION_TYPE']              = 'filesystem'
 
 db.init_app(app)                 
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'auth.patient_login'
 login_manager.login_message = 'Please log in to access this page.'
 
 @login_manager.unauthorized_handler

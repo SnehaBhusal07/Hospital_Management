@@ -28,13 +28,13 @@ class Doctor(UserMixin, db.Model):
         return f'doctor_{self.id}'      
 
 class Appointment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id         = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
-    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    time_slot = db.Column(db.String(10), nullable=False)   
-    status = db.Column(db.String(20), default='Booked')    
-
+    doctor_id  = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    date       = db.Column(db.Date, nullable=False)
+    time_slot  = db.Column(db.String(10), nullable=False)
+    status     = db.Column(db.String(20), default='Booked')
+    
 class MedicalRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
@@ -42,3 +42,5 @@ class MedicalRecord(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
     diagnosis = db.Column(db.Text)
     report = db.Column(db.Text)
+    prescription = db.Column(db.Text)
+    status = db.Column(db.String(50), default='Completed')

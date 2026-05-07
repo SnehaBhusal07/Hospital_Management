@@ -13,24 +13,29 @@
 
     <div class="page">
 
-        <!-- SIDEBAR -->
         <div class="sidebar">
             <div class="logo">MediPortal</div>
             <nav>
-                <a href="{{ url_for('pages_bp.doctor_dashboard') }}">DashBoard</a>
-                <a href="{{ url_for('pages_bp.schedule') }}">Schedule</a>
-                <a href="{{ url_for('pages_bp.patient_history') }}" class="active">Patients</a>
-                <a href="{{ url_for('pages_bp.update_diagnosis') }}">Report</a>
+                <a href="/doctor/dashboard">Dashboard</a>
+                <a href="/doctor/schedule">Schedule</a>
+                <a href="/doctor/patient-history" class="active">Patients</a>
+                <a href="/doctor/update-diagnosis">Report</a>
             </nav>
             <div class="doc-info">
                 <div class="avatar" id="doc-avatar">--</div>
                 <p id="doc-name">Loading...</p>
-                <p id="doc-specialization">Loading...</p>
-                <button onclick="logout()" style="margin-top:10px; cursor:pointer;">Logout</button>
+                <p id="doc-spec">Loading...</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
             </div>
         </div>
 
-        <!-- MAIN -->
         <div class="main">
 
             <div class="topbar">
@@ -38,322 +43,311 @@
                     <h2>Patient History</h2>
                     <p>View detailed patient records</p>
                 </div>
-                <p id="current-date"></p>
+                <p id="current-date">-</p>
             </div>
 
-            <!-- Patient Selector -->
-            <div style="margin: 15px 20px;">
-                <label style="font-size:14px; font-weight:bold; color:#555;">Select Patient</label>
-                <select id="patient-selector" style="
-                    width:100%;
-                    padding:10px;
-                    margin-top:6px;
-                    border:1px solid #0F4C5C;
-                    border-radius:6px;
-                    font-size:14px;
-                    color:#333;
-                ">
+            <!-- Message box -->
+            <div id="page-msg" style="display:none; margin:0 20px;
+                padding:10px; border-radius:6px; font-size:13px;
+                text-align:center;">
+            </div>
+
+            <!-- Patient selector -->
+            <div style="background:white; margin:15px 20px;
+                border-radius:8px; padding:15px;">
+                <h3 style="margin-bottom:10px;">Select Patient</h3>
+                <select id="patient-select" style="
+                    width:100%; padding:10px;
+                    border:1px solid #ccc; border-radius:6px;
+                    font-size:13px; color:#333;">
                     <option value="">-- Select a patient --</option>
                 </select>
             </div>
 
-            <!-- Patient Card -->
-            <div class="patient-card" id="patient-card" style="display:none;">
-                <div class="patient-avatar" id="patient-avatar">--</div>
-                <div class="patient-details">
-                    <h2 id="patient-name">--</h2>
-                    <div class="info-row">
-                        <span><strong>Email:</strong> <span id="patient-email">--</span></span>
-                        <span><strong>Phone:</strong> <span id="patient-phone">--</span></span>
+            <!-- Patient info card -->
+            <div id="patient-card" style="display:none;
+                background:white; margin:0 20px 15px;
+                border-radius:8px; padding:15px;
+                border-left:4px solid #0F4C5C;
+                display:none;">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div id="pat-avatar" style="
+                        width:50px; height:50px;
+                        background:#e1f5ee; color:#0F4C5C;
+                        border-radius:50%; display:flex;
+                        align-items:center; justify-content:center;
+                        font-size:18px; font-weight:bold;">
                     </div>
+                    <div>
+                        <h3 id="pat-name" style="color:#333;"></h3>
+                        <p id="pat-email" style="font-size:13px;
+                            color:#888;"></p>
+                    </div>
+                    <button id="update-btn" onclick="goToUpdate()"
+                        style="margin-left:auto; padding:8px 16px;
+                        background:#0F4C5C; color:white; border:none;
+                        border-radius:6px; font-size:13px; cursor:pointer;">
+                        Update Diagnosis
+                    </button>
                 </div>
             </div>
 
-            <!-- Filter Bar -->
-            <div class="filter-bar">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="Follow-up">Follow-up</button>
-                <button class="filter-btn" data-filter="Consultation">Consultation</button>
-                <button class="filter-btn" data-filter="Lab Review">Lab Review</button>
-                <button class="filter-btn" data-filter="Routine">Routine</button>
-            </div>
-
-            <!-- Visit History Table -->
-            <div class="history-table">
-                <h3>Visit History
-                    <span id="visit-count" style="
-                        font-size:12px;
-                        background-color:#0F4C5C;
-                        color:white;
-                        padding:2px 8px;
-                        border-radius:12px;
-                        margin-left:8px;
-                        font-weight:normal;
-                    "></span>
-                </h3>
-                <table>
-                    <tr>
-                        <th>Date</th>
-                        <th>Diagnosis</th>
-                        <th>Doctor</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                    </tr>
-                    <tr data-type="Follow-up">
-                        <td>04 May 2026</td>
-                        <td>Hypertension Follow-up</td>
-                        <td>Dr. Anil Kumar</td>
-                        <td>Follow-up</td>
-                        <td><span class="status green">In Progress</span></td>
-                    </tr>
-                    <tr data-type="Consultation">
-                        <td>10 Apr 2026</td>
-                        <td>Chest Pain Evaluation</td>
-                        <td>Dr. Anil Kumar</td>
-                        <td>Consultation</td>
-                        <td><span class="status gray">Done</span></td>
-                    </tr>
-                    <tr data-type="Lab Review">
-                        <td>20 Mar 2026</td>
-                        <td>ECG Test Review</td>
-                        <td>Dr. Anil Kumar</td>
-                        <td>Lab Review</td>
-                        <td><span class="status gray">Done</span></td>
-                    </tr>
-                    <tr data-type="Routine">
-                        <td>01 Feb 2026</td>
-                        <td>Blood Pressure Check</td>
-                        <td>Dr. Anil Kumar</td>
-                        <td>Routine</td>
-                        <td><span class="status gray">Done</span></td>
-                    </tr>
-                </table>
-                <p id="no-results" style="display:none; text-align:center; padding:20px; color:#888; font-size:13px;">
-                    No visits found.
-                </p>
-            </div>
-
-            <!-- Extra Info -->
-            <div class="extra-info">
-                <div class="info-box">
-                    <h3>Allergies</h3>
-                    <p>Penicillin</p>
-                    <p>Dust</p>
-                </div>
-                <div class="info-box">
-                    <h3>Chronic Conditions</h3>
-                    <p>Hypertension</p>
-                    <p>Type 2 Diabetes</p>
+            <!-- History timeline -->
+            <div style="background:white; margin:0 20px;
+                border-radius:8px; padding:15px;">
+                <h3 style="margin-bottom:12px;">Visit History</h3>
+                <div id="history-container">
+                    <p style="color:#888; font-size:13px;">
+                        Select a patient to view their history.
+                    </p>
                 </div>
             </div>
 
         </div>
     </div>
 
-    <script>
-        // ---- 1. Auto date ----
-        const today = new Date();
-        const options = { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' };
-        document.getElementById('current-date').textContent =
-            today.toLocaleDateString('en-GB', options);
+<script>
+
+    // ---- 1. Auto date ----
+    const today = new Date();
+    const options = {
+        weekday: 'short', day: 'numeric',
+        month: 'long', year: 'numeric'
+    };
+    document.getElementById('current-date').textContent =
+        today.toLocaleDateString('en-GB', options);
+
+    let selectedPatientId   = null;
+    let selectedPatientName = null;
 
 
-        // ---- 2. Load doctor info and patient list ----
-        async function loadData() {
-            // Check login
-            const meRes = await fetch('/api/doctor/me');
-            if (meRes.status === 401 || meRes.status === 403) {
-                window.location.href = '/';
-                return;
-            }
-            const meData = await meRes.json();
+    // ---- 2. Load doctor info ----
+    async function loadDoctorInfo() {
+        try {
+            const res  = await fetch('/api/doctor/me');
+            if (!res.ok) { window.location.href = '/'; return; }
+            const data = await res.json();
 
-            // Update sidebar
-            document.getElementById('doc-name').textContent = meData.name;
-            document.getElementById('doc-specialization').textContent = meData.specialization;
-            const initials = meData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            document.getElementById('doc-name').textContent = data.name;
+            document.getElementById('doc-spec').textContent = data.specialization;
+            const initials = data.name.split(' ')
+                .map(function(n) { return n[0]; })
+                .join('').toUpperCase();
             document.getElementById('doc-avatar').textContent = initials;
 
-            // Get all appointments to build patient list
-            const res = await fetch('/api/doctor/appointments');
+        } catch(e) {
+            showMsg('Could not load doctor info.', 'error');
+        }
+    }
+
+
+    // ---- 3. Load patients from appointments ----
+    async function loadPatients() {
+        try {
+            const res  = await fetch('/api/doctor/appointments');
+            if (!res.ok) return;
             const data = await res.json();
 
-            // Get unique patients only
-            const seen = new Set();
-            const uniquePatients = data.appointments.filter(appt => {
-                if (seen.has(appt.patient_id)) return false;
-                seen.add(appt.patient_id);
-                return true;
+            // get unique patients
+            const seen     = {};
+            const patients = [];
+            data.appointments.forEach(function(appt) {
+                if (!seen[appt.patient_id]) {
+                    seen[appt.patient_id] = true;
+                    patients.push({
+                        id   : appt.patient_id,
+                        name : appt.patient_name,
+                        email: appt.patient_email
+                    });
+                }
             });
 
-            // Populate patient selector
-            const selector = document.getElementById('patient-selector');
-            selector.innerHTML = '<option value="">-- Select a patient --</option>';
-
-            uniquePatients.forEach(appt => {
-                selector.innerHTML += `
-                    <option value="${appt.patient_id}"
-                        data-name="${appt.patient_name}"
-                        data-email="${appt.patient_email}">
-                        ${appt.patient_name}
-                    </option>`;
+            // fill dropdown
+            const select = document.getElementById('patient-select');
+            patients.forEach(function(p) {
+                const option = document.createElement('option');
+                option.value       = p.id;
+                option.textContent = p.name;
+                option.dataset.email = p.email;
+                select.appendChild(option);
             });
 
-            if (uniquePatients.length === 0) {
-                selector.innerHTML = '<option value="">No patients found</option>';
+            // check if patient_id in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const patId = urlParams.get('patient_id');
+            if (patId) {
+                select.value = patId;
+                select.dispatchEvent(new Event('change'));
             }
+
+        } catch(e) {
+            showMsg('Could not load patients.', 'error');
+        }
+    }
+
+
+    // ---- 4. Patient dropdown change ----
+    document.getElementById('patient-select').addEventListener(
+        'change', async function() {
+
+        const patientId = this.value;
+        if (!patientId) {
+            document.getElementById('patient-card').style.display = 'none';
+            document.getElementById('history-container').innerHTML =
+                '<p style="color:#888; font-size:13px;">' +
+                'Select a patient to view their history.</p>';
+            return;
         }
 
+        const selectedOption = this.options[this.selectedIndex];
+        selectedPatientId    = patientId;
+        selectedPatientName  = selectedOption.textContent;
 
-        // ---- 3. When patient is selected, load their history ----
-        document.getElementById('patient-selector').addEventListener('change', async function() {
-            const selected = this.options[this.selectedIndex];
+        // show patient card
+        const card = document.getElementById('patient-card');
+        card.style.display = 'flex';
 
-            if (!this.value) {
-                document.getElementById('patient-card').style.display = 'none';
-                clearTable();
+        const initials = selectedPatientName.split(' ')
+            .map(function(n) { return n[0]; })
+            .join('').toUpperCase();
+
+        document.getElementById('pat-avatar').textContent = initials;
+        document.getElementById('pat-name').textContent   = selectedPatientName;
+        document.getElementById('pat-email').textContent  =
+            selectedOption.dataset.email || '';
+
+        // load history
+        loadHistory(patientId);
+    });
+
+
+    // ---- 5. Load patient history ----
+    async function loadHistory(patientId) {
+        const container = document.getElementById('history-container');
+        container.innerHTML =
+            '<p style="color:#888; font-size:13px;">Loading history...</p>';
+
+        try {
+            const res  = await fetch(
+                '/api/doctor/patient/' + patientId + '/history'
+            );
+            const data = await res.json();
+
+            if (!res.ok) {
+                container.innerHTML =
+                    '<p style="color:#c0392b; font-size:13px;">' +
+                    (data.message || 'Failed to load history.') + '</p>';
                 return;
             }
 
-            const patientId = this.value;
-            const patientName = selected.dataset.name;
-            const patientEmail = selected.dataset.email;
+            if (data.history.length === 0) {
+                container.innerHTML =
+                    '<p style="color:#888; font-size:13px;">' +
+                    'No medical history found for this patient.</p>';
+                return;
+            }
 
-            // Update patient card
-            const initials = patientName.split(' ').map(n => n[0]).join('').toUpperCase();
-            document.getElementById('patient-avatar').textContent = initials;
-            document.getElementById('patient-name').textContent = patientName;
-            document.getElementById('patient-email').textContent = patientEmail;
-            document.getElementById('patient-card').style.display = 'flex';
+            container.innerHTML = '';
+            data.history.forEach(function(record) {
 
-            // Fetch patient history from backend
-            const res = await fetch(`/api/doctor/patient/${patientId}/history`);
-            const data = await res.json();
+                const dateObj = new Date(record.date);
+                const dateOptions = {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                };
+                const formattedDate = dateObj.toLocaleDateString(
+                    'en-GB', dateOptions
+                );
 
-            populateTable(data.history);
+                const item = document.createElement('div');
+                item.style.cssText =
+                    'display:flex; gap:15px; margin-bottom:15px;';
+                item.innerHTML =
+                    '<div style="width:14px; height:14px; border-radius:50%;' +
+                        'background:#0F4C5C; flex-shrink:0; margin-top:4px;">' +
+                    '</div>' +
+                    '<div style="background:#f9f9f9; border-radius:8px;' +
+                        'padding:12px 15px; flex:1; border:1px solid #eee;">' +
+                        '<p style="font-size:12px; color:#888;">' +
+                            formattedDate + '</p>' +
+                        '<p style="font-size:14px; font-weight:bold;' +
+                            'color:#0F4C5C; margin:4px 0;">' +
+                            'Diagnosis: ' + (record.diagnosis || 'N/A') +
+                        '</p>' +
+                        '<p style="font-size:13px; color:#555;">' +
+                            'Notes: ' + (record.report || 'N/A') +
+                        '</p>' +
+                    '</div>';
+
+                container.appendChild(item);
+            });
+
+        } catch(e) {
+            container.innerHTML =
+                '<p style="color:#c0392b; font-size:13px;">' +
+                'Could not connect to server.</p>';
+        }
+    }
+
+
+    // ---- 6. Go to update diagnosis ----
+    function goToUpdate() {
+        if (selectedPatientId) {
+            window.location.href =
+                '/doctor/update-diagnosis?patient_id=' +
+                selectedPatientId + '&patient_name=' +
+                encodeURIComponent(selectedPatientName);
+        }
+    }
+
+
+    // ---- 7. Logout ----
+    async function logout() {
+    const confirmed = confirm('Are you sure you want to logout?');
+    if (!confirmed) return;
+
+    try {
+        // check if admin session
+        const sessionRes  = await fetch('/api/check-session');
+        const sessionData = await sessionRes.json();
+
+        let url = '/api/logout';
+        if (sessionData.role === 'admin') {
+            url = '/api/admin/logout';
+        }
+
+        const res = await fetch(url, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' }
         });
 
-
-        // ---- 4. Populate history table ----
-        function populateTable(history) {
-            const table = document.querySelector('table');
-
-            // Remove old data rows
-            table.querySelectorAll('tr[data-type]').forEach(row => row.remove());
-
-            const noResults = document.getElementById('no-results');
-
-            if (!history || history.length === 0) {
-                noResults.style.display = 'block';
-                updateCount();
-                return;
-            }
-
-            noResults.style.display = 'none';
-
-            history.forEach(record => {
-                const row = document.createElement('tr');
-                row.setAttribute('data-type', 'all');
-                row.style.cursor = 'pointer';
-                row.innerHTML = `
-                    <td>${formatDate(record.date)}</td>
-                    <td>${record.diagnosis}</td>
-                    <td>${record.doctor_name}</td>
-                    <td>Appointment</td>
-                    <td><span class="status gray">Done</span></td>
-                `;
-
-                // Highlight on click
-                row.addEventListener('click', function() {
-                    table.querySelectorAll('tr[data-type]').forEach(r => {
-                        r.style.backgroundColor = '';
-                    });
-                    this.style.backgroundColor = '#e1f5ee';
-                });
-
-                table.appendChild(row);
-            });
-
-            updateCount();
-            reattachFilters();
-        }
-
-
-        // ---- 5. Clear table ----
-        function clearTable() {
-            document.querySelector('table').querySelectorAll('tr[data-type]').forEach(row => row.remove());
-            document.getElementById('visit-count').textContent = '0';
-            document.getElementById('no-results').style.display = 'none';
-        }
-
-
-        // ---- 6. Format date ----
-        function formatDate(dateStr) {
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        }
-
-
-        // ---- 7. Count visible visits ----
-        function updateCount() {
-            const rows = document.querySelectorAll('table tr[data-type]');
-            let count = 0;
-            rows.forEach(row => {
-                if (row.style.display !== 'none') count++;
-            });
-            document.getElementById('visit-count').textContent = count;
-        }
-
-
-        // ---- 8. Filter buttons ----
-        function reattachFilters() {
-            const filterBtns = document.querySelectorAll('.filter-btn');
-            const rows = document.querySelectorAll('table tr[data-type]');
-            const noResults = document.getElementById('no-results');
-
-            filterBtns.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    filterBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-
-                    const filter = this.dataset.filter;
-                    let visibleCount = 0;
-
-                    rows.forEach(function(row) {
-                        if (filter === 'all') {
-                            row.style.display = '';
-                            visibleCount++;
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    });
-
-                    noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-                    updateCount();
-                });
-            });
-        }
-
-
-        // ---- 9. Print button ----
-        const historyTable = document.querySelector('.history-table h3');
-        const printBtn = document.createElement('button');
-        printBtn.textContent = '🖨 Print';
-        printBtn.style.cssText = 'margin-left:12px; padding:4px 12px; background:#0F4C5C; color:white; border:none; border-radius:6px; font-size:12px; cursor:pointer;';
-        historyTable.appendChild(printBtn);
-        printBtn.addEventListener('click', function() { window.print(); });
-
-
-        // ---- 10. Logout ----
-        async function logout() {
-            await fetch('/api/doctor/logout', { method: 'POST' });
+        if (res.ok) {
+            window.location.href = '/';
+        } else {
+            // force redirect anyway
             window.location.href = '/';
         }
 
+    } catch(e) {
+        // force redirect even if fetch fails
+        window.location.href = '/';
+    }
+}
 
-        // ---- Run on page load ----
-        loadData();
-    </script>
+    // ---- Helper ----
+    function showMsg(text, type) {
+        const msg = document.getElementById('page-msg');
+        msg.textContent      = text;
+        msg.style.display    = 'block';
+        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+        setTimeout(function() { msg.style.display = 'none'; }, 3000);
+    }
 
+
+    // ---- Init ----
+    loadDoctorInfo();
+    loadPatients();
+
+</script>
 </body>
 </html>

@@ -302,11 +302,36 @@
 
         // ---- 8. Logout ----
         async function logout() {
-            const confirmed = confirm('Are you sure you want to logout?');
-            if (!confirmed) return;
-            const res = await fetch('/api/logout', { method: 'POST' });
-            if (res.ok) window.location.href = '/';
+    const confirmed = confirm('Are you sure you want to logout?');
+    if (!confirmed) return;
+
+    try {
+        // check if admin session
+        const sessionRes  = await fetch('/api/check-session');
+        const sessionData = await sessionRes.json();
+
+        let url = '/api/logout';
+        if (sessionData.role === 'admin') {
+            url = '/api/admin/logout';
         }
+
+        const res = await fetch(url, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (res.ok) {
+            window.location.href = '/';
+        } else {
+            // force redirect anyway
+            window.location.href = '/';
+        }
+
+    } catch(e) {
+        // force redirect even if fetch fails
+        window.location.href = '/';
+    }
+}
 
 
         // ---- Helpers ----

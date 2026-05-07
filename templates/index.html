@@ -152,207 +152,234 @@
 
     <script>
 
-        // ---- SLIDER ----
-        let current = 0;
-        const features = document.getElementsByClassName("feature");
-        let interval;
+    // ---- SLIDER ----
+    let current = 0;
+    const features = document.getElementsByClassName("feature");
+    let interval;
 
+    showFeature(current);
+    startAuto();
+
+    function showFeature(index) {
+        for (let i = 0; i < features.length; i++) {
+            features[i].classList.remove("active");
+        }
+        features[index].classList.add("active");
+    }
+
+    function changeFeature(direction) {
+        clearInterval(interval);
+        current += direction;
+        if (current >= features.length) current = 0;
+        if (current < 0) current = features.length - 1;
         showFeature(current);
         startAuto();
+    }
 
-        function showFeature(index) {
-            for (let i = 0; i < features.length; i++) {
-                features[i].classList.remove("active");
-            }
-            features[index].classList.add("active");
-        }
-
-        function changeFeature(direction) {
-            clearInterval(interval);
-            current += direction;
+    function startAuto() {
+        interval = setInterval(function() {
+            current++;
             if (current >= features.length) current = 0;
-            if (current < 0) current = features.length - 1;
             showFeature(current);
-            startAuto();
-        }
-
-        function startAuto() {
-            interval = setInterval(function() {
-                current++;
-                if (current >= features.length) current = 0;
-                showFeature(current);
-            }, 4000);
-        }
+        }, 4000);
+    }
 
 
-        // ---- MODAL ----
-        function openModal() {
-            document.getElementById("authModal").style.display = "flex";
-            document.getElementById("modal-overlay").style.display = "block";
-            showLogin();
-            hideMsg();
-        }
+    // ---- MODAL ----
+    function openModal() {
+        document.getElementById("authModal").style.display = "flex";
+        document.getElementById("modal-overlay").style.display = "block";
+        showLogin();
+        hideMsg();
+    }
 
-        function closeModal() {
-            document.getElementById("authModal").style.display = "none";
-            document.getElementById("modal-overlay").style.display = "none";
-            hideMsg();
-        }
-
-
-        // ---- TABS ----
-        function showLogin() {
-            document.getElementById("loginForm").classList.add("active-form");
-            document.getElementById("signupForm").classList.remove("active-form");
-            document.getElementById("loginTab").classList.add("active-tab");
-            document.getElementById("signupTab").classList.remove("active-tab");
-            document.getElementById("role-selector").style.display = "flex";
-            hideMsg();
-        }
-
-        function showSignup() {
-            document.getElementById("signupForm").classList.add("active-form");
-            document.getElementById("loginForm").classList.remove("active-form");
-            document.getElementById("signupTab").classList.add("active-tab");
-            document.getElementById("loginTab").classList.remove("active-tab");
-            document.getElementById("role-selector").style.display = "none";
-            hideMsg();
-        }
+    function closeModal() {
+        document.getElementById("authModal").style.display = "none";
+        document.getElementById("modal-overlay").style.display = "none";
+        hideMsg();
+    }
 
 
-        // ---- ROLE BUTTONS ----
-        let currentRole = 'patient';
+    // ---- TABS ----
+    function showLogin() {
+        document.getElementById("loginForm").classList.add("active-form");
+        document.getElementById("signupForm").classList.remove("active-form");
+        document.getElementById("loginTab").classList.add("active-tab");
+        document.getElementById("signupTab").classList.remove("active-tab");
+        document.getElementById("role-selector").style.display = "flex";
+        hideMsg();
+    }
 
-        document.querySelectorAll('.role-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.role-btn').forEach(function(b) {
-                    b.classList.remove('active-role');
-                });
-                this.classList.add('active-role');
-                currentRole = this.dataset.role;
-                hideMsg();
+    function showSignup() {
+        document.getElementById("signupForm").classList.add("active-form");
+        document.getElementById("loginForm").classList.remove("active-form");
+        document.getElementById("signupTab").classList.add("active-tab");
+        document.getElementById("loginTab").classList.remove("active-tab");
+        document.getElementById("role-selector").style.display = "none";
+        hideMsg();
+    }
 
-                if (currentRole === 'admin') {
-                    document.getElementById('admin-username-group').style.display = 'block';
-                    document.getElementById('email-group').style.display = 'none';
-                } else {
-                    document.getElementById('admin-username-group').style.display = 'none';
-                    document.getElementById('email-group').style.display = 'block';
-                }
+
+    // ---- ROLE BUTTONS ----
+    let currentRole = 'patient';
+
+    document.querySelectorAll('.role-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.role-btn').forEach(function(b) {
+                b.classList.remove('active-role');
             });
-        });
-
-
-        // ---- LOGIN ----
-        document.getElementById('login-btn').addEventListener('click', async function() {
+            this.classList.add('active-role');
+            currentRole = this.dataset.role;
             hideMsg();
 
-            const password = document.getElementById('login-password').value.trim();
-            if (!password) { showMsg('Please enter your password.', 'error'); return; }
-
-            let url = '';
-            let body = {};
-
-            if (currentRole === 'patient') {
-                const email = document.getElementById('login-email').value.trim();
-                if (!email) { showMsg('Please enter your email.', 'error'); return; }
-                url = '/api/login';                  
-                body = { email, password };
-
-            } else if (currentRole === 'doctor') {
-                const email = document.getElementById('login-email').value.trim();
-                if (!email) { showMsg('Please enter your email.', 'error'); return; }
-                url = '/api/doctor/login';          
-                body = { email, password };
-
-            } else if (currentRole === 'admin') {
-                const username = document.getElementById('admin-username').value.trim();
-                if (!username) { showMsg('Please enter your username.', 'error'); return; }
-                url = '/api/admin/login';           
-                body = { username, password };
-            }
-
-            try {
-                const response = await fetch(url, {          
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMsg('Login successful! Redirecting...', 'success');
-                    setTimeout(function() {
-                        if (currentRole === 'patient') {
-                            window.location.href = '/patient/dashboard';
-                        } else if (currentRole === 'doctor') {
-                            window.location.href = '/doctor/dashboard';
-                        } else if (currentRole === 'admin') {
-                            window.location.href = '/management/dashboard';
-                        }
-                    }, 1000);
-                } else {
-                    showMsg(data.message || 'Login failed.', 'error');
-                }
-
-            } catch (err) {
-                showMsg('Could not connect to server.', 'error');
-            }
+document.querySelectorAll('.role-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.role-btn').forEach(function(b) {
+            b.classList.remove('active-role');
         });
+        this.classList.add('active-role');
+        currentRole = this.dataset.role;
+        hideMsg();
+
+        if (currentRole === 'admin') {
+            document.getElementById('admin-username-group').style.display = 'block';
+            document.getElementById('email-group').style.display = 'none';
+        } else {
+            document.getElementById('admin-username-group').style.display = 'none';
+            document.getElementById('email-group').style.display = 'block';
+        }
+    });
+});
+        });
+    });
 
 
-        // ---- SIGNUP ----
-        document.getElementById('signup-btn').addEventListener('click', async function() {
-            hideMsg();
+    // ---- LOGIN ----
+    document.getElementById('login-btn').addEventListener('click', async function() {
+        hideMsg();
 
-            const name     = document.getElementById('reg-name').value.trim();
-            const email    = document.getElementById('reg-email').value.trim();
-            const phone    = document.getElementById('reg-phone').value.trim();
-            const password = document.getElementById('reg-password').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+        if (!password) {
+            showMsg('Please enter your password.', 'error');
+            return;
+        }
 
-            if (!name || !email || !password) {
-                showMsg('Please fill in all required fields.', 'error');
+        let url  = '';
+        let body = {};
+
+        if (currentRole === 'patient') {
+            const email = document.getElementById('login-email').value.trim();
+            if (!email) {
+                showMsg('Please enter your email.', 'error');
                 return;
             }
+            url  = '/api/patient/login';
+            body = { email: email, password: password };
 
-            try {
-                const response = await fetch("http://127.0.0.1:5000/api/register", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, phone, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMsg('Registered successfully! Please log in.', 'success');
-                    setTimeout(function() { showLogin(); }, 1500);
-                } else {
-                    showMsg(data.message || 'Registration failed.', 'error');
-                }
-
-            } catch (err) {
-                showMsg('Could not connect to server.', 'error');
+        } else if (currentRole === 'doctor') {
+            const email = document.getElementById('login-email').value.trim();
+            if (!email) {
+                showMsg('Please enter your email.', 'error');
+                return;
             }
-        });
+            url  = '/api/doctor/login';
+            body = { email: email, password: password };
 
-
-        // ---- HELPERS ----
-        function showMsg(text, type) {
-            const msg = document.getElementById('msg');
-            msg.textContent = text;
-            msg.style.display = 'block';
-            msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
-            msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+        } else if (currentRole === 'admin') {
+            const username = document.getElementById('admin-username').value.trim();
+            if (!username) {
+                showMsg('Please enter your username.', 'error');
+                return;
+            }
+            url  = '/api/admin/login';
+            body = { username: username, password: password };
         }
 
-        function hideMsg() {
-            const msg = document.getElementById('msg');
-            msg.style.display = 'none';
+        try {
+            const response = await fetch(url, {
+                method : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body   : JSON.stringify(body)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showMsg('Login successful! Redirecting...', 'success');
+                setTimeout(function() {
+                    if (currentRole === 'patient') {
+                        window.location.href = '/patient/dashboard';
+                    } else if (currentRole === 'doctor') {
+                        window.location.href = '/doctor/dashboard';
+                    } else if (currentRole === 'admin') {
+                        window.location.href = '/admin/dashboard';
+                    }
+                }, 1000);
+            } else {
+                showMsg(data.message || 'Login failed.', 'error');
+            }
+
+        } catch(err) {
+            showMsg('Could not connect to server.', 'error');
+        }
+    });
+
+
+     
+    document.getElementById('signup-btn').addEventListener('click', async function() {
+        hideMsg();
+
+        const name     = document.getElementById('reg-name').value.trim();
+        const email    = document.getElementById('reg-email').value.trim();
+        const phone    = document.getElementById('reg-phone').value.trim();
+        const password = document.getElementById('reg-password').value.trim();
+
+        if (!name || !email || !password) {
+            showMsg('Please fill in all required fields.', 'error');
+            return;
         }
 
-    </script>
+        try {
+            const response = await fetch('/api/register', {
+                method : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body   : JSON.stringify({
+                    name    : name,
+                    email   : email,
+                    phone   : phone,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showMsg('Registered successfully! Please log in.', 'success');
+                setTimeout(function() { showLogin(); }, 1500);
+            } else {
+                showMsg(data.message || 'Registration failed.', 'error');
+            }
+
+        } catch(err) {
+            showMsg('Could not connect to server.', 'error');
+        }
+    });
+
+
+    
+    function showMsg(text, type) {
+        const msg = document.getElementById('msg');
+        msg.textContent      = text;
+        msg.style.display    = 'block';
+        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+    }
+
+    function hideMsg() {
+        document.getElementById('msg').style.display = 'none';
+    }
+
+</script>
 
 </body>
 </html>
