@@ -77,3 +77,7 @@ def admin_daily_schedule():
 @pages_bp.route('/admin/settings')
 def admin_settings():
     return render_template('system-settings.html')
+
+@pages_bp.route('/symptom-checker')
+def symptom_checker():
+    return render_template('symptom-checker.html')
