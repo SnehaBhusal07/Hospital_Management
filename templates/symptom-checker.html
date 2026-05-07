@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptom Checker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <style>
+        * { padding: 0; margin: 0; box-sizing: border-box; }
+        body { background-color: #F4F9F9; font-family: Arial, sans-serif; }
+        .navbar {
+            height: 70px;
+            background-color: #0F4C5C;
+            color: #F4F9F9;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+        #name { font-size: 24px; color: #F4F9F9; }
+        .back-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #F4F9F9;
+            color: #F4F9F9;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.1); }
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 0 20px 40px;
+        }
+        .chat-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .chat-header h2 { font-size: 22px; color: #0F4C5C; margin-bottom: 6px; }
+        .chat-header p { font-size: 14px; color: #555; }
+        .chat-box {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .message {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .message.user { flex-direction: row-reverse; }
+        .avatar-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .bot-icon { background: #0F4C5C; color: white; }
+        .user-icon { background: #e1f5ee; color: #0F4C5C; }
+        .bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .bot-bubble {
+            background: #f4f9f9;
+            border: 1px solid #ddd;
+            color: #1E2D2F;
+            border-top-left-radius: 2px;
+        }
+        .user-bubble {
+            background: #0F4C5C;
+            color: white;
+            border-top-right-radius: 2px;
+        }
+        .result-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 8px;
+        }
+        .dept-badge {
+            display: inline-block;
+            background: #e1f5ee;
+            color: #0F4C5C;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+        .urgency-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        .urgency-low { background: #d4f4e8; color: #0a6640; }
+        .urgency-medium { background: #fff0d4; color: #a05f00; }
+        .urgency-high { background: #fde8e8; color: #c0392b; }
+        .result-reason { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .result-advice {
+            font-size: 13px;
+            color: #444;
+            padding: 8px 12px;
+            background: #f4f9f9;
+            border-left: 3px solid #0F4C5C;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        .book-btn {
+            width: 100%;
+            padding: 10px;
+            background: #0F4C5C;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .book-btn:hover { background: #2C7DA0; }
+        .typing {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f4f9f9;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            border-top-left-radius: 2px;
+            width: fit-content;
+        }
+        .dot {
+            width: 7px;
+            height: 7px;
+            background: #0F4C5C;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        .symptom-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #0F4C5C;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+            font-family: Arial, sans-serif;
+        }
+        .symptom-input:focus { box-shadow: 0 0 0 3px rgba(15,76,92,0.1); }
+        .send-btn {
+            padding: 12px 20px;
+            background: #0F4C5C;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .send-btn:hover { background: #2C7DA0; }
+        .send-btn:disabled { background: #aaa; cursor: not-allowed; }
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .suggestion-chip {
+            padding: 6px 14px;
+            border: 1px solid #0F4C5C;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #0F4C5C;
+            cursor: pointer;
+            background: white;
+        }
+        .suggestion-chip:hover { background: #e1f5ee; }
+        .disclaimer {
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div id="name">Hospital Appointment and Patient Management System</div>
+    <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+</div>
+
+<div class="container">
+    <div class="chat-header">
+        <h2>Symptom Checker</h2>
+        <p>Describe your symptoms and we'll suggest the right department for you</p>
+    </div>
+
+    <div class="suggestions">
+        <button class="suggestion-chip" onclick="useChip('I have chest pain and shortness of breath')">Chest pain</button>
+        <button class="suggestion-chip" onclick="useChip('I have severe headache and dizziness')">Headache & dizziness</button>
+        <button class="suggestion-chip" onclick="useChip('I have knee pain and difficulty walking')">Knee pain</button>
+        <button class="suggestion-chip" onclick="useChip('I have a skin rash and itching')">Skin rash</button>
+        <button class="suggestion-chip" onclick="useChip('I have ear pain and hearing loss')">Ear pain</button>
+        <button class="suggestion-chip" onclick="useChip('I have fever and cough for 3 days')">Fever & cough</button>
+    </div>
+
+    <div class="chat-box" id="chat-box">
+        <div class="message bot">
+            <div class="avatar-icon bot-icon">AI</div>
+            <div class="bubble bot-bubble">
+                Hello! I'm your medical assistant. Please describe your symptoms in detail and I'll suggest the most appropriate department for your appointment.<br><br>
+                <em>For example: "I've been having chest pain and shortness of breath for two days."</em>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-row">
+        <textarea
+            class="symptom-input"
+            id="symptom-input"
+            rows="2"
+            placeholder="Describe your symptoms here..."
+        ></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendSymptoms()">Check</button>
+    </div>
+    <p class="disclaimer">⚠ This tool is for guidance only. Always consult a qualified doctor for medical advice.</p>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const input = document.getElementById('symptom-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendSymptoms();
+        }
+    });
+
+    function useChip(text) {
+        input.value = text;
+        input.focus();
+    }
+
+    function addMessage(content, type) {
+        const msg = document.createElement('div');
+        msg.className = `message ${type}`;
+        const icon = document.createElement('div');
+        icon.className = `avatar-icon ${type === 'bot' ? 'bot-icon' : 'user-icon'}`;
+        icon.textContent = type === 'bot' ? 'AI' : 'You';
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${type === 'bot' ? 'bot-bubble' : 'user-bubble'}`;
+        bubble.innerHTML = content;
+        msg.appendChild(icon);
+        msg.appendChild(bubble);
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return bubble;
+    }
+
+    function showTyping() {
+        const msg = document.createElement('div');
+        msg.className = 'message bot';
+        msg.id = 'typing-indicator';
+        const icon = document.createElement('div');
+        icon.className = 'avatar-icon bot-icon';
+        icon.textContent = 'AI';
+        const typing = document.createElement('div');
+        typing.className = 'typing';
+        typing.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+        msg.appendChild(icon);
+        msg.appendChild(typing);
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTyping() {
+        const t = document.getElementById('typing-indicator');
+        if (t) t.remove();
+    }
+
+    function getUrgencyClass(urgency) {
+        if (urgency === 'high') return 'urgency-high';
+        if (urgency === 'medium') return 'urgency-medium';
+        return 'urgency-low';
+    }
+
+    function buildResultCard(data) {
+        return `
+            <div class="result-card">
+                <span class="dept-badge">${data.department}</span>
+                <span class="urgency-badge ${getUrgencyClass(data.urgency)}">${data.urgency} urgency</span>
+                <p class="result-reason">${data.reason}</p>
+                <div class="result-advice">${data.advice}</div>
+                <button class="book-btn" onclick="bookAppointment('${data.department}')">
+                    Book Appointment with ${data.department} →
+                </button>
+            </div>
+        `;
+    }
+
+    async function sendSymptoms() {
+        const symptoms = input.value.trim();
+        if (!symptoms) return;
+
+        addMessage(symptoms, 'user');
+        input.value = '';
+        sendBtn.disabled = true;
+        showTyping();
+
+        try {
+            const res = await fetch('/api/symptom-check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symptoms })
+            });
+
+            const data = await res.json();
+            removeTyping();
+
+            if (res.ok) {
+                const content = `Based on your symptoms, I recommend:<br>${buildResultCard(data)}`;
+                addMessage(content, 'bot');
+            } else {
+                addMessage('Sorry, I could not analyse your symptoms. Please try again.', 'bot');
+            }
+
+        } catch (err) {
+            removeTyping();
+            addMessage('Could not connect to the server. Please check your connection.', 'bot');
+        }
+
+        sendBtn.disabled = false;
+        input.focus();
+    }
+
+    function bookAppointment(department) {
+        window.location.href = `/patient/book-appointment?department=${department}`;
+    }
+</script>
+
+</body>
+</html>

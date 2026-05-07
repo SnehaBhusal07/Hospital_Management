@@ -3,6 +3,9 @@ from flask_login import login_required, current_user
 from models import Doctor, Appointment, MedicalRecord, Patient
 from extensions import db
 from datetime import datetime, timedelta, date
+from groq import Groq
+import json
+import os
 
 patient_bp = Blueprint('patient_bp', __name__)
 
@@ -280,3 +283,101 @@ def generate_slots(start_time, end_time):
         current += timedelta(minutes=15)
 
     return slots
+
+
+# @patient_bp.route('/api/symptom-check', methods=['POST'])
+# def symptom_check():
+#     data = request.get_json()
+#     symptoms = data.get('symptoms', '')
+
+#     if not symptoms:
+#         return jsonify({'message': 'Please describe your symptoms'}), 400
+
+#     client = anthropic.Anthropic()
+
+#     message = client.messages.create(
+#         model="claude-opus-4-20250514",
+#         max_tokens=1024,
+#         messages=[
+#             {
+#                 "role": "user",
+#                 "content": f"""You are a medical assistant helping patients find the right hospital department.
+                
+# The patient describes: {symptoms}
+
+# Based on these symptoms, suggest the most appropriate department from this list only:
+# cardiology, neurology, orthopedics, pediatrics, dermatology, ent, ophthalmology, gynecology, psychiatry, radiology, oncology, emergency
+
+# Respond in this exact JSON format:
+# {{
+#     "department": "department_name",
+#     "reason": "brief explanation why this department",
+#     "urgency": "low/medium/high",
+#     "advice": "one sentence of general advice"
+# }}
+
+# Only respond with the JSON, nothing else."""
+#             }
+#         ]
+#     )
+
+#     import json
+#     result = json.loads(message.content[0].text)
+#     return jsonify(result), 200
+
+#temp
+# import os
+
+# @patient_bp.route('/api/symptom-check', methods=['POST'])
+# def symptom_check():
+#     data = request.get_json()
+#     symptoms = data.get('symptoms', '')
+
+#     if not symptoms:
+#         return jsonify({'message': 'Please describe your symptoms'}), 400
+
+#     api_key = os.environ.get('ANTHROPIC_API_KEY')
+#     print(f"API Key found: {api_key is not None}")   # ← shows in terminal
+
+#     client = anthropic.Anthropic(api_key=api_key)
+#     ...
+
+
+@patient_bp.route('/api/symptom-check', methods=['POST'])
+def symptom_check():
+    data = request.get_json()
+    symptoms = data.get('symptoms', '')
+
+    if not symptoms:
+        return jsonify({'message': 'Please describe your symptoms'}), 400
+
+    try:
+        client = Groq(api_key=os.environ.get('GROQ_API_KEY'))
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{
+                "role": "user",
+                "content": f"""You are a medical assistant helping patients find the right hospital department.
+
+The patient describes: {symptoms}
+
+Suggest the most appropriate department from this list only:
+cardiology, neurology, orthopedics, pediatrics, dermatology, ent, ophthalmology, gynecology, psychiatry, radiology, oncology, emergency
+
+Respond in this exact JSON format only, no other text:
+{{
+    "department": "department_name",
+    "reason": "brief explanation why this department",
+    "urgency": "low/medium/high",
+    "advice": "one sentence of general advice"
+}}"""
+            }]
+        )
+
+        result = json.loads(response.choices[0].message.content)
+        return jsonify(result), 200
+
+    except Exception as e:
+        print(f"API error: {str(e)}")
+        return jsonify({'message': f'Error: {str(e)}'}), 500
