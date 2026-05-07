@@ -74,6 +74,10 @@ def admin_availability():
 def admin_daily_schedule():
     return render_template('daily-schedule.html')
 
+@pages_bp.route('/admin/manage-hospital')
+def admin_manage_hospital():
+    return render_template('admission.html')
+
 @pages_bp.route('/admin/settings')
 def admin_settings():
     return render_template('system-settings.html')

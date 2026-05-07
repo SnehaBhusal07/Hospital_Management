@@ -214,7 +214,8 @@ def update_patient(patient_id):
         diagnosis    = data.get('diagnosis', ''),
         prescription = data.get('prescription', ''),
         report       = data.get('report', ''),
-        status       = data.get('status', 'Completed')
+        status       = data.get('status', 'Completed'),
+        record_type  = data.get('record_type', 'observation')
     )
     db.session.add(new_record)
 

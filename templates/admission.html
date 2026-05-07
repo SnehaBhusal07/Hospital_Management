@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='management.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <div id="name">Hospital Appointment and Patient Management System</div>
+    </div>
+
+    <div class="page">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="logo">MediPortal</div>
+            <nav>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/manage-doctors">Manage Doctors</a>
+                <a href="/admin/availability">Availability</a>
+                <a href="/admin/appointments">Appointments</a>
+                <a href="/admin/daily-schedule">Daily Schedule</a>
+                <a href="/admin/manage-hospital" class="active">Internal Management</a>
+                <a href="/admin/settings">Settings</a>
+                
+            </nav>
+            <div class="doc-info">
+                <div class="avatar">AD</div>
+                <p>Admin</p>
+                <p>Management</p>
+            </div>
+            <div style="padding:10px 22px 20px;">
+                <button onclick="logout()" style="
+                    width:100%; padding:8px;
+                    background:white; color:#c0392b;
+                    border:1px solid #c0392b;
+                    border-radius:6px; font-size:13px;
+                    cursor:pointer;">Logout</button>
+            </div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="main">
+            <div class="topbar">
+                <div>
+                <h2>Manage Hospital</h2>
+                <p>Manage Beds,Operations and Admitted Patients</p>
+                </div>
+                <div>
+                <p id="current-date">Date</p>
+                </div>
+            </div>
+            
+            <div class="stats-row">
+                <div class="card">
+                    <h3 id="T_beds">-</h3>
+                    <p>Total Beds</p>
+                </div>
+                <div class="card">
+                    <h3 id="a_bed">-</h3>
+                    <p>Available Beds</p>
+                </div>
+                <div class="card">
+                    <h3 id="a_patients">-</h3>
+                    <p>Admitted Patients</p>
+                </div>
+                <div class="card">
+                    <h3 id="Operations">-</h3>
+                    <p>Operations</p>
+                </div>
+            </div>
+            <div class="btn-manage">
+                <button onclick="showTable('a_bed_table')">See Available Beds</button>
+                <button onclick="showTable('a_patients_table')">See Admitted Patients</button>
+                <button onclick="showTable('discharged_patients_table')">See Discharged Patients</button>
+                <button onclick="showTable('operation_table')">See Operations</button>
+            </div>
+            <div class="disp">
+                <h3>Available Beds </h3>
+                <table id="a_bed_table">
+                    <th>Beds ID</th>
+                    <th> Book </th>
+                </table>
+            </div>
+            <div class="disp">
+                <h3>Admitted Patients</h3>
+                <table id="a_patients_table">
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Admitted Date</th>
+                    <th>Status</th>
+                </table>
+            </div>
+            <div class="disp">
+                <h3>Discharged patients </h3>
+                <table id="discharged_patients_table">
+                    <th>Name</th>
+                    <th> Age </th>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Admitted Date</th>
+                    <th>Discharged Date</th>
+                </table>
+            </div>
+            <div class="disp">
+                <h3>Operations </h3>
+                <div lass="btn-manage">
+                    <button>Today</button>
+                    <button>Upcoming</button>
+                    <button>Past</button>
+                </div>
+                <table id="operation_table">
+                    <th>Name</th>
+                    <th> Age </th>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Operation Date </th>
+                    <th>Time</th>
+                </table>
+            </div>
+
+
+
+        </div>
+    </div>
+<script>
+const today = new Date()
+const options = {
+    weekday: "short",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+}
+document.getElementById('current-date').textContent = today.toLocaleDateString('ne-NP', options);
+
+async function showTable(tableId) {
+    document.querySelectorAll(".disp").forEach(div => div.style.display = 'none');
+
+    const tableElement = document.getElementById(tableId);
+    if (tableElement) {
+        tableElement.parentElement.style.display = 'block'
+    }
+    try {
+        if (tableId === 'a_patients_table') {
+            const res = await fetch('/api/admin/admitted-patients');
+            const data = await res.json();
+            renderAdmitted(data);
+        }
+        else if (tableId === 'operation_table') {
+            const res = await fetch('/api/admin/operations');
+            const data = await res.json();
+            renderOperations(data);
+        }
+        else if (tableId === 'a_bed_table') {
+            const res = await fetch('/api/admin/available-beds');
+            const data = await res.json();
+            renderBeds(data);
+        }
+        else if (tableId === 'discharged_patients_table') {
+            const res = await fetch('/api/admin/discharged-patients');
+            const data = await res.json();
+            renderDischarged(data);
+        }
+    } catch (error) {
+        console.error("Failed to fetch data:", error)
+    }
+}
+
+function renderBeds(data) {
+    const table = document.getElementById('a_bed_table');
+    table.innerHTML = `<tr><th>Bed ID</th><th>Book</th></tr>`;
+    data.forEach(bed => {
+        table.innerHTML += `<tr>
+            <td>${bed.bed_id}</td>
+            <td><button>Book</button></td>
+        </tr>`;
+    });
+}
+
+function renderDischarged(data) {
+    const table = document.getElementById('discharged_patients_table');  // fix 1: correct method and ID
+    table.innerHTML = `<tr><th>Name</th><th>Age</th><th>Doctor</th><th>Department</th><th>Admitted Date</th><th>Discharged Date</th></tr>`;
+    data.forEach(DP => {   // fix 2: dot not comma
+        table.innerHTML += `<tr>
+            <td>${DP.name}</td>
+            <td>${DP.age}</td>
+            <td>${DP.doctor}</td>
+            <td>${DP.department}</td>
+            <td>${DP.admitted_date}</td>
+            <td>${DP.discharged_date}</td>  
+        </tr>`  // fix 3: discharged_date not discharged_data
+    })
+}
+
+function renderAdmitted(data) {
+    const table = document.getElementById('a_patients_table');
+    table.innerHTML = `<tr><th>Name</th><th>Doctor</th><th>Dept</th><th>Date</th><th>Status</th></tr>`;
+    data.forEach(p => {
+        table.innerHTML += `<tr>
+            <td>${p.name}</td>
+            <td>${p.doctor}</td>
+            <td>${p.dept}</td>
+            <td>${p.date}</td>
+            <td>${p.status}</td>
+        </tr>`;
+    });
+}
+
+function renderOperations(data) {
+    const table = document.getElementById('operation_table');
+    table.innerHTML = `<tr><th>Patient</th><th>Doctor</th><th>Dept</th><th>Date</th><th>Time</th></tr>`;
+    data.forEach(op => {
+        table.innerHTML += `<tr>
+            <td>${op.name}</td>
+            <td>${op.doctor}</td>
+            <td>${op.dept}</td>
+            <td>${op.date}</td>
+            <td>${op.time}</td>
+        </tr>`;
+    });
+}
+
+async function loadStats() {
+    const res = await fetch('/api/admin/management-stats');
+    const data = await res.json();
+    document.getElementById('T_beds').textContent = data.total_beds;
+    document.getElementById('a_bed').textContent = data.available_beds;
+    document.getElementById('a_patients').textContent = data.admitted_patients;
+    document.getElementById('Operations').textContent = data.operations;
+}
+loadStats();
+</script>
+</body>
+</html>   

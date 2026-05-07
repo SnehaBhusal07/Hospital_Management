@@ -7,6 +7,7 @@ from flask import Flask, jsonify
 from routes.patient import patient_bp
 from routes.management import management_bp
 from routes.pages import pages_bp           
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aspataal'
@@ -43,6 +44,7 @@ def load_user(user_id):
     return None
 
 
+migrate = Migrate(app, db)
 
 with app.app_context():
     from models import Patient, Doctor, Appointment, MedicalRecord

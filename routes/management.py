@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session,redirect
 from extensions import db
 from models import Doctor, Patient, Appointment, MedicalRecord
 from werkzeug.security import generate_password_hash
@@ -232,7 +232,63 @@ def get_all_patients():
         })
     return jsonify({'patients': result}), 200
 
+from flask import render_template
 
+
+@management_bp.route('/api/admin/admitted-patients')
+def get_admitted():
+    if not is_admin():
+        return jsonify({'message':'Admin login required'}),403
+    records = MedicalRecord.query.filter_by(status='admitted').all()
+    data=[]
+    for r in records:
+        patient=Patient.query.get(r.patient_id)
+        doctor=Doctor.query.get(r.doctor_id)
+        data.append({
+            "name":patient.name,
+            "age":'N/A',
+            "doctor": doctor.name,
+            "dept": doctor.department,
+            "date": r.date.strftime('%Y-%m-%d'),
+            "status": r.status
+        })
+    return jsonify(data)
+
+@management_bp.route('/api/admin/operations')
+def get_operations():
+    if not is_admin():
+        return jsonify({'message':'Admin login required'}),403
+    appointments=Appointment.query.all()
+    data=[]
+    for a in appointments:
+        patient = db.session.get(Patient, a.patient_id)  # ← fetch manually
+        doctor = db.session.get(Doctor, a.doctor_id) 
+        data.append({
+            "name": patient.name if patient else 'Unknown',
+            "doctor": doctor.name if doctor else 'Unknown',
+            "dept": doctor.department if doctor else 'Unknown',
+            "date": a.date.strftime('%Y-%m-%d'),
+            "time": a.time_slot
+        })
+    return jsonify(data)
+@management_bp.route('/api/admin/discharged-patients')
+def get_discharged():
+    if not is_admin():
+        return jsonify({'message':'Admin login required'}),403
+    discharge=MedicalRecord.query.filter_by(status='discharge').all()
+    data=[]
+    for r in discharge:
+        patient=Patient.query.get(r.patient_id)
+        doctor=Doctor.query.get(r.doctor_id)
+        data.append({
+            "name":patient.name,
+            "age":'N/A',
+            "doctor": doctor.name,
+            "dept": doctor.department,
+            "admitted_date": r.date.strftime('%Y-%m-%d'),
+            "discharged_date": r.discharged_date.strftime('%Y-%m-%d')if r.discharged_date else 'N/A'
+        })
+    return jsonify(data)
 # ---- ADMIN LOGOUT ----
 @management_bp.route('/api/admin/logout', methods=['POST'])
 def admin_logout():

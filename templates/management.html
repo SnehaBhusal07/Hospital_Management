@@ -22,7 +22,9 @@
                 <a href="/admin/availability">Availability</a>
                 <a href="/admin/appointments">Appointments</a>
                 <a href="/admin/daily-schedule">Daily Schedule</a>
+                <a href="/admin/manage-hospital">Internal Management</a>
                 <a href="/admin/settings">Settings</a>
+                
             </nav>
             <div class="doc-info">
                 <div class="avatar">AD</div>
@@ -50,12 +52,8 @@
                 <p id="current-date"></p>
             </div>
 
-<<<<<<< HEAD
             <!-- Message -->
             <div id="page-msg" style="display:none; margin:10px 20px;
-=======
-            <div id="page-msg" style="display:none; margin:0 20px;
->>>>>>> ce3b1ab5b56f9430d6d51819ad44ca24e665a1f5
                 padding:10px; border-radius:6px; font-size:13px;
                 text-align:center;">
             </div>
@@ -241,9 +239,8 @@
                 document.getElementById('stat-patients').textContent = '?';
             }
         }
-    }
+    
 
-<<<<<<< HEAD
         loadDashboard();
 
 
@@ -283,34 +280,6 @@
         }
 
     </script>
-=======
-    loadDashboard();
-
-
-    // ---- 3. Logout ----
-    async function logout() {
-        const confirmed = confirm('Are you sure you want to logout?');
-        if (!confirmed) return;
-        const res = await fetch('/api/admin/logout', { method: 'POST' });
-        if (res.ok) window.location.href = '/';
-    }
-
-
-    // ---- Helper ----
-    function showMsg(text, type) {
-        const msg = document.getElementById('page-msg');
-        msg.textContent      = text;
-        msg.style.display    = 'block';
-        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
-        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
-        setTimeout(function() {
-            msg.style.display = 'none';
-        }, 3000);
-    }
-
-</script>
->>>>>>> ce3b1ab5b56f9430d6d51819ad44ca24e665a1f5
 </body>
 </html>
 
-<

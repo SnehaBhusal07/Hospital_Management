@@ -44,3 +44,5 @@ class MedicalRecord(db.Model):
     report = db.Column(db.Text)
     prescription = db.Column(db.Text)
     status = db.Column(db.String(50), default='Completed')
+    discharged_date=db.Column(db.DateTime,nullable=True)
+    record_type = db.Column(db.String(50), default='observation')
