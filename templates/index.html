@@ -250,24 +250,13 @@
             currentRole = this.dataset.role;
             hideMsg();
 
-document.querySelectorAll('.role-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.role-btn').forEach(function(b) {
-            b.classList.remove('active-role');
-        });
-        this.classList.add('active-role');
-        currentRole = this.dataset.role;
-        hideMsg();
-
-        if (currentRole === 'admin') {
-            document.getElementById('admin-username-group').style.display = 'block';
-            document.getElementById('email-group').style.display = 'none';
-        } else {
-            document.getElementById('admin-username-group').style.display = 'none';
-            document.getElementById('email-group').style.display = 'block';
-        }
-    });
-});
+            if (currentRole === 'admin') {
+                document.getElementById('admin-username-group').style.display = 'block';
+                document.getElementById('email-group').style.display = 'none';
+            } else {
+                document.getElementById('admin-username-group').style.display = 'none';
+                document.getElementById('email-group').style.display = 'block';
+            }
         });
     });
 

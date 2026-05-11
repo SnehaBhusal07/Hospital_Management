@@ -129,3 +129,4 @@ def me():
         'name' : current_user.name,
         'email': current_user.email
     }), 200
+
