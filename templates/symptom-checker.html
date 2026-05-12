@@ -8,6 +8,7 @@
     <style>
         * { padding: 0; margin: 0; box-sizing: border-box; }
         body { background-color: #F4F9F9; font-family: Arial, sans-serif; }
+
         .navbar {
             height: 70px;
             background-color: #0F4C5C;
@@ -28,17 +29,66 @@
             font-size: 13px;
         }
         .back-btn:hover { background: rgba(255,255,255,0.1); }
+
         .container {
             max-width: 700px;
             margin: 30px auto;
             padding: 0 20px 40px;
         }
+
         .chat-header {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         .chat-header h2 { font-size: 22px; color: #0F4C5C; margin-bottom: 6px; }
-        .chat-header p { font-size: 14px; color: #555; }
+        .chat-header p  { font-size: 14px; color: #555; }
+
+        /* CATEGORY TABS */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .cat-btn {
+            padding: 7px 14px;
+            border: 1px solid #0F4C5C;
+            border-radius: 20px;
+            background: white;
+            color: #0F4C5C;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .cat-btn:hover,
+        .cat-btn.active {
+            background: #0F4C5C;
+            color: white;
+        }
+
+        /* SUGGESTION CHIPS */
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+            min-height: 36px;
+        }
+        .suggestion-chip {
+            padding: 7px 14px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #555;
+            cursor: pointer;
+            background: white;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .suggestion-chip:hover { background: #e1f5ee; border-color: #0F4C5C; color: #0F4C5C; }
+
+        /* CHAT BOX */
         .chat-box {
             background: white;
             border-radius: 12px;
@@ -52,25 +102,19 @@
             flex-direction: column;
             gap: 16px;
         }
-        .message {
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
-        }
+
+        .message { display: flex; gap: 10px; align-items: flex-start; }
         .message.user { flex-direction: row-reverse; }
+
         .avatar-icon {
-            width: 34px;
-            height: 34px;
+            width: 34px; height: 34px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: bold;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: bold; flex-shrink: 0;
         }
-        .bot-icon { background: #0F4C5C; color: white; }
+        .bot-icon  { background: #0F4C5C; color: white; }
         .user-icon { background: #e1f5ee; color: #0F4C5C; }
+
         .bubble {
             max-width: 80%;
             padding: 12px 16px;
@@ -89,6 +133,8 @@
             color: white;
             border-top-right-radius: 2px;
         }
+
+        /* RESULT CARD */
         .result-card {
             background: white;
             border: 1px solid #ddd;
@@ -114,13 +160,16 @@
             font-size: 12px;
             margin-left: 8px;
         }
-        .urgency-low { background: #d4f4e8; color: #0a6640; }
+        .urgency-low    { background: #d4f4e8; color: #0a6640; }
         .urgency-medium { background: #fff0d4; color: #a05f00; }
-        .urgency-high { background: #fde8e8; color: #c0392b; }
-        .result-reason { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .urgency-high   { background: #fde8e8; color: #c0392b; }
+
+        .result-reason {
+            font-size: 13px; color: #555;
+            margin-bottom: 8px; margin-top: 8px;
+        }
         .result-advice {
-            font-size: 13px;
-            color: #444;
+            font-size: 13px; color: #444;
             padding: 8px 12px;
             background: #f4f9f9;
             border-left: 3px solid #0F4C5C;
@@ -128,20 +177,17 @@
             margin-bottom: 12px;
         }
         .book-btn {
-            width: 100%;
-            padding: 10px;
-            background: #0F4C5C;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
+            width: 100%; padding: 10px;
+            background: #0F4C5C; color: white;
+            border: none; border-radius: 8px;
+            font-size: 14px; cursor: pointer;
+            font-family: inherit;
         }
         .book-btn:hover { background: #2C7DA0; }
+
+        /* TYPING */
         .typing {
-            display: flex;
-            gap: 4px;
-            align-items: center;
+            display: flex; gap: 4px; align-items: center;
             padding: 12px 16px;
             background: #f4f9f9;
             border: 1px solid #ddd;
@@ -150,61 +196,39 @@
             width: fit-content;
         }
         .dot {
-            width: 7px;
-            height: 7px;
-            background: #0F4C5C;
-            border-radius: 50%;
+            width: 7px; height: 7px;
+            background: #0F4C5C; border-radius: 50%;
             animation: bounce 1.2s infinite;
         }
         .dot:nth-child(2) { animation-delay: 0.2s; }
         .dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes bounce {
             0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-6px); }
+            30%           { transform: translateY(-6px); }
         }
-        .input-row {
-            display: flex;
-            gap: 10px;
-        }
+
+        /* INPUT */
+        .input-row { display: flex; gap: 10px; }
         .symptom-input {
-            flex: 1;
-            padding: 12px 16px;
+            flex: 1; padding: 12px 16px;
             border: 1px solid #0F4C5C;
             border-radius: 8px;
-            font-size: 14px;
-            outline: none;
+            font-size: 14px; outline: none;
             resize: none;
             font-family: Arial, sans-serif;
         }
-        .symptom-input:focus { box-shadow: 0 0 0 3px rgba(15,76,92,0.1); }
+        .symptom-input:focus {
+            box-shadow: 0 0 0 3px rgba(15,76,92,0.1);
+        }
         .send-btn {
             padding: 12px 20px;
-            background: #0F4C5C;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            white-space: nowrap;
+            background: #0F4C5C; color: white;
+            border: none; border-radius: 8px;
+            font-size: 14px; cursor: pointer;
         }
-        .send-btn:hover { background: #2C7DA0; }
+        .send-btn:hover    { background: #2C7DA0; }
         .send-btn:disabled { background: #aaa; cursor: not-allowed; }
-        .suggestions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .suggestion-chip {
-            padding: 6px 14px;
-            border: 1px solid #0F4C5C;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #0F4C5C;
-            cursor: pointer;
-            background: white;
-        }
-        .suggestion-chip:hover { background: #e1f5ee; }
+
         .disclaimer {
             text-align: center;
             font-size: 11px;
@@ -221,85 +245,357 @@
 </div>
 
 <div class="container">
+
     <div class="chat-header">
-        <h2>Symptom Checker</h2>
-        <p>Describe your symptoms and we'll suggest the right department for you</p>
+        <h2>🩺 Symptom Checker</h2>
+        <p>Describe your symptoms and we'll suggest the right department</p>
     </div>
 
-    <div class="suggestions">
-        <button class="suggestion-chip" onclick="useChip('I have chest pain and shortness of breath')">Chest pain</button>
-        <button class="suggestion-chip" onclick="useChip('I have severe headache and dizziness')">Headache & dizziness</button>
-        <button class="suggestion-chip" onclick="useChip('I have knee pain and difficulty walking')">Knee pain</button>
-        <button class="suggestion-chip" onclick="useChip('I have a skin rash and itching')">Skin rash</button>
-        <button class="suggestion-chip" onclick="useChip('I have ear pain and hearing loss')">Ear pain</button>
-        <button class="suggestion-chip" onclick="useChip('I have fever and cough for 3 days')">Fever & cough</button>
+    <!-- CATEGORY TABS -->
+    <div class="category-tabs">
+        <button class="cat-btn active" onclick="showCategory('all', this)">
+            All
+        </button>
+        <button class="cat-btn" onclick="showCategory('heart', this)">
+            ❤️ Heart
+        </button>
+        <button class="cat-btn" onclick="showCategory('head', this)">
+            🧠 Head
+        </button>
+        <button class="cat-btn" onclick="showCategory('stomach', this)">
+            🫃 Stomach
+        </button>
+        <button class="cat-btn" onclick="showCategory('bones', this)">
+            🦴 Bones & Muscles
+        </button>
+        <button class="cat-btn" onclick="showCategory('skin', this)">
+            🖐 Skin
+        </button>
+        <button class="cat-btn" onclick="showCategory('ent', this)">
+            👃 ENT
+        </button>
+        <button class="cat-btn" onclick="showCategory('eyes', this)">
+            👁 Eyes
+        </button>
+        <button class="cat-btn" onclick="showCategory('general', this)">
+            🤒 General
+        </button>
     </div>
 
+    <!-- SUGGESTION CHIPS -->
+    <div class="suggestions" id="suggestions"></div>
+
+    <!-- CHAT BOX -->
     <div class="chat-box" id="chat-box">
         <div class="message bot">
             <div class="avatar-icon bot-icon">AI</div>
             <div class="bubble bot-bubble">
-                Hello! I'm your medical assistant. Please describe your symptoms in detail and I'll suggest the most appropriate department for your appointment.<br><br>
-                <em>For example: "I've been having chest pain and shortness of breath for two days."</em>
+                Hello! I'm your medical assistant. Describe your symptoms
+                below or click a suggestion chip to get started.<br><br>
+                <em>Example: "I have chest pain and shortness of breath
+                for two days."</em>
             </div>
         </div>
     </div>
 
+    <!-- INPUT -->
     <div class="input-row">
         <textarea
             class="symptom-input"
             id="symptom-input"
             rows="2"
-            placeholder="Describe your symptoms here..."
-        ></textarea>
-        <button class="send-btn" id="send-btn" onclick="sendSymptoms()">Check</button>
+            placeholder="Describe your symptoms here...">
+        </textarea>
+        <button class="send-btn" id="send-btn" onclick="sendSymptoms()">
+            Check
+        </button>
     </div>
-    <p class="disclaimer">⚠ This tool is for guidance only. Always consult a qualified doctor for medical advice.</p>
+
+    <p class="disclaimer">
+        ⚠ This tool is for guidance only.
+        Always consult a qualified doctor for medical advice.
+    </p>
+
 </div>
 
 <script>
-    const chatBox = document.getElementById('chat-box');
-    const input = document.getElementById('symptom-input');
-    const sendBtn = document.getElementById('send-btn');
 
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendSymptoms();
-        }
+    // ---- ALL SYMPTOM CHIPS BY CATEGORY ----
+    const symptoms = {
+        heart: [
+            'Chest pain',
+            'Shortness of breath',
+            'Palpitations',
+            'Rapid heartbeat',
+            'Chest tightness',
+            'Pain radiating to arm',
+            'Irregular heartbeat',
+            'Swollen ankles'
+        ],
+        head: [
+            'Severe headache',
+            'Migraine',
+            'Dizziness',
+            'Fainting',
+            'Memory loss',
+            'Confusion',
+            'Tremors',
+            'Seizures',
+            'Numbness in face',
+            'Sudden vision loss'
+        ],
+        stomach: [
+            'Stomach pain',
+            'Nausea',
+            'Vomiting',
+            'Diarrhea',
+            'Constipation',
+            'Bloating',
+            'Loss of appetite',
+            'Blood in stool',
+            'Jaundice',
+            'Acid reflux',
+            'Stomach cramps',
+            'Difficulty swallowing'
+        ],
+        bones: [
+            'Knee pain',
+            'Back pain',
+            'Joint pain',
+            'Muscle weakness',
+            'Swollen joints',
+            'Difficulty walking',
+            'Neck pain',
+            'Shoulder pain',
+            'Hip pain',
+            'Leg cramps',
+            'Bone fracture',
+            'Wrist pain'
+        ],
+        skin: [
+            'Skin rash',
+            'Itching',
+            'Dry skin',
+            'Acne',
+            'Hives',
+            'Skin discoloration',
+            'Wound not healing',
+            'Hair loss',
+            'Nail changes',
+            'Blisters',
+            'Excessive sweating'
+        ],
+        ent: [
+            'Ear pain',
+            'Hearing loss',
+            'Ringing in ears',
+            'Runny nose',
+            'Sore throat',
+            'Nasal congestion',
+            'Loss of smell',
+            'Sneezing',
+            'Hoarse voice',
+            'Ear discharge',
+            'Blocked ears',
+            'Throat swelling'
+        ],
+        eyes: [
+            'Blurry vision',
+            'Eye pain',
+            'Red eyes',
+            'Watery eyes',
+            'Double vision',
+            'Light sensitivity',
+            'Eye discharge',
+            'Swollen eyelids',
+            'Sudden vision change',
+            'Floaters in vision'
+        ],
+        general: [
+            'Fever',
+            'Fatigue',
+            'Weight loss',
+            'Weight gain',
+            'Night sweats',
+            'Chills',
+            'Swollen lymph nodes',
+            'Allergic reaction',
+            'Cough',
+            'Wheezing',
+            'Frequent urination',
+            'Excessive thirst',
+            'Weakness',
+            'Loss of taste',
+            'Body ache'
+        ]
+    };
+
+    // combine all for 'all' category
+    const allSymptoms = [];
+    Object.values(symptoms).forEach(function(list) {
+        list.forEach(function(s) {
+            if (!allSymptoms.includes(s)) allSymptoms.push(s);
+        });
     });
 
+
+    // ---- SHOW CATEGORY ----
+    function showCategory(cat, btn) {
+
+        // update active tab
+        document.querySelectorAll('.cat-btn').forEach(function(b) {
+            b.classList.remove('active');
+        });
+        btn.classList.add('active');
+
+        const list = cat === 'all' ? allSymptoms : (symptoms[cat] || []);
+        renderChips(list);
+    }
+
+
+    // ---- RENDER CHIPS ----
+    function renderChips(list) {
+        const container = document.getElementById('suggestions');
+        container.innerHTML = '';
+
+        list.forEach(function(symptom) {
+            const btn       = document.createElement('button');
+            btn.className   = 'suggestion-chip';
+            btn.textContent = symptom;
+            btn.addEventListener('click', function() {
+                useChip(symptom);
+            });
+            container.appendChild(btn);
+        });
+    }
+
+    // show all chips on load
+    renderChips(allSymptoms);
+
+
+    // ---- USE CHIP ----
     function useChip(text) {
-        input.value = text;
+        const input   = document.getElementById('symptom-input');
+        const current = input.value.trim();
+
+        // append to existing text if any
+        if (current) {
+            input.value = current + ', ' + text.toLowerCase();
+        } else {
+            input.value = text;
+        }
+
         input.focus();
     }
 
+
+    // ---- SEND ON ENTER ----
+    document.getElementById('symptom-input')
+        .addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendSymptoms();
+            }
+        });
+
+
+    // ---- SEND SYMPTOMS ----
+    async function sendSymptoms() {
+        const input    = document.getElementById('symptom-input');
+        const symptoms = input.value.trim();
+        if (!symptoms) return;
+
+        addMessage(symptoms, 'user');
+        input.value = '';
+
+        document.getElementById('send-btn').disabled = true;
+        showTyping();
+
+        try {
+            const res  = await fetch('/api/symptom-check', {
+                method : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body   : JSON.stringify({ symptoms })
+            });
+
+            const data = await res.json();
+            removeTyping();
+
+            if (res.ok) {
+                addMessage(
+                    'Based on your symptoms, I recommend:<br>' +
+                    buildResultCard(data),
+                    'bot'
+                );
+            } else {
+                addMessage(
+                    'Sorry, I could not analyse your symptoms. Please try again.',
+                    'bot'
+                );
+            }
+
+        } catch(e) {
+            removeTyping();
+            addMessage('Could not connect to server.', 'bot');
+        }
+
+        document.getElementById('send-btn').disabled = false;
+        document.getElementById('symptom-input').focus();
+    }
+
+
+    // ---- BUILD RESULT CARD ----
+    function buildResultCard(data) {
+        const urgencyClass = 'urgency-' + (data.urgency || 'low');
+        return `
+            <div class="result-card">
+                <span class="dept-badge">${data.department || '-'}</span>
+                <span class="urgency-badge ${urgencyClass}">
+                    ${data.urgency || 'low'} urgency
+                </span>
+                <p class="result-reason">${data.reason || ''}</p>
+                <div class="result-advice">${data.advice || ''}</div>
+                <button class="book-btn"
+                    onclick="bookAppointment('${data.department}')">
+                    Book Appointment with ${data.department} →
+                </button>
+            </div>`;
+    }
+
+
+    // ---- CHAT HELPERS ----
+    const chatBox = document.getElementById('chat-box');
+
     function addMessage(content, type) {
-        const msg = document.createElement('div');
-        msg.className = `message ${type}`;
-        const icon = document.createElement('div');
-        icon.className = `avatar-icon ${type === 'bot' ? 'bot-icon' : 'user-icon'}`;
+        const msg    = document.createElement('div');
+        msg.className = 'message ' + type;
+        const icon   = document.createElement('div');
+        icon.className   = 'avatar-icon ' +
+            (type === 'bot' ? 'bot-icon' : 'user-icon');
         icon.textContent = type === 'bot' ? 'AI' : 'You';
         const bubble = document.createElement('div');
-        bubble.className = `bubble ${type === 'bot' ? 'bot-bubble' : 'user-bubble'}`;
+        bubble.className = 'bubble ' +
+            (type === 'bot' ? 'bot-bubble' : 'user-bubble');
         bubble.innerHTML = content;
         msg.appendChild(icon);
         msg.appendChild(bubble);
         chatBox.appendChild(msg);
         chatBox.scrollTop = chatBox.scrollHeight;
-        return bubble;
     }
 
     function showTyping() {
-        const msg = document.createElement('div');
+        const msg    = document.createElement('div');
         msg.className = 'message bot';
-        msg.id = 'typing-indicator';
-        const icon = document.createElement('div');
-        icon.className = 'avatar-icon bot-icon';
+        msg.id       = 'typing-indicator';
+        const icon   = document.createElement('div');
+        icon.className   = 'avatar-icon bot-icon';
         icon.textContent = 'AI';
         const typing = document.createElement('div');
         typing.className = 'typing';
-        typing.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+        typing.innerHTML =
+            '<div class="dot"></div>' +
+            '<div class="dot"></div>' +
+            '<div class="dot"></div>';
         msg.appendChild(icon);
         msg.appendChild(typing);
         chatBox.appendChild(msg);
@@ -311,64 +607,11 @@
         if (t) t.remove();
     }
 
-    function getUrgencyClass(urgency) {
-        if (urgency === 'high') return 'urgency-high';
-        if (urgency === 'medium') return 'urgency-medium';
-        return 'urgency-low';
-    }
-
-    function buildResultCard(data) {
-        return `
-            <div class="result-card">
-                <span class="dept-badge">${data.department}</span>
-                <span class="urgency-badge ${getUrgencyClass(data.urgency)}">${data.urgency} urgency</span>
-                <p class="result-reason">${data.reason}</p>
-                <div class="result-advice">${data.advice}</div>
-                <button class="book-btn" onclick="bookAppointment('${data.department}')">
-                    Book Appointment with ${data.department} →
-                </button>
-            </div>
-        `;
-    }
-
-    async function sendSymptoms() {
-        const symptoms = input.value.trim();
-        if (!symptoms) return;
-
-        addMessage(symptoms, 'user');
-        input.value = '';
-        sendBtn.disabled = true;
-        showTyping();
-
-        try {
-            const res = await fetch('/api/symptom-check', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ symptoms })
-            });
-
-            const data = await res.json();
-            removeTyping();
-
-            if (res.ok) {
-                const content = `Based on your symptoms, I recommend:<br>${buildResultCard(data)}`;
-                addMessage(content, 'bot');
-            } else {
-                addMessage('Sorry, I could not analyse your symptoms. Please try again.', 'bot');
-            }
-
-        } catch (err) {
-            removeTyping();
-            addMessage('Could not connect to the server. Please check your connection.', 'bot');
-        }
-
-        sendBtn.disabled = false;
-        input.focus();
-    }
-
     function bookAppointment(department) {
-        window.location.href = `/patient/book-appointment?department=${department}`;
+        window.location.href =
+            '/patient/find-doctors?department=' + department;
     }
+
 </script>
 
 </body>

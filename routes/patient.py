@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
-from models import Doctor, Appointment, MedicalRecord, Patient
+from models import Doctor, Appointment, MedicalRecord, Patient,AdmittedPatient
 from extensions import db
 from datetime import datetime, timedelta, date
 from groq import Groq
 import json
 import os
-
+from utils.email import send_booking_email
 patient_bp = Blueprint('patient_bp', __name__)
 
 
@@ -157,7 +157,23 @@ def book_appointment():
     db.session.add(new_appointment)
     db.session.commit()
 
-    return jsonify({'message': 'Appointment booked successfully!'}), 201
+    try:
+        send_booking_email(
+            to_email       = current_user.email,
+            patient_name   = current_user.name,
+            doctor_name    = doctor.name,
+            specialization = doctor.specialization,
+            date           = str(selected_date),
+            time_slot      = data['time_slot'],
+            appointment_id = new_appointment.id
+        )
+        email_sent = True
+    except:
+        email_sent=False
+
+
+    return jsonify({'message': 'Appointment booked successfully!',
+                    'emaill_sent':email_sent}), 201
 
 
 # ---- CANCEL APPOINTMENT ----
@@ -345,7 +361,7 @@ def generate_slots(start_time, end_time):
 
 @patient_bp.route('/api/symptom-check', methods=['POST'])
 def symptom_check():
-    data = request.get_json()
+    data     = request.get_json()
     symptoms = data.get('symptoms', '')
 
     if not symptoms:
@@ -358,12 +374,61 @@ def symptom_check():
             model="llama-3.3-70b-versatile",
             messages=[{
                 "role": "user",
-                "content": f"""You are a medical assistant helping patients find the right hospital department.
+                "content": f"""You are a medical assistant helping patients
+find the right hospital department.
 
-The patient describes: {symptoms}
+Patient description: {symptoms}
 
 Suggest the most appropriate department from this list only:
-cardiology, neurology, orthopedics, pediatrics, dermatology, ent, ophthalmology, gynecology, psychiatry, radiology, oncology, emergency
+cardiology, neurology, orthopedics, pediatrics, dermatology,
+ent, ophthalmology, gynecology, psychiatry, general medicine, emergency
+
+Respond in this exact JSON format only, no other text:
+{{
+    "department": "department_name",
+    "reason": "brief explanation why this department",
+    "urgency": "low/medium/high",
+    "advice": "one sentence of general advice",
+    "warnings": ["warning sign 1", "warning sign 2"]
+}}
+
+warnings should list 2-3 symptoms that would require emergency care."""
+            }]
+        )
+
+        result = json.loads(response.choices[0].message.content)
+        return jsonify(result), 200
+
+    except Exception as e:
+        print(f"API error: {str(e)}")
+        return jsonify({'message': f'Error: {str(e)}'}), 500@patient_bp.route('/api/symptom-check', methods=['POST'])
+def symptom_check():
+    data     = request.get_json()
+    symptoms = data.get('symptoms', '')
+
+    if not symptoms:
+        return jsonify({'message': 'Please describe your symptoms'}), 400
+
+    # ---- DEBUG: print key status ----
+    api_key = os.environ.get('GROQ_API_KEY')
+    print(f"GROQ API Key found: {api_key is not None}")
+    print(f"Symptoms received: {symptoms}")
+
+    try:
+        client = Groq(api_key=api_key)
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{
+                "role": "user",
+                "content": f"""You are a medical assistant helping patients
+find the right hospital department.
+
+Patient description: {symptoms}
+
+Suggest the most appropriate department from this list only:
+cardiology, neurology, orthopedics, pediatrics, dermatology,
+ent, ophthalmology, gynecology, psychiatry, general medicine, emergency
 
 Respond in this exact JSON format only, no other text:
 {{
@@ -375,9 +440,40 @@ Respond in this exact JSON format only, no other text:
             }]
         )
 
+        print(f"Raw AI response: {response.choices[0].message.content}")
+
         result = json.loads(response.choices[0].message.content)
         return jsonify(result), 200
 
     except Exception as e:
-        print(f"API error: {str(e)}")
+        print(f"GROQ ERROR: {str(e)}")
         return jsonify({'message': f'Error: {str(e)}'}), 500
+    
+    # ---- PATIENT ADMISSIONS ----
+@patient_bp.route('/api/patient/admissions', methods=['GET'])
+@login_required
+def patient_admissions():
+    if not current_user.get_id().startswith('patient_'):
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    admissions = AdmittedPatient.query.filter_by(
+        patient_id=current_user.id
+    ).order_by(AdmittedPatient.admitted_date.desc()).all()
+
+    result = []
+    for a in admissions:
+        doctor = db.session.get(Doctor, a.doctor_id)
+        result.append({
+            'id'            : a.id,
+            'doctor_name'   : doctor.name       if doctor else 'Unknown',
+            'department'    : doctor.department  if doctor else 'Unknown',
+            'admission_type': a.admission_type   or 'observation',
+            'admitted_date' : str(a.admitted_date),
+            'discharged_date': str(a.discharged_date) if a.discharged_date else None,
+            'bed_number'    : a.bed_number,
+            'diagnosis'     : a.diagnosis        or '—',
+            'status'        : a.status
+        })
+
+    return jsonify({'admissions': result}), 200
+

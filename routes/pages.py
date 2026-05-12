@@ -34,6 +34,9 @@ def reports():
 def book_appointment():
     return render_template('book-appointment.html')
 
+@pages_bp.route('/patient/symptom-checker')
+def symptom_checker():
+    return render_template('symptom-checker.html')
 
 # ---- DOCTOR ----
 @pages_bp.route('/doctor/dashboard')
@@ -82,6 +85,3 @@ def admin_manage_hospital():
 def admin_settings():
     return render_template('system-settings.html')
 
-@pages_bp.route('/symptom-checker')
-def symptom_checker():
-    return render_template('symptom-checker.html')

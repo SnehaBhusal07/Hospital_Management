@@ -7,7 +7,7 @@ class Patient(UserMixin, db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)   
-    phone = db.Column(db.String(15))
+    phone = db.Column(db.Integer)
     appointments = db.relationship('Appointment', backref='patient', lazy=True)
 
     def get_id(self):
@@ -36,13 +36,34 @@ class Appointment(db.Model):
     status     = db.Column(db.String(20), default='Booked')
     
 class MedicalRecord(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
-    doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
-    diagnosis = db.Column(db.Text)
-    report = db.Column(db.Text)
+    id           = db.Column(db.Integer, primary_key=True)
+    patient_id   = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    doctor_id    = db.Column(db.Integer, db.ForeignKey('doctor.id'),  nullable=False)
+    date         = db.Column(db.DateTime, default=datetime.utcnow)
+    diagnosis    = db.Column(db.Text)
     prescription = db.Column(db.Text)
-    status = db.Column(db.String(50), default='Completed')
-    discharged_date=db.Column(db.DateTime,nullable=True)
-    record_type = db.Column(db.String(50), default='observation')
+    report       = db.Column(db.Text)
+    status       = db.Column(db.String(20), default='Completed')
+
+  
+    patient = db.relationship('Patient', backref='medical_records')
+    doctor  = db.relationship('Doctor',  backref='medical_records')
+class AdmittedPatient(db.Model):
+    id             = db.Column(db.Integer, primary_key=True)
+    patient_id     = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    doctor_id      = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
+    admission_type = db.Column(db.String(50))        # observation or operation
+    admitted_date  = db.Column(db.Date, nullable=False)
+    discharged_date= db.Column(db.Date, nullable=True)  # null = still admitted
+    diagnosis      = db.Column(db.Text)
+    status         = db.Column(db.String(20), default='Admitted')  # Admitted / Discharged
+    bed_number     = db.Column(db.Integer)
+
+    # relationships to get patient and doctor info easily
+    patient = db.relationship('Patient', backref='admissions')
+    doctor  = db.relationship('Doctor',  backref='admissions')
+
+class Bed(db.Model):
+    id         = db.Column(db.Integer, primary_key=True)
+    bed_number = db.Column(db.Integer, unique=True, nullable=False)
+    is_occupied= db.Column(db.Boolean, default=False)

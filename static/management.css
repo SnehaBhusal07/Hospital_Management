@@ -457,7 +457,8 @@ td {
     justify-content: space-evenly;
     height:35px;
     width:250px;
-    border-radius: 5px;
+    border: 2px solid #1a3c4d;
+    border-radius: 10px;
     color:#e1eef5;
     font-size: 15px;
     cursor: pointer;
@@ -475,4 +476,135 @@ td {
 }
 .disp{
    display: none; 
+}
+.btn-admit{
+    width: 100%;
+    height:40px;
+    margin-top:20px;
+    background-color: #2c5f74;
+    border:2px,solid,#2c5f74;
+    border-radius: 10px;
+    color: #d4f4e8;
+    
+}
+.btn-admit:hover{
+    background-color: #0F4C5C;
+    cursor: pointer;
+}
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 10px;
+    padding: 28px;
+    width: 460px;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+.show {
+    display: block ;
+}
+
+/* form inside popup */
+.popup label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.popup input,
+.popup select,
+.popup textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    margin-bottom: 14px;
+    box-sizing: border-box;
+}
+
+.popup input:focus,
+.popup select:focus,
+.popup textarea:focus {
+    border-color: #0F4C5C;
+    outline: none;
+}
+
+.popup h3 {
+    color: #0F4C5C;
+    font-size: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.popup .form-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.popup .btn-save {
+    flex: 1;
+    padding: 11px;
+    background: #0F4C5C;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.popup .btn-save:hover {
+    background: #0a3a47;
+}
+
+.popup .btn-cancel {
+    flex: 1;
+    padding: 11px;
+    background: white;
+    color: #0F4C5C;
+    border: 1px solid #0F4C5C;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.popup .close-btn {
+    float: right;
+    font-size: 20px;
+    cursor: pointer;
+    color: #888;
+    background: none;
+    border: none;
+    line-height: 1;
+}
+
+.popup .close-btn:hover {
+    color: #333;
+}
+.popup.show {
+    display: block;
+}
+.disp {
+    display: none;
 }

@@ -3,236 +3,703 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Management Portal</title>
+    <title>Internal Management</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='management.css') }}">
+    <style>
+        /* ---- POPUP ---- */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 10px;
+            padding: 28px;
+            width: 460px;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .show { display: block !important; }
+
+        .popup h3 {
+            color: #1a3c4d;
+            font-size: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .popup label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-bottom: 6px;
+            margin-top: 12px;
+        }
+
+        .popup select,
+        .popup input,
+        .popup textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .popup select:focus,
+        .popup input:focus,
+        .popup textarea:focus {
+            border-color: #1a3c4d;
+            outline: none;
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+            color: #888;
+            background: none;
+            border: none;
+        }
+
+        .close-btn:hover { color: #333; }
+
+        /* ---- MANAGE BUTTONS ---- */
+        .btn-manage {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-manage button {
+            padding: 8px 18px;
+            border: 1px solid #1a3c4d;
+            border-radius: 20px;
+            background: white;
+            color: #1a3c4d;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-manage button:hover,
+        .btn-manage button.active {
+            background: #1a3c4d;
+            color: white;
+        }
+
+        /* ---- TABLE SECTIONS ---- */
+        .disp {
+            display: none;
+            background: white;
+            margin: 0 20px 20px;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .disp h3 {
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: #333;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* ---- ADMIT BUTTON ---- */
+        .btn-admit {
+            margin: 0 20px 20px;
+            padding: 10px 24px;
+            background: #1a3c4d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-admit:hover { background: #0f2a38; }
+
+        /* ---- MSG BOX ---- */
+        #admit-msg {
+            display: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <div class="navbar">
-        <div id="name">Hospital Appointment and Patient Management System</div>
+
+<div class="navbar">
+    <div id="name">Hospital Appointment and Patient Management System</div>
+</div>
+
+<div class="page">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo">MediPortal</div>
+        <nav>
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/manage-doctors">Manage Doctors</a>
+            <a href="/admin/availability">Availability</a>
+            <a href="/admin/appointments">Appointments</a>
+            <a href="/admin/daily-schedule">Daily Schedule</a>
+            <a href="/admin/manage-hospital" class="active">Internal Management</a>
+            <a href="/admin/settings">Settings</a>
+        </nav>
+        <div class="doc-info">
+            <div class="avatar">AD</div>
+            <p>Admin</p>
+            <p>Management</p>
+        </div>
+        <div style="padding:10px 22px 20px;">
+            <button onclick="logout()" style="
+                width:100%; padding:8px;
+                background:white; color:#c0392b;
+                border:1px solid #c0392b;
+                border-radius:6px; font-size:13px;
+                cursor:pointer;">Logout</button>
+        </div>
     </div>
 
-    <div class="page">
+    <!-- MAIN -->
+    <div class="main">
 
-        <!-- SIDEBAR -->
-        <div class="sidebar">
-            <div class="logo">MediPortal</div>
-            <nav>
-                <a href="/admin/dashboard">Dashboard</a>
-                <a href="/admin/manage-doctors">Manage Doctors</a>
-                <a href="/admin/availability">Availability</a>
-                <a href="/admin/appointments">Appointments</a>
-                <a href="/admin/daily-schedule">Daily Schedule</a>
-                <a href="/admin/manage-hospital" class="active">Internal Management</a>
-                <a href="/admin/settings">Settings</a>
-                
-            </nav>
-            <div class="doc-info">
-                <div class="avatar">AD</div>
-                <p>Admin</p>
-                <p>Management</p>
+        <div class="topbar">
+            <div>
+                <h2>Manage Hospital</h2>
+                <p>Manage Beds, Operations and Admitted Patients</p>
             </div>
-            <div style="padding:10px 22px 20px;">
-                <button onclick="logout()" style="
-                    width:100%; padding:8px;
-                    background:white; color:#c0392b;
-                    border:1px solid #c0392b;
-                    border-radius:6px; font-size:13px;
-                    cursor:pointer;">Logout</button>
+            <p id="current-date"></p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="card">
+                <h3 id="T_beds">-</h3>
+                <p>Total Beds</p>
+            </div>
+            <div class="card">
+                <h3 id="a_bed">-</h3>
+                <p>Available Beds</p>
+            </div>
+            <div class="card">
+                <h3 id="a_patients">-</h3>
+                <p>Admitted Patients</p>
+            </div>
+            <div class="card">
+                <h3 id="Operations">-</h3>
+                <p>Operations</p>
             </div>
         </div>
 
-        <!-- MAIN -->
-        <div class="main">
-            <div class="topbar">
-                <div>
-                <h2>Manage Hospital</h2>
-                <p>Manage Beds,Operations and Admitted Patients</p>
-                </div>
-                <div>
-                <p id="current-date">Date</p>
-                </div>
-            </div>
-            
-            <div class="stats-row">
-                <div class="card">
-                    <h3 id="T_beds">-</h3>
-                    <p>Total Beds</p>
-                </div>
-                <div class="card">
-                    <h3 id="a_bed">-</h3>
-                    <p>Available Beds</p>
-                </div>
-                <div class="card">
-                    <h3 id="a_patients">-</h3>
-                    <p>Admitted Patients</p>
-                </div>
-                <div class="card">
-                    <h3 id="Operations">-</h3>
-                    <p>Operations</p>
-                </div>
-            </div>
-            <div class="btn-manage">
-                <button onclick="showTable('a_bed_table')">See Available Beds</button>
-                <button onclick="showTable('a_patients_table')">See Admitted Patients</button>
-                <button onclick="showTable('discharged_patients_table')">See Discharged Patients</button>
-                <button onclick="showTable('operation_table')">See Operations</button>
-            </div>
-            <div class="disp">
-                <h3>Available Beds </h3>
-                <table id="a_bed_table">
-                    <th>Beds ID</th>
-                    <th> Book </th>
-                </table>
-            </div>
-            <div class="disp">
-                <h3>Admitted Patients</h3>
-                <table id="a_patients_table">
+        <!-- Admit Button -->
+        <button class="btn-admit" onclick="openAdmitPopup()">
+            + Admit Patient
+        </button>
+
+        <!-- Table Switch Buttons -->
+        <div class="btn-manage">
+            <button onclick="showTable('a_patients_table')"
+                id="btn-admitted">Admitted Patients</button>
+            <button onclick="showTable('discharged_patients_table')"
+                id="btn-discharged">Discharged Patients</button>
+            <button onclick="showTable('operation_table')"
+                id="btn-operations">Operations</button>
+        </div>
+
+        <!-- Admitted Patients Table -->
+        <div class="disp" id="section-admitted">
+            <h3>Admitted Patients</h3>
+            <table id="a_patients_table">
+                <tr>
                     <th>Name</th>
-                    <th>Age</th>
                     <th>Doctor</th>
                     <th>Department</th>
-                    <th>Admitted Date</th>
+                    <th>Date</th>
                     <th>Status</th>
-                </table>
-            </div>
-            <div class="disp">
-                <h3>Discharged patients </h3>
-                <table id="discharged_patients_table">
+                </tr>
+            </table>
+        </div>
+
+        <!-- Discharged Patients Table -->
+        <div class="disp" id="section-discharged">
+            <h3>Discharged Patients</h3>
+            <table id="discharged_patients_table">
+                <tr>
                     <th>Name</th>
-                    <th> Age </th>
                     <th>Doctor</th>
                     <th>Department</th>
                     <th>Admitted Date</th>
                     <th>Discharged Date</th>
-                </table>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Operations Table -->
+        <div class="disp" id="section-operations">
+            <h3>Operations</h3>
+            <div class="btn-manage" style="padding:0 0 12px;">
+                <button onclick="filterOperations('all')">All</button>
+                <button onclick="filterOperations('today')">Today</button>
+                <button onclick="filterOperations('tomorrow')">Tomorrow</button>
+                <button onclick="filterOperations('upcoming')">Upcoming</button>
+                <button onclick="filterOperations('past')">Past</button>
             </div>
-            <div class="disp">
-                <h3>Operations </h3>
-                <div lass="btn-manage">
-                    <button>Today</button>
-                    <button>Upcoming</button>
-                    <button>Past</button>
-                </div>
-                <table id="operation_table">
+            <table id="operation_table">
+                <tr>
                     <th>Name</th>
-                    <th> Age </th>
                     <th>Doctor</th>
                     <th>Department</th>
-                    <th>Operation Date </th>
-                    <th>Time</th>
-                </table>
-            </div>
-
-
-
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </table>
         </div>
+
     </div>
+</div>
+
+<!-- OVERLAY -->
+<div id="admit-overlay" class="overlay"></div>
+
+<!-- ADMIT POPUP -->
+<div id="admit-popup" class="popup">
+
+    <button class="close-btn" onclick="closeAdmitPopup()">✕</button>
+    <h3>Admit Patient</h3>
+
+    <div id="admit-msg"></div>
+
+    <label>Patient</label>
+    <select id="admit-patient">
+        <option value="">-- Select Patient --</option>
+    </select>
+
+    <label>Doctor</label>
+    <select id="admit-doctor">
+        <option value="">-- Select Doctor --</option>
+    </select>
+
+    <label>Admission Type</label>
+    <select id="admit-type">
+        <option value="observation">Observation</option>
+        <option value="operation">Operation</option>
+    </select>
+
+    <label>Date of Admission</label>
+    <input type="date" id="admit-date" />
+
+    <label>Diagnosis / Reason</label>
+    <textarea id="admit-diagnosis" rows="3"
+        placeholder="Enter diagnosis or reason..."></textarea>
+
+    <div class="form-buttons" style="margin-top:16px;">
+        <button class="btn-save" onclick="submitAdmit()">
+            Confirm Admission
+        </button>
+        <button class="btn-cancel" onclick="closeAdmitPopup()">
+            Cancel
+        </button>
+    </div>
+
+</div>
+
 <script>
-const today = new Date()
-const options = {
-    weekday: "short",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-}
-document.getElementById('current-date').textContent = today.toLocaleDateString('ne-NP', options);
 
-async function showTable(tableId) {
-    document.querySelectorAll(".disp").forEach(div => div.style.display = 'none');
+    // ---- 1. DATE ----
+    const today = new Date();
+    const options = {
+        weekday: 'short', day: 'numeric',
+        month: 'long', year: 'numeric'
+    };
+    document.getElementById('current-date').textContent =
+        today.toLocaleDateString('en-GB', options);
 
-    const tableElement = document.getElementById(tableId);
-    if (tableElement) {
-        tableElement.parentElement.style.display = 'block'
+
+    // ---- 2. LOAD STATS ----
+    async function loadStats() {
+        try {
+            const res  = await fetch('/api/admin/management-stats');
+            const data = await res.json();
+            if (!res.ok) { console.log('Stats error:', data.message); return; }
+
+            document.getElementById('T_beds').textContent     = data.total_beds;
+            document.getElementById('a_bed').textContent      = data.available_beds;
+            document.getElementById('a_patients').textContent = data.admitted;
+            document.getElementById('Operations').textContent = data.operations;
+        } catch(e) {
+            console.log('Could not load stats:', e);
+        }
     }
-    try {
+
+    loadStats();
+
+
+    // ---- 3. SHOW TABLE ----
+    function showTable(tableId) {
+
+        document.querySelectorAll('.disp').forEach(function(div) {
+            div.style.display = 'none';
+        });
+
+        document.querySelectorAll('.btn-manage button').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+
         if (tableId === 'a_patients_table') {
-            const res = await fetch('/api/admin/admitted-patients');
-            const data = await res.json();
-            renderAdmitted(data);
+            document.getElementById('section-admitted').style.display = 'block';
+            document.getElementById('btn-admitted').classList.add('active');
+            loadAdmitted();
+
+        } else if (tableId === 'discharged_patients_table') {
+            document.getElementById('section-discharged').style.display = 'block';
+            document.getElementById('btn-discharged').classList.add('active');
+            loadDischarged();
+
+        } else if (tableId === 'operation_table') {
+            document.getElementById('section-operations').style.display = 'block';
+            document.getElementById('btn-operations').classList.add('active');
+            allOperations = [];      // reset before loading
+            loadOperations();
         }
-        else if (tableId === 'operation_table') {
-            const res = await fetch('/api/admin/operations');
-            const data = await res.json();
-            renderOperations(data);
-        }
-        else if (tableId === 'a_bed_table') {
-            const res = await fetch('/api/admin/available-beds');
-            const data = await res.json();
-            renderBeds(data);
-        }
-        else if (tableId === 'discharged_patients_table') {
-            const res = await fetch('/api/admin/discharged-patients');
-            const data = await res.json();
-            renderDischarged(data);
-        }
-    } catch (error) {
-        console.error("Failed to fetch data:", error)
     }
-}
 
-function renderBeds(data) {
-    const table = document.getElementById('a_bed_table');
-    table.innerHTML = `<tr><th>Bed ID</th><th>Book</th></tr>`;
-    data.forEach(bed => {
-        table.innerHTML += `<tr>
-            <td>${bed.bed_id}</td>
-            <td><button>Book</button></td>
-        </tr>`;
-    });
-}
 
-function renderDischarged(data) {
-    const table = document.getElementById('discharged_patients_table');  // fix 1: correct method and ID
-    table.innerHTML = `<tr><th>Name</th><th>Age</th><th>Doctor</th><th>Department</th><th>Admitted Date</th><th>Discharged Date</th></tr>`;
-    data.forEach(DP => {   // fix 2: dot not comma
-        table.innerHTML += `<tr>
-            <td>${DP.name}</td>
-            <td>${DP.age}</td>
-            <td>${DP.doctor}</td>
-            <td>${DP.department}</td>
-            <td>${DP.admitted_date}</td>
-            <td>${DP.discharged_date}</td>  
-        </tr>`  // fix 3: discharged_date not discharged_data
-    })
-}
+    // ---- 4. LOAD ADMITTED ----
+    async function loadAdmitted() {
+        try {
+            const res  = await fetch('/api/admin/admitted-patients');
+            const data = await res.json();
 
-function renderAdmitted(data) {
-    const table = document.getElementById('a_patients_table');
-    table.innerHTML = `<tr><th>Name</th><th>Doctor</th><th>Dept</th><th>Date</th><th>Status</th></tr>`;
-    data.forEach(p => {
-        table.innerHTML += `<tr>
-            <td>${p.name}</td>
-            <td>${p.doctor}</td>
-            <td>${p.dept}</td>
-            <td>${p.date}</td>
-            <td>${p.status}</td>
-        </tr>`;
-    });
-}
+            const patients = Array.isArray(data) ? data : (data.patients || []);
+            const table    = document.getElementById('a_patients_table');
 
-function renderOperations(data) {
-    const table = document.getElementById('operation_table');
-    table.innerHTML = `<tr><th>Patient</th><th>Doctor</th><th>Dept</th><th>Date</th><th>Time</th></tr>`;
-    data.forEach(op => {
-        table.innerHTML += `<tr>
-            <td>${op.name}</td>
-            <td>${op.doctor}</td>
-            <td>${op.dept}</td>
-            <td>${op.date}</td>
-            <td>${op.time}</td>
-        </tr>`;
-    });
-}
+            table.innerHTML = `
+                <tr>
+                    <th>Name</th><th>Doctor</th><th>Department</th>
+                    <th>Bed</th><th>Date</th><th>Type</th><th>Status</th>
+                </tr>`;
 
-async function loadStats() {
-    const res = await fetch('/api/admin/management-stats');
-    const data = await res.json();
-    document.getElementById('T_beds').textContent = data.total_beds;
-    document.getElementById('a_bed').textContent = data.available_beds;
-    document.getElementById('a_patients').textContent = data.admitted_patients;
-    document.getElementById('Operations').textContent = data.operations;
-}
-loadStats();
+            if (patients.length === 0) {
+                table.innerHTML +=
+                    '<tr><td colspan="7" style="text-align:center; color:#888;">' +
+                    'No admitted patients.</td></tr>';
+                return;
+            }
+
+            patients.forEach(function(p) {
+                table.innerHTML += `
+                    <tr>
+                        <td>${p.name}</td>
+                        <td>${p.doctor}</td>
+                        <td>${p.dept || p.department || '-'}</td>
+                        <td>${p.bed_number || '-'}</td>
+                        <td>${p.date || p.admitted_date || '-'}</td>
+                        <td>${p.admission_type || '-'}</td>
+                        <td><span class="status green">${p.status}</span></td>
+                    </tr>`;
+            });
+
+        } catch(e) {
+            console.log('Failed to load admitted:', e);
+        }
+    }
+
+
+    // ---- 5. LOAD DISCHARGED ----
+    async function loadDischarged() {
+        try {
+            const res  = await fetch('/api/admin/discharged-patients');
+            const data = await res.json();
+
+            const patients = Array.isArray(data) ? data : (data.patients || []);
+            const table    = document.getElementById('discharged_patients_table');
+
+            table.innerHTML = `
+                <tr>
+                    <th>Name</th><th>Doctor</th><th>Department</th>
+                    <th>Admitted Date</th><th>Discharged Date</th>
+                </tr>`;
+
+            if (patients.length === 0) {
+                table.innerHTML +=
+                    '<tr><td colspan="5" style="text-align:center; color:#888;">' +
+                    'No discharged patients.</td></tr>';
+                return;
+            }
+
+            patients.forEach(function(p) {
+                table.innerHTML += `
+                    <tr>
+                        <td>${p.name}</td>
+                        <td>${p.doctor}</td>
+                        <td>${p.department || p.dept || '-'}</td>
+                        <td>${p.admitted_date || p.date || '-'}</td>
+                        <td>${p.discharged_date || '-'}</td>
+                    </tr>`;
+            });
+
+        } catch(e) {
+            console.log('Failed to load discharged:', e);
+        }
+    }
+
+
+    // ---- 6. LOAD OPERATIONS ----
+    let allOperations = [];
+
+    async function loadOperations() {
+        try {
+            const res  = await fetch('/api/admin/operations');
+            const data = await res.json();
+
+            console.log('Operations data:', data);
+
+            allOperations = Array.isArray(data) ? data :
+                           (data.operations || []);
+
+            displayOperations(allOperations);
+
+        } catch(e) {
+            console.log('Failed to load operations:', e);
+        }
+    }
+
+    function displayOperations(data) {
+        const table = document.getElementById('operation_table');
+        table.innerHTML = `
+            <tr>
+                <th>Name</th><th>Doctor</th>
+                <th>Department</th><th>Date</th><th>Status</th>
+            </tr>`;
+
+        if (!data || data.length === 0) {
+            table.innerHTML +=
+                '<tr><td colspan="5" ' +
+                'style="text-align:center; color:#888; padding:16px;">' +
+                'No operations found.</td></tr>';
+            return;
+        }
+
+        data.forEach(function(op) {
+            table.innerHTML += `
+                <tr>
+                    <td>${op.name   || '-'}</td>
+                    <td>${op.doctor || '-'}</td>
+                    <td>${op.dept   || op.department || '-'}</td>
+                    <td>${op.date   || '-'}</td>
+                    <td><span class="status gray">${op.status || '-'}</span></td>
+                </tr>`;
+        });
+    }
+
+
+    // ---- 7. FILTER OPERATIONS ----
+    function filterOperations(filter) {
+
+        // if not loaded yet, load first then filter
+        if (allOperations.length === 0) {
+            loadOperations().then(function() {
+                applyOperationFilter(filter);
+            });
+            return;
+        }
+
+        applyOperationFilter(filter);
+    }
+
+    function applyOperationFilter(filter) {
+        const now         = new Date();
+        const todayStr    = now.toISOString().split('T')[0];
+        const tomorrow    = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+        let filtered = [];
+
+        if (filter === 'all') {
+            filtered = allOperations;
+        } else if (filter === 'today') {
+            filtered = allOperations.filter(function(op) {
+                return op.date === todayStr;
+            });
+        } else if (filter === 'tomorrow') {
+            filtered = allOperations.filter(function(op) {
+                return op.date === tomorrowStr;
+            });
+        } else if (filter === 'upcoming') {
+            filtered = allOperations.filter(function(op) {
+                return op.date >= todayStr;
+            });
+        } else if (filter === 'past') {
+            filtered = allOperations.filter(function(op) {
+                return op.date < todayStr;
+            });
+        }
+
+        displayOperations(filtered);
+    }
+
+
+    // ---- 8. POPUP OPEN/CLOSE ----
+    async function openAdmitPopup() {
+        document.getElementById('admit-overlay').classList.add('show');
+        document.getElementById('admit-popup').classList.add('show');
+        hideAdmitMsg();
+
+        document.getElementById('admit-patient').innerHTML =
+            '<option value="">-- Select Patient --</option>';
+        document.getElementById('admit-doctor').innerHTML =
+            '<option value="">-- Select Doctor --</option>';
+
+        await loadDropdowns();
+    }
+
+    function closeAdmitPopup() {
+        document.getElementById('admit-overlay').classList.remove('show');
+        document.getElementById('admit-popup').classList.remove('show');
+        document.getElementById('admit-patient').value   = '';
+        document.getElementById('admit-doctor').value    = '';
+        document.getElementById('admit-type').value      = 'observation';
+        document.getElementById('admit-date').value      = '';
+        document.getElementById('admit-diagnosis').value = '';
+        hideAdmitMsg();
+    }
+
+    document.getElementById('admit-overlay')
+        .addEventListener('click', closeAdmitPopup);
+
+
+    // ---- 9. LOAD DROPDOWNS ----
+    async function loadDropdowns() {
+        try {
+            const patRes  = await fetch('/api/admin/patients');
+            const patData = await patRes.json();
+
+            if (patRes.ok) {
+                const select = document.getElementById('admit-patient');
+                patData.patients.forEach(function(p) {
+                    const opt       = document.createElement('option');
+                    opt.value       = p.id;
+                    opt.textContent = p.name;
+                    select.appendChild(opt);
+                });
+            }
+
+            const docRes  = await fetch('/api/admin/doctors');
+            const docData = await docRes.json();
+
+            if (docRes.ok) {
+                const select = document.getElementById('admit-doctor');
+                docData.doctors.forEach(function(d) {
+                    const opt       = document.createElement('option');
+                    opt.value       = d.id;
+                    opt.textContent = d.name + ' — ' + d.specialization;
+                    select.appendChild(opt);
+                });
+            }
+
+        } catch(e) {
+            showAdmitMsg('Could not load data.', 'error');
+        }
+    }
+
+
+    // ---- 10. SUBMIT ADMISSION ----
+    async function submitAdmit() {
+        hideAdmitMsg();
+
+        const patientId = document.getElementById('admit-patient').value;
+        const doctorId  = document.getElementById('admit-doctor').value;
+        const type      = document.getElementById('admit-type').value;
+        const date      = document.getElementById('admit-date').value;
+        const diagnosis = document.getElementById('admit-diagnosis').value.trim();
+
+        if (!patientId) { showAdmitMsg('Please select a patient.', 'error');        return; }
+        if (!doctorId)  { showAdmitMsg('Please select a doctor.', 'error');         return; }
+        if (!date)      { showAdmitMsg('Please select admission date.', 'error');   return; }
+        if (!diagnosis) { showAdmitMsg('Please enter diagnosis.', 'error');         return; }
+
+        try {
+            const res  = await fetch('/api/admin/admit-patient', {
+                method : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body   : JSON.stringify({
+                    patient_id    : patientId,
+                    doctor_id     : doctorId,
+                    admission_type: type,
+                    admitted_date : date,
+                    diagnosis     : diagnosis
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                showAdmitMsg(
+                    'Patient admitted! Bed: ' + data.bed_number,
+                    'success'
+                );
+                loadStats();
+                setTimeout(function() {
+                    closeAdmitPopup();
+                    showTable('a_patients_table');
+                }, 1500);
+            } else {
+                showAdmitMsg(data.message || 'Admission failed.', 'error');
+            }
+
+        } catch(e) {
+            showAdmitMsg('Could not connect to server.', 'error');
+        }
+    }
+
+
+    // ---- 11. LOGOUT ----
+    async function logout() {
+        const confirmed = confirm('Are you sure you want to logout?');
+        if (!confirmed) return;
+        try { await fetch('/api/admin/logout', { method: 'POST' }); } catch(e) {}
+        window.location.href = '/';
+    }
+
+
+    // ---- HELPERS ----
+    function showAdmitMsg(text, type) {
+        const msg            = document.getElementById('admit-msg');
+        msg.textContent      = text;
+        msg.style.display    = 'block';
+        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+    }
+
+    function hideAdmitMsg() {
+        document.getElementById('admit-msg').style.display = 'none';
+    }
+
 </script>
 </body>
-</html>   
+</html>

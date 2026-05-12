@@ -15,6 +15,7 @@ from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aspataal'
+app.config['SESSION_COOKIE_SECURE']   = False     
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hospital.db'
 app.config['ADMIN_USERNAME'] = 'admin'
 app.config['ADMIN_PASSWORD'] = 'admin123'
@@ -22,6 +23,12 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['REMEMBER_COOKIE_DURATION'] = 0
 app.config['SESSION_TYPE']              = 'filesystem'
+app.config['MAIL_SERVER']   = 'smtp.gmail.com'
+app.config['MAIL_PORT']     = 587
+app.config['MAIL_USERNAME'] = 'bhusalsneha2062@gmail.com'   # your Gmail
+app.config['MAIL_PASSWORD'] = 'tegd gwyf iikr clqx'      # Gmail app password
+app.config['MAIL_FROM']     = 'bhusalsneha2062@gmail.com'
+api_key = os.getenv("GROQ_API_KEY")
 
 db.init_app(app)                 
 login_manager = LoginManager(app)
@@ -38,6 +45,7 @@ app.register_blueprint(patient_bp)
 app.register_blueprint(management_bp)  
 app.register_blueprint(pages_bp)              
 
+
 @login_manager.user_loader
 def load_user(user_id):
     from models import Patient, Doctor
@@ -51,9 +59,16 @@ def load_user(user_id):
 migrate = Migrate(app, db)
 
 with app.app_context():
-    from models import Patient, Doctor, Appointment, MedicalRecord
+    from models import Patient, Doctor, Appointment, MedicalRecord,Bed
+
     db.create_all()
-    print("Database created!")
+    if Bed.query.count() == 0:
+        for i in range(1, 201):
+            bed = Bed(bed_number=i, is_occupied=False)
+            db.session.add(bed)
+        db.session.commit()
+        print("Beds created!")
+        print("Database created!")
 
 if __name__ == '__main__':
     app.run(debug=True)

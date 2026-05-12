@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_login import logout_user, login_required, current_user
-from models import Doctor, Appointment, Patient, MedicalRecord
+from models import Doctor, Appointment, Patient, AdmittedPatient,MedicalRecord,Bed
 from extensions import db
 from datetime import date, datetime
 
@@ -56,6 +56,7 @@ def view_appointments():
             'patient_name'  : patient.name,
             'patient_phone' : patient.phone or '',
             'date'          : str(appt.date),
+            'patient_email' : patient.email, 
             'time_slot'     : appt.time_slot,
             'status'        : appt.status
         })
@@ -123,13 +124,15 @@ def patient_history(patient_id):
     if not patient:
         return jsonify({'message': 'Patient not found'}), 404
 
+    # get appointments with this doctor
     appointments = Appointment.query.filter_by(
-        doctor_id=current_user.id,
-        patient_id=patient_id
+        doctor_id  = current_user.id,
+        patient_id = patient_id
     ).order_by(Appointment.date.desc()).all()
 
+    # get medical records          ← use MedicalRecord not AdmittedPatient
     records = MedicalRecord.query.filter_by(
-        patient_id=patient_id
+        patient_id = patient_id
     ).order_by(MedicalRecord.date.desc()).all()
 
     appt_list = []
@@ -147,10 +150,10 @@ def patient_history(patient_id):
         record_list.append({
             'date'        : str(r.date),
             'doctor_name' : doctor.name if doctor else 'Unknown',
-            'diagnosis'   : r.diagnosis,
-            'prescription': r.prescription if hasattr(r, 'prescription') else '',
-            'report'      : r.report,
-            'status'      : r.status if hasattr(r, 'status') else 'Completed'
+            'diagnosis'   : r.diagnosis    or 'N/A',
+            'prescription': r.prescription or 'N/A',
+            'report'      : r.report       or 'N/A',
+            'status'      : r.status       or 'Completed'
         })
 
     return jsonify({
@@ -163,6 +166,7 @@ def patient_history(patient_id):
         'appointments'   : appt_list,
         'medical_records': record_list
     }), 200
+
 
 
 # ---- GET MY PATIENTS ----
@@ -208,14 +212,14 @@ def update_patient(patient_id):
     if not patient:
         return jsonify({'message': 'Patient not found'}), 404
 
+    # save to MedicalRecord          ← correct model
     new_record = MedicalRecord(
         patient_id   = patient_id,
         doctor_id    = current_user.id,
-        diagnosis    = data.get('diagnosis', ''),
+        diagnosis    = data.get('diagnosis',    ''),
         prescription = data.get('prescription', ''),
-        report       = data.get('report', ''),
-        status       = data.get('status', 'Completed'),
-        record_type  = data.get('record_type', 'observation')
+        report       = data.get('report',       ''),
+        status       = 'Completed'
     )
     db.session.add(new_record)
 
@@ -227,3 +231,57 @@ def update_patient(patient_id):
 
     db.session.commit()
     return jsonify({'message': 'Patient record updated successfully!'}), 201
+
+# ---- GET DOCTOR OPERATIONS ----
+@doctor_bp.route('/api/doctor/operations', methods=['GET'])
+@login_required
+def get_doctor_operations():
+    if not current_user.get_id().startswith('doctor_'):
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    operations = AdmittedPatient.query.filter_by(
+        doctor_id      = current_user.id,
+        admission_type = 'operation'
+    ).order_by(AdmittedPatient.admitted_date).all()
+
+    result = []
+    for op in operations:
+        patient = db.session.get(Patient, op.patient_id)
+        result.append({
+            'id'     : op.id,
+            'name'   : patient.name if patient else 'Unknown',
+            'date'   : str(op.admitted_date),
+            'status' : op.status,
+            'diagnosis': op.diagnosis or '—'
+        })
+
+    return jsonify({'operations': result}), 200
+# ---- DISCHARGE PATIENT (Doctor) ----
+@doctor_bp.route('/api/doctor/discharge/<int:admission_id>', methods=['POST'])
+@login_required
+def discharge_patient(admission_id):
+    if not current_user.get_id().startswith('doctor_'):
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    data      = request.get_json()
+    admission = AdmittedPatient.query.get(admission_id)
+
+    if not admission:
+        return jsonify({'message': 'Admission not found'}), 404
+    if admission.doctor_id != current_user.id:
+        return jsonify({'message': 'Unauthorized'}), 403
+    if admission.status == 'Discharged':
+        return jsonify({'message': 'Already discharged'}), 400
+
+    # save discharge notes
+    admission.status           = 'Discharged'
+    admission.discharged_date  = date.today()
+    admission.diagnosis        = data.get('notes', admission.diagnosis)
+
+    # free the bed
+    bed = Bed.query.filter_by(bed_number=admission.bed_number).first()
+    if bed:
+        bed.is_occupied = False
+
+    db.session.commit()
+    return jsonify({'message': 'Patient discharged successfully!'}), 200

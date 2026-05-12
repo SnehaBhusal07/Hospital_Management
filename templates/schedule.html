@@ -41,7 +41,7 @@
             <div class="topbar">
                 <div>
                     <h2>My Schedule</h2>
-                    <p>View your patient appointments</p>
+                    <p>View your appointments and operations</p>
                 </div>
                 <p id="current-date">-</p>
             </div>
@@ -52,49 +52,212 @@
                 text-align:center;">
             </div>
 
-            <!-- Filter bar -->
-            <div class="filter-bar">
-                <button class="filter-btn active" data-filter="all">
-                    All
+            <!-- Tab buttons -->
+            <div style="display:flex; gap:10px; padding:15px 20px;">
+                <button id="tab-appointments" onclick="switchTab('appointments')"
+                    style="padding:9px 20px; background:#0F4C5C; color:white;
+                    border:none; border-radius:6px; font-size:13px;
+                    cursor:pointer;">
+                    Appointments
                 </button>
-                <button class="filter-btn" data-filter="today">
-                    Today
-                </button>
-                <button class="filter-btn" data-filter="upcoming">
-                    Upcoming
-                </button>
-                <button class="filter-btn" data-filter="completed">
-                    Completed
+                <button id="tab-operations" onclick="switchTab('operations')"
+                    style="padding:9px 20px; background:white; color:#0F4C5C;
+                    border:1px solid #0F4C5C; border-radius:6px; font-size:13px;
+                    cursor:pointer;">
+                    Operations
                 </button>
             </div>
 
-            <!-- Schedule table -->
-            <div class="appointment-section" style="background:white;
-                margin:0 20px; border-radius:8px; padding:15px;">
-                <h3>Patient Appointments
-                    <span id="appt-count" style="
-                        font-size:12px; background-color:#0F4C5C;
-                        color:white; padding:2px 8px;
-                        border-radius:12px; margin-left:8px;">
-                    </span>
-                </h3>
-                <table id="schedule-table" style="margin-top:10px;">
-                    <tr>
-                        <th>Patient</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                    <tbody id="schedule-tbody">
+            <!-- APPOINTMENTS SECTION -->
+            <div id="section-appointments">
+
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="today">Today</button>
+                    <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+                    <button class="filter-btn" data-filter="completed">Completed</button>
+                </div>
+
+                <div class="appointment-section" style="background:white;
+                    margin:0 20px; border-radius:8px; padding:15px;">
+                    <h3>Patient Appointments
+                        <span id="appt-count" style="font-size:12px;
+                            background-color:#0F4C5C; color:white;
+                            padding:2px 8px; border-radius:12px;
+                            margin-left:8px;"></span>
+                    </h3>
+                    <table id="schedule-table" style="margin-top:10px;">
                         <tr>
-                            <td colspan="5" style="text-align:center;
-                                color:#888;">Loading...</td>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Action</th>
                         </tr>
-                    </tbody>
-                </table>
+                        <tbody id="schedule-tbody">
+                            <tr>
+                                <td colspan="5" style="text-align:center;
+                                    color:#888;">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
+            <!-- OPERATIONS SECTION -->
+            <div id="section-operations" style="display:none;">
+
+                <div class="filter-bar">
+                    <button class="op-filter-btn active" data-filter="all"
+                        style="padding:8px 18px; border:1px solid #0F4C5C;
+                        border-radius:20px; background:#0F4C5C; color:white;
+                        font-size:13px; cursor:pointer; margin:0 4px;">
+                        All
+                    </button>
+                    <button class="op-filter-btn" data-filter="today"
+                        style="padding:8px 18px; border:1px solid #0F4C5C;
+                        border-radius:20px; background:white; color:#0F4C5C;
+                        font-size:13px; cursor:pointer; margin:0 4px;">
+                        Today
+                    </button>
+                    <button class="op-filter-btn" data-filter="tomorrow"
+                        style="padding:8px 18px; border:1px solid #0F4C5C;
+                        border-radius:20px; background:white; color:#0F4C5C;
+                        font-size:13px; cursor:pointer; margin:0 4px;">
+                        Tomorrow
+                    </button>
+                    <button class="op-filter-btn" data-filter="upcoming"
+                        style="padding:8px 18px; border:1px solid #0F4C5C;
+                        border-radius:20px; background:white; color:#0F4C5C;
+                        font-size:13px; cursor:pointer; margin:0 4px;">
+                        Upcoming
+                    </button>
+                    <button class="op-filter-btn" data-filter="past"
+                        style="padding:8px 18px; border:1px solid #0F4C5C;
+                        border-radius:20px; background:white; color:#0F4C5C;
+                        font-size:13px; cursor:pointer; margin:0 4px;">
+                        Past
+                    </button>
+                </div>
+
+                <div class="appointment-section" style="background:white;
+                    margin:0 20px; border-radius:8px; padding:15px;">
+                    <h3>Operation Schedule
+                        <span id="op-count" style="font-size:12px;
+                            background-color:#0F4C5C; color:white;
+                            padding:2px 8px; border-radius:12px;
+                            margin-left:8px;"></span>
+                    </h3>
+                    <table id="op-table" style="margin-top:10px;">
+                        <tr>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Diagnosis</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        <tbody id="op-tbody">
+                            <tr>
+                                <td colspan="5" style="text-align:center;
+                                    color:#888;">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Discharge overlay -->
+    <div id="discharge-overlay" style="display:none; position:fixed;
+        top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.5); z-index:999;"
+        onclick="closeDischarge()">
+    </div>
+
+    <!-- Discharge popup -->
+    <div id="discharge-popup" style="display:none; position:fixed;
+        top:50%; left:50%; transform:translate(-50%,-50%);
+        background:white; border-radius:10px; padding:28px;
+        width:460px; z-index:1000;
+        box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+
+        <button onclick="closeDischarge()" style="
+            float:right; font-size:20px; cursor:pointer;
+            color:#888; background:none; border:none;">✕
+        </button>
+
+        <h3 style="color:#0F4C5C; margin-bottom:20px;
+            padding-bottom:10px; border-bottom:1px solid #eee;">
+            Discharge Patient
+        </h3>
+
+        <div id="discharge-msg" style="display:none; padding:10px;
+            border-radius:6px; font-size:13px;
+            margin-bottom:12px; text-align:center;">
+        </div>
+
+        <div style="background:#f0f9f6; border-radius:8px;
+            padding:12px 15px; margin-bottom:16px;
+            border-left:4px solid #0F4C5C;">
+            <p id="discharge-patient-name" style="font-weight:bold;
+                color:#333; font-size:14px;"></p>
+            <p id="discharge-patient-date" style="font-size:12px;
+                color:#888; margin-top:3px;"></p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <div>
+                <label style="font-size:13px; font-weight:bold;
+                    color:#333; display:block; margin-bottom:6px;">
+                    Operation / Treatment Summary
+                </label>
+                <textarea id="discharge-notes" rows="3"
+                    placeholder="Describe the operation or treatment done..."
+                    style="width:100%; padding:10px; border:1px solid #ccc;
+                    border-radius:6px; font-size:13px; font-family:inherit;
+                    box-sizing:border-box; resize:vertical;"></textarea>
+            </div>
+            <div>
+                <label style="font-size:13px; font-weight:bold;
+                    color:#333; display:block; margin-bottom:6px;">
+                    Post-Discharge Instructions
+                </label>
+                <textarea id="discharge-instructions" rows="3"
+                    placeholder="e.g. Rest for 2 weeks, follow-up in 10 days..."
+                    style="width:100%; padding:10px; border:1px solid #ccc;
+                    border-radius:6px; font-size:13px; font-family:inherit;
+                    box-sizing:border-box; resize:vertical;"></textarea>
+            </div>
+            <div>
+                <label style="font-size:13px; font-weight:bold;
+                    color:#333; display:block; margin-bottom:6px;">
+                    Discharge Status
+                </label>
+                <select id="discharge-status" style="width:100%; padding:10px;
+                    border:1px solid #ccc; border-radius:6px;
+                    font-size:13px; color:#333;">
+                    <option value="Recovered">Fully Recovered</option>
+                    <option value="Follow-up Required">Follow-up Required</option>
+                    <option value="Referred">Referred to Another Hospital</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="confirmDischarge()" style="
+                flex:1; padding:11px; background:#0F4C5C;
+                color:white; border:none; border-radius:6px;
+                font-size:14px; cursor:pointer;">
+                Confirm Discharge
+            </button>
+            <button onclick="closeDischarge()" style="
+                flex:1; padding:11px; background:white;
+                color:#0F4C5C; border:1px solid #0F4C5C;
+                border-radius:6px; font-size:14px; cursor:pointer;">
+                Cancel
+            </button>
         </div>
     </div>
 
@@ -109,11 +272,46 @@
     document.getElementById('current-date').textContent =
         today.toLocaleDateString('en-GB', options);
 
-    const todayStr = today.toISOString().split('T')[0];
-    let allAppointments = [];
+    const todayStr    = today.toISOString().split('T')[0];
+    const tomorrow    = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    let allAppointments    = [];
+    let allOperations      = [];
+    let currentAdmissionId = null;
 
 
-    // ---- 2. Load doctor info ----
+    // ---- 2. Tab switching ----
+    function switchTab(tab) {
+        const apptSection = document.getElementById('section-appointments');
+        const opSection   = document.getElementById('section-operations');
+        const apptTab     = document.getElementById('tab-appointments');
+        const opTab       = document.getElementById('tab-operations');
+
+        if (tab === 'appointments') {
+            apptSection.style.display = 'block';
+            opSection.style.display   = 'none';
+            apptTab.style.background  = '#0F4C5C';
+            apptTab.style.color       = 'white';
+            apptTab.style.border      = 'none';
+            opTab.style.background    = 'white';
+            opTab.style.color         = '#0F4C5C';
+            opTab.style.border        = '1px solid #0F4C5C';
+        } else {
+            opSection.style.display   = 'block';
+            apptSection.style.display = 'none';
+            opTab.style.background    = '#0F4C5C';
+            opTab.style.color         = 'white';
+            opTab.style.border        = 'none';
+            apptTab.style.background  = 'white';
+            apptTab.style.color       = '#0F4C5C';
+            apptTab.style.border      = '1px solid #0F4C5C';
+        }
+    }
+
+
+    // ---- 3. Load doctor info ----
     async function loadDoctorInfo() {
         try {
             const res  = await fetch('/api/doctor/me');
@@ -133,17 +331,17 @@
     }
 
 
-    // ---- 3. Load appointments ----
+    // ---- 4. Load appointments ----
     async function loadAppointments() {
         try {
-            const res  = await fetch('/api/doctor/appointments');
+            const res = await fetch('/api/doctor/appointments');
             if (!res.ok) {
                 showMsg('Failed to load appointments.', 'error');
                 return;
             }
-            const data = await res.json();
+            const data      = await res.json();
             allAppointments = data.appointments;
-            buildTable(allAppointments);
+            buildAppointmentTable(allAppointments);
 
         } catch(e) {
             showMsg('Could not connect to server.', 'error');
@@ -151,11 +349,10 @@
     }
 
 
-    // ---- 4. Build table ----
-    function buildTable(appointments) {
+    // ---- 5. Build appointment table ----
+    function buildAppointmentTable(appointments) {
         const tbody = document.getElementById('schedule-tbody');
-        document.getElementById('appt-count').textContent =
-            appointments.length;
+        document.getElementById('appt-count').textContent = appointments.length;
 
         if (appointments.length === 0) {
             tbody.innerHTML =
@@ -169,15 +366,9 @@
 
             let statusClass = 'orange';
             let statusText  = 'Waiting';
-            if (appt.status === 'Completed') {
-                statusClass = 'gray'; statusText = 'Completed';
-            }
-            if (appt.status === 'Cancelled') {
-                statusClass = 'red'; statusText = 'Cancelled';
-            }
-            if (appt.status === 'In Progress') {
-                statusClass = 'green'; statusText = 'In Progress';
-            }
+            if (appt.status === 'Completed')  { statusClass = 'gray';   statusText = 'Completed';   }
+            if (appt.status === 'Cancelled')  { statusClass = 'red';    statusText = 'Cancelled';   }
+            if (appt.status === 'In Progress'){ statusClass = 'green';  statusText = 'In Progress'; }
 
             const row = document.createElement('tr');
             row.innerHTML =
@@ -186,26 +377,17 @@
                 '<td>' + appt.time_slot + '</td>' +
                 '<td><span class="status ' + statusClass + '">' +
                     statusText + '</span></td>' +
-                '<td><button class="view-btn" data-id="' +
-                    appt.patient_id + '">View History</button></td>';
+                '<td><button onclick="viewPatient(' + appt.patient_id + ')"' +
+                    ' style="padding:5px 12px; background:#0F4C5C; color:white;' +
+                    ' border:none; border-radius:4px; font-size:12px;' +
+                    ' cursor:pointer;">View</button></td>';
 
             tbody.appendChild(row);
-        });
-
-        // style view buttons
-        document.querySelectorAll('.view-btn').forEach(function(btn) {
-            btn.style.cssText =
-                'padding:5px 12px; background:#0F4C5C; color:white;' +
-                'border:none; border-radius:4px; font-size:12px; cursor:pointer;';
-            btn.onclick = function() {
-                window.location.href =
-                    '/doctor/patient-history?patient_id=' + this.dataset.id;
-            };
         });
     }
 
 
-    // ---- 5. Filter buttons ----
+    // ---- 6. Appointment filter buttons ----
     document.querySelectorAll('.filter-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
 
@@ -215,58 +397,228 @@
             this.classList.add('active');
 
             const filter = this.dataset.filter;
+            let filtered = [];
 
             if (filter === 'all') {
-                buildTable(allAppointments);
+                filtered = allAppointments;
             } else if (filter === 'today') {
-                buildTable(allAppointments.filter(function(a) {
+                filtered = allAppointments.filter(function(a) {
                     return a.date === todayStr;
-                }));
+                });
             } else if (filter === 'upcoming') {
-                buildTable(allAppointments.filter(function(a) {
-                    return a.date >= todayStr && a.status !== 'Completed';
-                }));
+                filtered = allAppointments.filter(function(a) {
+                    return a.date >= todayStr &&
+                           a.status !== 'Completed' &&
+                           a.status !== 'Cancelled';
+                });
             } else if (filter === 'completed') {
-                buildTable(allAppointments.filter(function(a) {
+                filtered = allAppointments.filter(function(a) {
                     return a.status === 'Completed';
-                }));
+                });
             }
+
+            buildAppointmentTable(filtered);
         });
     });
 
 
-    // ---- 6. Logout ----
-    async function logout() {
-    const confirmed = confirm('Are you sure you want to logout?');
-    if (!confirmed) return;
+    // ---- 7. Load operations ----
+    async function loadOperations() {
+        try {
+            const res = await fetch('/api/doctor/operations');
+            if (!res.ok) {
+                showMsg('Failed to load operations.', 'error');
+                return;
+            }
+            const data    = await res.json();
+            allOperations = data.operations;
+            buildOperationTable(allOperations);
 
-    try {
-        // check if admin session
-        const sessionRes  = await fetch('/api/check-session');
-        const sessionData = await sessionRes.json();
-
-        let url = '/api/logout';
-        if (sessionData.role === 'admin') {
-            url = '/api/admin/logout';
+        } catch(e) {
+            showMsg('Could not connect to server.', 'error');
         }
-
-        const res = await fetch(url, {
-            method : 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (res.ok) {
-            window.location.href = '/';
-        } else {
-            // force redirect anyway
-            window.location.href = '/';
-        }
-
-    } catch(e) {
-        // force redirect even if fetch fails
-        window.location.href = '/';
     }
-}
+
+
+    // ---- 8. Build operation table ----
+    function buildOperationTable(operations) {
+        const tbody = document.getElementById('op-tbody');
+        document.getElementById('op-count').textContent = operations.length;
+
+        if (operations.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="5" style="text-align:center; color:#888;">' +
+                'No operations found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        operations.forEach(function(op) {
+
+            let statusClass = 'green';
+            if (op.status === 'Discharged') statusClass = 'gray';
+            if (op.status === 'Completed')  statusClass = 'gray';
+
+            const row = document.createElement('tr');
+            row.innerHTML =
+                '<td>' + op.name      + '</td>' +
+                '<td>' + op.date      + '</td>' +
+                '<td>' + (op.diagnosis || '—') + '</td>' +
+                '<td><span class="status ' + statusClass + '">' +
+                    op.status + '</span></td>' +
+                '<td>' +
+                    '<button onclick="dischargePatient(' +
+                        op.id + ', \'' +
+                        op.name.replace(/'/g, "\\'") + '\', \'' +
+                        op.date + '\')"' +
+                    ' style="padding:5px 12px; background:#c0392b; color:white;' +
+                    ' border:none; border-radius:4px; font-size:12px;' +
+                    ' cursor:pointer;"' +
+                    (op.status === 'Discharged' ? ' disabled' : '') + '>' +
+                    (op.status === 'Discharged' ? 'Discharged' : 'Discharge') +
+                    '</button>' +
+                '</td>';
+
+            tbody.appendChild(row);
+        });
+    }
+
+
+    // ---- 9. Operation filter buttons ----
+    document.querySelectorAll('.op-filter-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+
+            document.querySelectorAll('.op-filter-btn').forEach(function(b) {
+                b.style.background = 'white';
+                b.style.color      = '#0F4C5C';
+            });
+            this.style.background = '#0F4C5C';
+            this.style.color      = 'white';
+
+            const filter = this.dataset.filter;
+            let filtered = [];
+
+            if (filter === 'all') {
+                filtered = allOperations;
+            } else if (filter === 'today') {
+                filtered = allOperations.filter(function(op) {
+                    return op.date === todayStr;
+                });
+            } else if (filter === 'tomorrow') {
+                filtered = allOperations.filter(function(op) {
+                    return op.date === tomorrowStr;
+                });
+            } else if (filter === 'upcoming') {
+                filtered = allOperations.filter(function(op) {
+                    return op.date >= todayStr;
+                });
+            } else if (filter === 'past') {
+                filtered = allOperations.filter(function(op) {
+                    return op.date < todayStr;
+                });
+            }
+
+            buildOperationTable(filtered);
+        });
+    });
+
+
+    // ---- 10. Open discharge popup ----
+    function dischargePatient(admissionId, patientName, admittedDate) {
+        currentAdmissionId = admissionId;
+
+        document.getElementById('discharge-patient-name').textContent =
+            patientName;
+        document.getElementById('discharge-patient-date').textContent =
+            'Admitted: ' + admittedDate;
+
+        document.getElementById('discharge-notes').value         = '';
+        document.getElementById('discharge-instructions').value  = '';
+        document.getElementById('discharge-status').selectedIndex = 0;
+        document.getElementById('discharge-msg').style.display   = 'none';
+
+        document.getElementById('discharge-popup').style.display   = 'block';
+        document.getElementById('discharge-overlay').style.display = 'block';
+    }
+
+
+    // ---- 11. Close discharge popup ----
+    function closeDischarge() {
+        document.getElementById('discharge-popup').style.display   = 'none';
+        document.getElementById('discharge-overlay').style.display = 'none';
+        currentAdmissionId = null;
+    }
+
+
+    // ---- 12. Confirm discharge ----
+    async function confirmDischarge() {
+
+        const notes        = document.getElementById('discharge-notes').value.trim();
+        const instructions = document.getElementById('discharge-instructions').value.trim();
+        const status       = document.getElementById('discharge-status').value;
+
+        if (!notes) {
+            showDischargeMsg('Please enter treatment summary!', 'error');
+            return;
+        }
+
+        const fullNotes =
+            'Summary: ' + notes +
+            (instructions ? ' | Instructions: ' + instructions : '') +
+            ' | Status: ' + status;
+
+        try {
+            const res = await fetch(
+                '/api/doctor/discharge/' + currentAdmissionId,
+                {
+                    method : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({ notes: fullNotes })
+                }
+            );
+
+            const data = await res.json();
+
+            if (res.ok) {
+                showDischargeMsg('Patient discharged successfully!', 'success');
+                setTimeout(function() {
+                    closeDischarge();
+                    loadOperations();
+                }, 1500);
+            } else {
+                showDischargeMsg(data.message || 'Failed to discharge.', 'error');
+            }
+
+        } catch(e) {
+            showDischargeMsg('Could not connect to server.', 'error');
+        }
+    }
+
+
+    // ---- 13. Show message in discharge popup ----
+    function showDischargeMsg(text, type) {
+        const msg = document.getElementById('discharge-msg');
+        msg.textContent      = text;
+        msg.style.display    = 'block';
+        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
+        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
+    }
+
+
+    // ---- 14. View patient ----
+    function viewPatient(patientId) {
+        window.location.href = '/doctor/patient-history?patient_id=' + patientId;
+    }
+
+
+    // ---- 15. Logout ----
+    async function logout() {
+        const confirmed = confirm('Are you sure you want to logout?');
+        if (!confirmed) return;
+        const res = await fetch('/api/doctor/logout', { method: 'POST' });
+        if (res.ok) window.location.href = '/';
+    }
+
 
     // ---- Helper ----
     function showMsg(text, type) {
@@ -282,6 +634,7 @@
     // ---- Init ----
     loadDoctorInfo();
     loadAppointments();
+    loadOperations();
 
 </script>
 </body>
