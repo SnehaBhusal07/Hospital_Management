@@ -366,9 +366,27 @@
 
             let statusClass = 'orange';
             let statusText  = 'Waiting';
-            if (appt.status === 'Completed')  { statusClass = 'gray';   statusText = 'Completed';   }
-            if (appt.status === 'Cancelled')  { statusClass = 'red';    statusText = 'Cancelled';   }
-            if (appt.status === 'In Progress'){ statusClass = 'green';  statusText = 'In Progress'; }
+            if (appt.status === 'Completed')   { statusClass = 'gray';  statusText = 'Completed';   }
+            if (appt.status === 'Cancelled')   { statusClass = 'red';   statusText = 'Cancelled';   }
+            if (appt.status === 'In Progress') { statusClass = 'green'; statusText = 'In Progress'; }
+
+            // determine next status
+            let nextStatus = '';
+            let btnText    = '';
+            let btnColor   = '#0F4C5C';
+
+            if (appt.status === 'Booked') {
+                nextStatus = 'In Progress';
+                btnText    = 'Start';
+                btnColor   = '#2C7DA0';
+            } else if (appt.status === 'In Progress') {
+                nextStatus = 'Completed';
+                btnText    = 'Complete';
+                btnColor   = '#0a6640';
+            } else if (appt.status === 'Completed') {
+                btnText  = 'Done';
+                btnColor = '#888';
+            }
 
             const row = document.createElement('tr');
             row.innerHTML =
@@ -377,16 +395,55 @@
                 '<td>' + appt.time_slot + '</td>' +
                 '<td><span class="status ' + statusClass + '">' +
                     statusText + '</span></td>' +
-                '<td><button onclick="viewPatient(' + appt.patient_id + ')"' +
+                '<td style="display:flex; gap:6px;">' +
+                    // View button
+                    '<button onclick="viewPatient(' + appt.patient_id + ')"' +
                     ' style="padding:5px 12px; background:#0F4C5C; color:white;' +
                     ' border:none; border-radius:4px; font-size:12px;' +
-                    ' cursor:pointer;">View</button></td>';
+                    ' cursor:pointer;">View</button>' +
+                    // Status update button
+                    (nextStatus ?
+                        '<button onclick="updateStatus(' + appt.appointment_id + ', \'' + nextStatus + '\')"' +
+                        ' style="padding:5px 12px; background:' + btnColor + '; color:white;' +
+                        ' border:none; border-radius:4px; font-size:12px;' +
+                        ' cursor:pointer;">' + btnText + '</button>'
+                    :
+                        '<button disabled style="padding:5px 12px; background:#888; color:white;' +
+                        ' border:none; border-radius:4px; font-size:12px;">' + btnText + '</button>'
+                    ) +
+                '</td>';
 
             tbody.appendChild(row);
         });
     }
 
 
+    // ---- Update appointment status ----
+    async function updateStatus(appointmentId, newStatus) {
+        try {
+            const res = await fetch(
+                '/api/doctor/appointment/' + appointmentId + '/status',
+                {
+                    method : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({ status: newStatus })
+                }
+            );
+
+            const data = await res.json();
+
+            if (res.ok) {
+                showMsg('Status updated to ' + newStatus + '!', 'success');
+                loadAppointments();    // reload table with updated status
+            } else {
+                showMsg(data.message || 'Failed to update.', 'error');
+            }
+
+        } catch(e) {
+            showMsg('Could not connect to server.', 'error');
+        }
+    }
+    
     // ---- 6. Appointment filter buttons ----
     document.querySelectorAll('.filter-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
