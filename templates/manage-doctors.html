@@ -255,7 +255,7 @@
 
                 try {
                     const res  = await fetch(
-                        '/api/admin/remove-doctor/' + docId,
+                        '/api/admin/delete-doctor/' + docId,
                         { method: 'DELETE' }
                     );
                     const data = await res.json();
@@ -386,47 +386,6 @@
         window.location.href = '/';
     }
 }
-
-
-    // ---- Helper ----
-    function showMsg(text, type) {
-        const msg = document.getElementById('page-msg');
-        msg.textContent      = text;
-        msg.style.display    = 'block';
-        msg.style.background = type === 'error' ? '#fde8e8' : '#d4f4e8';
-        msg.style.color      = type === 'error' ? '#c0392b' : '#0a6640';
-        setTimeout(function() { msg.style.display = 'none'; }, 3000);
-    }
-
-
-    // ---- Init ----
-    loadDoctors();
-
-
-    // ---- 6. Clear form ----
-    function clearForm() {
-        document.getElementById('doc-name').value     = '';
-        document.getElementById('doc-spec').value     = '';
-        document.getElementById('doc-dept').value     = '';
-        document.getElementById('doc-email').value    = '';
-        document.getElementById('doc-password').value = '';
-        document.getElementById('doc-phone').value    = '';
-        document.getElementById('doc-start').value    = '09:00';
-        document.getElementById('doc-end').value      = '17:00';
-        document.querySelectorAll('.day-checkbox input')
-            .forEach(function(cb) { cb.checked = false; });
-    }
-
-    document.getElementById('clear-btn').addEventListener('click', clearForm);
-
-
-    // ---- 7. Logout ----
-    async function logout() {
-        const confirmed = confirm('Are you sure you want to logout?');
-        if (!confirmed) return;
-        const res = await fetch('/api/admin/logout', { method: 'POST' });
-        if (res.ok) window.location.href = '/';
-    }
 
 
     // ---- Helper ----
