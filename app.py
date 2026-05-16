@@ -25,8 +25,8 @@ app.config['REMEMBER_COOKIE_DURATION'] = 0
 app.config['SESSION_TYPE']              = 'filesystem'
 app.config['MAIL_SERVER']   = 'smtp.gmail.com'
 app.config['MAIL_PORT']     = 587
-app.config['MAIL_USERNAME'] = 'bhusalsneha2062@gmail.com'   # your Gmail
-app.config['MAIL_PASSWORD'] = 'tegd gwyf iikr clqx'      # Gmail app password
+app.config['MAIL_USERNAME'] = 'bhusalsneha07@gmail.com'  
+app.config['MAIL_PASSWORD'] = 'gefg actd wkla abxx'     
 app.config['MAIL_FROM']     = 'bhusalsneha2062@gmail.com'
 api_key = os.getenv("GROQ_API_KEY")
 
